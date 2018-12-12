@@ -57,6 +57,7 @@ plt.ylabel("Number of subjects")
 plt.legend(loc= 'upper right')
 plt.show()
 
+plt.savefig('gender_age_dist_BIOBANK.png')
 
 #def main():
 #    dataset_demographic_filename = 2
