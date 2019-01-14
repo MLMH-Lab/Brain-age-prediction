@@ -13,10 +13,13 @@ import pandas as pd
 
 
 def plot_save_histogram(male_ages, female_ages):
-    """Creates histogram of age distribution by gender and saves in output folder as png"""
+    """Create histogram of age distribution by gender and saves in output folder as png"""
+    plt.style.use('seaborn-whitegrid')
     plt.figure(figsize=(10, 7))
+
     plt.hist(male_ages, color='blue', histtype='step', lw=2, bins=range(45, 75, 1), label='male')
     plt.hist(female_ages, color='red', histtype='step', lw=2, bins=range(45, 75, 1), label='female')
+
     plt.title("Age distribution in UK BIOBANK", fontsize=17)
     plt.axis('tight')
     plt.xlabel("Age at MRI scan [years]", fontsize=15)
@@ -25,7 +28,8 @@ def plot_save_histogram(male_ages, female_ages):
     plt.yticks(range(0, 401, 50))
     plt.legend(loc='upper right', fontsize=13)
     plt.tick_params(labelsize=13)
-    plt.savefig('/home/lea/PycharmProjects/predicted_brain_age/outputs/gender_age_dist_BIOBANK.png')
+
+    plt.savefig('../../../outputs/gender_age_dist_BIOBANK.png')
     plt.show()
 
 
