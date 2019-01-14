@@ -1,6 +1,11 @@
 """
 Script to explore distribution of age and gender in UK BIOBANK dataset from scanner1
 Aim is to plot a line graph of age vs number of subjects for male/female
+
+References
+[1] - Zhao, Lu, et al. "Age-Related Differences in Brain Morphology and the Modifiers in Middle-Aged and Older Adults."
+Cerebral Cortex (2018).
+
 """
 
 import matplotlib.pyplot as plt
