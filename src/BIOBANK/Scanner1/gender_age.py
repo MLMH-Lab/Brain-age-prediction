@@ -34,6 +34,7 @@ def plot_save_histogram(male_ages, female_ages):
 
 
 def main():
+    # Loading data
     dataset_demographic = pd.read_csv('../../../data/BIOBANK/Scanner1/participants.tsv', sep='\t')
     dataset_excl_nan = dataset_demographic.dropna()
 
@@ -46,9 +47,8 @@ def main():
 
     plot_save_histogram(male_ages, female_ages)
 
-    """Script to look at demographics info based on Zhao et al 2018
-    Required are: number of subjects, gender split, age range,"""
-
+    # Script to look at demographics info based on Zhao et al 2018
+    # Required are: number of subjects, gender split, age range
     print('Whole dataset')
     print(dataset_excl_nan.Age.describe())
 
