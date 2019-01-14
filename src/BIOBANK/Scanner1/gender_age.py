@@ -33,51 +33,6 @@ def plot_save_histogram(male_ages, female_ages):
     plt.show()
 
 
-def display_demographics(dataset_excl_nan):
-    """Print and save demographic information about sample size and age"""
-    male_code = 1
-    female_code = 0
-
-    n_total = len(dataset_excl_nan)
-    n_male = len(dataset_excl_nan.groupby('Gender').get_group(male_code))
-    n_female = len(dataset_excl_nan.groupby('Gender').get_group(female_code))
-
-    age_mean = dataset_excl_nan.Age.mean()
-    age_sd = dataset_excl_nan.Age.std()
-    age_range_min = dataset_excl_nan.Age.min()
-    age_range_max = dataset_excl_nan.Age.max()
-
-    age_male_mean = dataset_excl_nan.groupby('Gender').get_group(male_code).Age.mean()
-    age_female_mean = dataset_excl_nan.groupby('Gender').get_group(female_code).Age.mean()
-    age_male_sd = dataset_excl_nan.groupby('Gender').get_group(male_code).Age.std()
-    age_female_sd = dataset_excl_nan.groupby('Gender').get_group(female_code).Age.std()
-    age_male_range_min = dataset_excl_nan.groupby('Gender').get_group(male_code).Age.min()
-    age_female_range_min = dataset_excl_nan.groupby('Gender').get_group(female_code).Age.min()
-    age_male_range_max = dataset_excl_nan.groupby('Gender').get_group(male_code).age.max()
-    age_female_range_max = dataset_excl_nan.groupby('Gender').get_group(female_code).Age.max()
-
-    print("Sample sizes [Total (m / f)]: %d (%d / %d)" % (n_total, n_male, n_female))
-    print("Age - total [mean (SD), min-max]: %5.2f (%5.2f), %5.2f-%5.2f"
-          % (age_mean, age_sd, age_range_min, age_range_max))
-    print("Age - male [mean (SD), min-max]: %5.2f (%5.2f), %5.2f-%5.2f"
-          % (age_male_mean, age_male_sd, age_male_range_min, age_male_range_max))
-    print("Age - female [mean (SD), min-max]: %5.2f (%5.2f), %5.2f-%5.2f"
-          % (age_female_mean, age_female_sd, age_female_range_min, age_female_range_max))
-
-    # Saves into txt file
-    file = open('../../../outputs/demographics.txt', 'w')
-
-    file.write("Demographics for UK BIOBANK Scanner1 \n \n")
-    file.write("Sample sizes [Total (m / f)]: %d (%d / %d) \n" % (n_total, n_male, n_female))
-    file.write("Age - total [mean (SD), min-max]: %5.2f (%5.2f), %5.2f-%5.2f \n"
-               % (age_mean, age_sd, age_range_min, age_range_max))
-    file.write("Age - male [mean (SD), min-max]: %5.2f (%5.2f), %5.2f-%5.2f \n"
-               % (age_male_mean, age_male_sd, age_male_range_min, age_male_range_max))
-    file.write("Age - female [mean (SD), min-max]: %5.2f (%5.2f), %5.2f-%5.2f \n"
-               % (age_female_mean, age_female_sd, age_female_range_min, age_female_range_max))
-    file.close()
-
-
 def main():
     dataset_demographic = pd.read_csv('../../../data/BIOBANK/Scanner1/participants.tsv', sep='\t')
     dataset_excl_nan = dataset_demographic.dropna()
@@ -94,7 +49,11 @@ def main():
     """Script to look at demographics info based on Zhao et al 2018
     Required are: number of subjects, gender split, age range,"""
 
-    display_demographics(dataset_excl_nan)
+    print('Whole dataset')
+    print(dataset_excl_nan.Age.describe())
+
+    print('Grouped dataset')
+    print(dataset_excl_nan.groupby('Gender').Age.describe())
 
 
 if __name__ == "__main__":
