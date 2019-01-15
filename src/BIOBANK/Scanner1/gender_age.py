@@ -7,9 +7,12 @@ References
 Cerebral Cortex (2018).
 
 """
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
+
+PROJECT_ROOT = Path('../../../') # Todo: Improve before publish code
 
 
 def plot_save_histogram(male_ages, female_ages):
@@ -29,13 +32,14 @@ def plot_save_histogram(male_ages, female_ages):
     plt.legend(loc='upper right', fontsize=13)
     plt.tick_params(labelsize=13)
 
-    plt.savefig('../../../outputs/gender_age_dist_BIOBANK.png')
+    output_img_path = PROJECT_ROOT / 'outputs' / 'gender_age_dist_BIOBANK.png'
+    plt.savefig(str(output_img_path))
     plt.show()
 
 
 def main():
     # Loading data
-    dataset_demographic = pd.read_csv('../../../data/BIOBANK/Scanner1/participants.tsv', sep='\t')
+    dataset_demographic = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv', sep='\t')
     dataset_excl_nan = dataset_demographic.dropna()
 
     # Histogram of age distribution by gender
@@ -51,9 +55,11 @@ def main():
     # Required are: number of subjects, gender split, age range
     print('Whole dataset')
     print(dataset_excl_nan.Age.describe())
+    dataset_excl_nan.Age.describe().to_csv(PROJECT_ROOT / 'outputs' / 'scanner01_whole_dataset_dem.csv')
 
     print('Grouped dataset')
     print(dataset_excl_nan.groupby('Gender').Age.describe())
+    dataset_excl_nan.groupby('Gender').Age.describe().to_csv(PROJECT_ROOT / 'outputs' / 'scanner01_grouped_dem.csv')
 
 
 if __name__ == "__main__":
