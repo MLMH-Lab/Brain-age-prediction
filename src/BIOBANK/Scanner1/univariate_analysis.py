@@ -1,5 +1,5 @@
 """
-Script to implement univariate analysis/logistic regression based on Zhao et al 2018, one per FS brain region
+Script to implement univariate analysis/linear mixed-effects regression based on [1], one per FS brain region
 Step 1: normalise each brain region (create arrays of total brain region and specific brain region, then divide)
 Step 2: create df with normalised brain region (dep var) and age of participant (indep var) (+ quadratic and cubic age?)
 Step 3: output coefficient per subject
@@ -17,15 +17,14 @@ import pandas as pd
 
 # from pathlib import Path
 
-# load freesurfer dataset
-# PROJECT_ROOT = Path('../../../../')
-# dataset_fs_all_regions = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
+# Load freesurfer dataset
+PROJECT_ROOT = Path('../../../../')
+
 dataset_fs_all_regions = pd.read_csv('/home/lea/PycharmProjects/'
                                      'predicted_brain_age/data/BIOBANK/Scanner1/freesurferData.csv')
 
 
 # load demographic dataset to access age of participants
-# dataset_demographic = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv', sep='\t')
 dataset_demographic = pd.read_csv('/home/lea/PycharmProjects/'
                                   'predicted_brain_age/data/BIOBANK/Scanner1/participants.tsv', sep='\t')
 dataset_demographic_excl_nan = dataset_demographic.dropna()
@@ -64,6 +63,18 @@ def extract_df(region_volume):
 extract_df('Left-Lateral-Ventricle')
 
 
+# attempt to normalise within df to preserve var labels - TO DO
+# def normalise_region_df(region_volume):
+#     """Normalise regional volume using df"""
+#
+#     new_norm_df = dataset_region_age['EstimatedTotalIntraCranialVol'].divide(dataset_region_age[region_volume])
+#
+#     return new_norm_df
+#
+# # test normalise_region function
+# normalise_region_df('Left-Lateral-Ventricle')
+
+
 def normalise_region(region_volume):
     """Normalise regional volume"""
 
@@ -76,17 +87,39 @@ def normalise_region(region_volume):
     age = np.array(dataset_region_age['Age'])
     age2 = age * age
     age3 = age * age * age
+
     global normalised_array
     normalised_array = np.array([participant_id, age, age2, age3, region_normalised])
 
     return normalised_array
 
 
-# test function
+# test normalise_region function
 normalise_region('Left-Lateral-Ventricle')
 
 
+# def csv_normalised(normalised_array, region_name):
+#     """Write normalised array to csv file by converting into df"""
+#
+#     file_name = region_name + '_normalised_array.csv'
+#     pd.DataFrame(normalised_array).to_csv('/Users/leabaecker/PycharmProjects/predicted_brain_age/outputs/'
+#                                           + file_name,
+#                                           columns=[{'Participant_ID':normalised_array[:,0], 'Age':normalised_array[:,1],
+#                                                     'Age2':normalised_array[:,2], 'Age3':normalised_array[:,3],
+#                                                     'Normalised_vol':normalised_array[:,4]}])
+#
+#
+# # test csv_normalised function
+# csv_normalised(normalised_array, 'Left-Lateral-Ventricle')
+
 def main(): # to  do
+    # Loading Freesurfer data
+    dataset_fs_all_regions = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
+
+    # Loading demographic data
+    dataset_demographic = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv', sep='\t')
+
+    to
 
     extract_df(region_volume)
     normalise_region(region_volume)
