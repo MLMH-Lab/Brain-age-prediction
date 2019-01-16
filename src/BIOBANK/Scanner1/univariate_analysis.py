@@ -34,6 +34,9 @@ dataset_demographic_excl_nan = dataset_demographic.dropna()
 print(len(dataset_demographic_excl_nan))
 print(len(dataset_fs_all_regions))
 
+for subject in dataset_fs_all_regions['Participant_ID']:
+    if subject not in dataset_demographic_excl_nan['Participant_ID']
+
 
 def extract_df(region_volume):
     """Create a new dataset that only contains relevant columns, add participant_id and demographics"""
@@ -44,27 +47,29 @@ def extract_df(region_volume):
         str.split('_', expand=True)[0]
 
     # merge FS dataset with demographics dataset to access age, gender, diagnosis
+    global dataset_region_age
     dataset_region_age = pd.merge(dataset_region, dataset_demographic_excl_nan, on='Participant_ID')
 
     return dataset_region_age
+
 
 # test extract_df function
 extract_df('Left-Lateral-Ventricle')
 
 
-
 def normalise_region(region_volume):
     """Normalise regional volume"""
 
-    total = np.array(dataset_fs_all_regions['EstimatedTotalIntraCranialVol'])
-    region = np.array(dataset_fs_all_regions[region_volume])
+    total = np.array(dataset_region_age['EstimatedTotalIntraCranialVol'])
+    region = np.array(dataset_region_age[region_volume])
     region_normalised = region / total
 
-    # Access demographics to add age
+    # Create new array with relevant variables
+    participant_id = np.array(dataset_region_age['Participant_ID'])
+    age = np.array(dataset_region_age['Age'])
+    global normalised_array
+    normalised_array = np.array([participant_id, age, region_normalised])
 
-
-    # Create new array
-    normalised_array = np.array([participant_id, region_normalised])
     return normalised_array
 
 
@@ -72,14 +77,7 @@ def normalise_region(region_volume):
 normalise_region('Left-Lateral-Ventricle')
 
 
-def match_df(df1, df2):
-    pd.merge(df1, df2, on='Participant_ID')
-
-for id in dataset_fs_all_regions["Participant_ID"]:
-    if id in dataset_demographic["Participant_ID"]:
-
-
-def main():
+def main(): # to  do
     pass
 
 
