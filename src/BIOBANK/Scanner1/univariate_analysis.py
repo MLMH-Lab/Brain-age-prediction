@@ -36,31 +36,29 @@ print(len(dataset_fs_all_regions))
 
 
 def extract_df(region_volume):
-    """Create a new dataset that only contains relevant columns"""
+    """Create a new dataset that only contains relevant columns, add participant_id and demographics"""
     dataset_region = dataset_fs_all_regions[['Image_ID', 'EstimatedTotalIntraCranialVol', region_volume]].copy()
 
-    dataset_region["Participant_ID"] = dataset_region['Image_ID']. \
+    # extract Participant_ID from Image_ID
+    dataset_region['Participant_ID'] = dataset_region['Image_ID']. \
         str.split('_', expand=True)[0]
 
-    return dataset_region
+    # merge FS dataset with demographics dataset to access age, gender, diagnosis
+    dataset_region_age = pd.merge(dataset_region, dataset_demographic_excl_nan, on='Participant_ID')
 
-# test function
+    return dataset_region_age
+
+# test extract_df function
 extract_df('Left-Lateral-Ventricle')
 
 
 
 def normalise_region(region_volume):
-    """Normalise regional volume, extract participant IDs,
-    and return array of participant IDs and normalised regional volumes"""
+    """Normalise regional volume"""
 
-    total = np.array(dataset_fs_all_regions[total_volume])
+    total = np.array(dataset_fs_all_regions['EstimatedTotalIntraCranialVol'])
     region = np.array(dataset_fs_all_regions[region_volume])
     region_normalised = region / total
-
-    # Create new column Participant_ID from Image_ID
-    dataset_fs_all_regions["Participant_ID"] = dataset_fs_all_regions['Image_ID']. \
-        str.split('_', expand=True)[0]
-    participant_id = np.array(dataset_fs_all_regions["Participant_ID"])
 
     # Access demographics to add age
 
@@ -71,7 +69,7 @@ def normalise_region(region_volume):
 
 
 # test function
-normalise_region('EstimatedTotalIntraCranialVol', 'Left-Lateral-Ventricle')
+normalise_region('Left-Lateral-Ventricle')
 
 
 def match_df(df1, df2):
