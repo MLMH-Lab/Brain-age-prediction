@@ -34,17 +34,24 @@ dataset_demographic_excl_nan = dataset_demographic.dropna()
 print(len(dataset_demographic_excl_nan))
 print(len(dataset_fs_all_regions))
 
-for subject in dataset_fs_all_regions['Participant_ID']:
-    if subject not in dataset_demographic_excl_nan['Participant_ID']
-
 
 def extract_df(region_volume):
-    """Create a new dataset that only contains relevant columns, add participant_id and demographics"""
+    """Create a new dataset that only contains columns relevant to univariate analysis,
+    add participant_id and demographics,
+    check if/which subjects with FS data are missing demographic data"""
+
     dataset_region = dataset_fs_all_regions[['Image_ID', 'EstimatedTotalIntraCranialVol', region_volume]].copy()
 
     # extract Participant_ID from Image_ID
     dataset_region['Participant_ID'] = dataset_region['Image_ID']. \
         str.split('_', expand=True)[0]
+
+    # create list with subjects in FS output with missing age data
+    age_missing = []
+    for subject in dataset_region['Participant_ID'].iteritems():
+        if subject not in dataset_demographic_excl_nan['Participant_ID'].iteritems():
+            age_missing += subject
+    print("Age missing for Participant_ID: ", age_missing)
 
     # merge FS dataset with demographics dataset to access age, gender, diagnosis
     global dataset_region_age
@@ -80,6 +87,10 @@ normalise_region('Left-Lateral-Ventricle')
 
 
 def main(): # to  do
+
+    extract_df(region_volume)
+    normalise_region(region_volume)
+
     pass
 
 
