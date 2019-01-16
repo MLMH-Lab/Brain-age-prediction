@@ -67,8 +67,10 @@ def normalise_region(region_volume):
     # Create new array with relevant variables
     participant_id = np.array(dataset_region_age['Participant_ID'])
     age = np.array(dataset_region_age['Age'])
+    age2 = age * age
+    age3 = age * age * age
     global normalised_array
-    normalised_array = np.array([participant_id, age, region_normalised])
+    normalised_array = np.array([participant_id, age, age2, age3, region_normalised])
 
     return normalised_array
 
