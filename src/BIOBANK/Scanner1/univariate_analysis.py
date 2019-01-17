@@ -119,9 +119,14 @@ def main():  # to  do
     csv_normalised(normalised_array, region_name)
 
     # linear regression - ordinary least squares (OLS)
-    OLS_model = sm.OLS()
+    x_indep_var = np.array(normalise_region_df[['Age']], dtype=float)
+    y_dep_var = np.array(normalise_region_df[['Normalised_vol_' + region_name]], dtype=float)
+    OLS_model = sm.OLS(y_dep_var, x_indep_var)
     OLS_result = OLS_model.fit()
+    OLS_predict = OLS_result.predict()
     print(OLS_result.summary())
+
+    result = sm.ols(formula="Age" ~ "Normalised_vol_Left-Lateral-Ventricle", data=normalise_region_df).fit()
 
 
 if __name__ == "__main__":
