@@ -76,11 +76,14 @@ def csv_normalised(normalised_array, region_name):
     file_name = region_name + '_normalised_array.csv'
     normalised_array_transposed = normalised_array.transpose()
     columns = ['Participant_ID', 'Age', 'Age2', 'Age3', 'Normalised_vol_' + region_name]
+
+    global normalise_region_df
     normalise_region_df = pd.DataFrame(normalised_array_transposed, columns=columns)
 
     # output csv
     normalise_region_df.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
 
+    return normalise_region_df
 
 # test csv_normalised function
 csv_normalised(normalised_array, 'Left-Lateral-Ventricle')
@@ -115,8 +118,10 @@ def main():  # to  do
     # output csv file with participant_id, age, age2, age3, normalised regional volume
     csv_normalised(normalised_array, region_name)
 
-    # regression
-    results1 = sm.OLS()
+    # linear regression - ordinary least squares (OLS)
+    OLS_model = sm.OLS()
+    OLS_result = OLS_model.fit()
+    print(OLS_result.summary())
 
 
 if __name__ == "__main__":
