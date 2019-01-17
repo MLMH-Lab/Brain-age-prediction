@@ -18,73 +18,55 @@ import pandas as pd
 # from pathlib import Path
 
 # Load freesurfer dataset
-PROJECT_ROOT = Path('../../../../')
-
+# PROJECT_ROOT = Path('../../../') # to do
 dataset_fs_all_regions = pd.read_csv('/home/lea/PycharmProjects/'
                                      'predicted_brain_age/data/BIOBANK/Scanner1/freesurferData.csv')
-
 
 # load demographic dataset to access age of participants
 dataset_demographic = pd.read_csv('/home/lea/PycharmProjects/'
                                   'predicted_brain_age/data/BIOBANK/Scanner1/participants.tsv', sep='\t')
 dataset_demographic_excl_nan = dataset_demographic.dropna()
 
-# check if both datasets contain same number of participants
-print(len(dataset_demographic_excl_nan))
-print(len(dataset_fs_all_regions))
 
+def check_missing(fs_df, dem_df): # to do
+    """Check if any participants in the FS dataset are not in the demographic dataset"""
 
-def extract_df(region_volume):
-    """Create a new dataset that only contains columns relevant to univariate analysis,
-    add participant_id and demographics,
-    check if/which subjects with FS data are missing demographic data"""
-
-    dataset_region = dataset_fs_all_regions[['Image_ID', 'EstimatedTotalIntraCranialVol', region_volume]].copy()
-
-    # extract Participant_ID from Image_ID
-    dataset_region['Participant_ID'] = dataset_region['Image_ID']. \
-        str.split('_', expand=True)[0]
-
-    # create list with subjects in FS output with missing age data
     age_missing = []
-    for subject in dataset_region['Participant_ID'].iteritems():
-        if subject not in dataset_demographic_excl_nan['Participant_ID'].iteritems():
-            age_missing += subject
-    print("Age missing for Participant_ID: ", age_missing)
+    # for subject in fs_df['Participant_ID'].iteritems():
+    #     if subject not in dem_df['Participant_ID'].iteritems():
+    #         age_missing.append(subject)
+    # print("Age missing for Participant_ID: ", age_missing)
 
-    # merge FS dataset with demographics dataset to access age, gender, diagnosis
-    global dataset_region_age
-    dataset_region_age = pd.merge(dataset_region, dataset_demographic_excl_nan, on='Participant_ID')
-
-    return dataset_region_age
+    return age_missing
 
 
-# test extract_df function
-extract_df('Left-Lateral-Ventricle')
+# test check_missing function
+check_missing(dataset_fs_all_regions, dataset_demographic_excl_nan)
 
 
 # attempt to normalise within df to preserve var labels - TO DO
-# def normalise_region_df(region_volume):
-#     """Normalise regional volume using df"""
-#
-#     new_norm_df = dataset_region_age['EstimatedTotalIntraCranialVol'].divide(dataset_region_age[region_volume])
-#
-#     return new_norm_df
-#
-# # test normalise_region function
-# normalise_region_df('Left-Lateral-Ventricle')
+def normalise_region_df(region_name):
+    """Normalise regional volume using df"""
+
+    new_norm_df = dataset_fs_dem['EstimatedTotalIntraCranialVol'].\
+        divide(dataset_fs_dem[region_name])
+
+    return new_norm_df
+
+# test normalise_region function
+normalise_region_df('Left-Lateral-Ventricle')
 
 
-def normalise_region(region_volume):
+def normalise_region(region_name):
     """Normalise regional volume"""
 
-    total = np.array(dataset_region_age['EstimatedTotalIntraCranialVol'])
-    region = np.array(dataset_region_age[region_volume])
+    total = np.array(dataset_fs_dem['EstimatedTotalIntraCranialVol'])
+    region = np.array(dataset_fs_dem[region_name])
     region_normalised = region / total
 
     # Create new array with relevant variables
-    participant_id = np.array(dataset_region_age['Participant_ID'])
-    age = np.array(dataset_region_age['Age'])
+    participant_id = np.array(dataset_fs_dem['Participant_ID'])
+    age = np.array(dataset_fs_dem['Age'])
     age2 = age * age
     age3 = age * age * age
 
@@ -112,16 +94,26 @@ normalise_region('Left-Lateral-Ventricle')
 # # test csv_normalised function
 # csv_normalised(normalised_array, 'Left-Lateral-Ventricle')
 
+
 def main(): # to  do
+
     # Loading Freesurfer data
     dataset_fs_all_regions = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
 
     # Loading demographic data
     dataset_demographic = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv', sep='\t')
 
-    to
+    # create a new col in FS dataset to contain Participant_ID
+    dataset_fs_all_regions['Participant_ID'] = dataset_fs_all_regions['Image_ID']. \
+        str.split('_', expand=True)[0]
 
-    extract_df(region_volume)
+    # check if any participants are missing demographic data
+    check_missing(dataset_fs_all_regions, dataset_demographic_excl_nan)
+
+    # merge FS dataset and demographic dataset to access age
+    dataset_fs_dem = pd.merge(dataset_fs_all_regions, dataset_demographic_excl_nan, on='Participant_ID')
+
+    # to do: iterate over regions in df and run the below
     normalise_region(region_volume)
 
     pass
