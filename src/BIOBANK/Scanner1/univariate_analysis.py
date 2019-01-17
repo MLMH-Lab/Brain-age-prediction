@@ -71,14 +71,15 @@ normalise_region(dataset_fs_dem, 'Left-Lateral-Ventricle')
 
 
 def csv_normalised(normalised_array, region_name):
-    """Write normalised array to csv file by converting into df"""
+    """Write normalised array to csv file by converting into df, one file per region required"""
 
     file_name = region_name + '_normalised_array.csv'
     normalised_array_transposed = normalised_array.transpose()
     columns = ['Participant_ID', 'Age', 'Age2', 'Age3', 'Normalised_vol_' + region_name]
+    normalise_region_df = pd.DataFrame(normalised_array_transposed, columns=columns)
 
-    pd.DataFrame(normalised_array_transposed, columns=columns).\
-        to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
+    # output csv
+    normalise_region_df.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
 
 
 # test csv_normalised function
@@ -111,7 +112,11 @@ def main():  # to  do
     region_name = 'Left-Lateral-Ventricle'
     normalise_region(dataset_fs_dem, region_name)
 
-    pass
+    # output csv file with participant_id, age, age2, age3, normalised regional volume
+    csv_normalised(normalised_array, region_name)
+
+    # regression
+    results1 = sm.OLS()
 
 
 if __name__ == "__main__":
