@@ -70,19 +70,19 @@ def normalise_region(df, region_name):
 normalise_region(dataset_fs_dem, 'Left-Lateral-Ventricle')
 
 
-# def csv_normalised(normalised_array, region_name):
-#     """Write normalised array to csv file by converting into df"""
-#
-#     file_name = region_name + '_normalised_array.csv'
-#     pd.DataFrame(normalised_array).to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/'
-#                                           + file_name,
-#                                           columns=[{'Participant_ID':normalised_array[:,0], 'Age':normalised_array[:,1],
-#                                                     'Age2':normalised_array[:,2], 'Age3':normalised_array[:,3],
-#                                                     'Normalised_vol':normalised_array[:,4]}])
-#
-#
-# # test csv_normalised function
-# csv_normalised(normalised_array, 'Left-Lateral-Ventricle')
+def csv_normalised(normalised_array, region_name):
+    """Write normalised array to csv file by converting into df"""
+
+    file_name = region_name + '_normalised_array.csv'
+    normalised_array_transposed = normalised_array.transpose()
+    columns = ['Participant_ID', 'Age', 'Age2', 'Age3', 'Normalised_vol_' + region_name]
+
+    pd.DataFrame(normalised_array_transposed, columns=columns).\
+        to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
+
+
+# test csv_normalised function
+csv_normalised(normalised_array, 'Left-Lateral-Ventricle')
 
 
 
