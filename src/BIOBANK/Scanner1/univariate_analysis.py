@@ -12,23 +12,12 @@ Cerebral Cortex (2018).
 
 import numpy as np
 import pandas as pd
-# import statsmodels.api as sm
+
+import statsmodels.api as sm
 # import statsmodels.formula.api as smf
 
-# from pathlib import Path
 
-# Load freesurfer dataset
-# PROJECT_ROOT = Path('../../../') # to do
-dataset_fs_all_regions = pd.read_csv('/home/lea/PycharmProjects/'
-                                     'predicted_brain_age/data/BIOBANK/Scanner1/freesurferData.csv')
-
-# load demographic dataset to access age of participants
-dataset_demographic = pd.read_csv('/home/lea/PycharmProjects/'
-                                  'predicted_brain_age/data/BIOBANK/Scanner1/participants.tsv', sep='\t')
-dataset_demographic_excl_nan = dataset_demographic.dropna()
-
-
-def check_missing(fs_df, dem_df): # to do
+def check_missing(fs_df, dem_df):  # to do
     """Check if any participants in the FS dataset are not in the demographic dataset"""
 
     age_missing = []
@@ -45,28 +34,29 @@ check_missing(dataset_fs_all_regions, dataset_demographic_excl_nan)
 
 
 # attempt to normalise within df to preserve var labels - TO DO
-def normalise_region_df(region_name):
+def normalise_region_df(df, region_name):
     """Normalise regional volume using df"""
 
-    new_norm_df = dataset_fs_dem['EstimatedTotalIntraCranialVol'].\
+    new_norm_df = dataset_fs_dem['EstimatedTotalIntraCranialVol']. \
         divide(dataset_fs_dem[region_name])
 
     return new_norm_df
+
 
 # test normalise_region function
 normalise_region_df('Left-Lateral-Ventricle')
 
 
-def normalise_region(region_name):
+def normalise_region(df, region_name):
     """Normalise regional volume"""
 
-    total = np.array(dataset_fs_dem['EstimatedTotalIntraCranialVol'])
-    region = np.array(dataset_fs_dem[region_name])
+    total = np.array(df['EstimatedTotalIntraCranialVol'])
+    region = np.array(df[region_name])
     region_normalised = region / total
 
     # Create new array with relevant variables
-    participant_id = np.array(dataset_fs_dem['Participant_ID'])
-    age = np.array(dataset_fs_dem['Age'])
+    participant_id = np.array(df['Participant_ID'])
+    age = np.array(df['Age'])
     age2 = age * age
     age3 = age * age * age
 
@@ -77,14 +67,14 @@ def normalise_region(region_name):
 
 
 # test normalise_region function
-normalise_region('Left-Lateral-Ventricle')
+normalise_region(dataset_fs_dem, 'Left-Lateral-Ventricle')
 
 
 # def csv_normalised(normalised_array, region_name):
 #     """Write normalised array to csv file by converting into df"""
 #
 #     file_name = region_name + '_normalised_array.csv'
-#     pd.DataFrame(normalised_array).to_csv('/Users/leabaecker/PycharmProjects/predicted_brain_age/outputs/'
+#     pd.DataFrame(normalised_array).to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/'
 #                                           + file_name,
 #                                           columns=[{'Participant_ID':normalised_array[:,0], 'Age':normalised_array[:,1],
 #                                                     'Age2':normalised_array[:,2], 'Age3':normalised_array[:,3],
@@ -95,26 +85,31 @@ normalise_region('Left-Lateral-Ventricle')
 # csv_normalised(normalised_array, 'Left-Lateral-Ventricle')
 
 
-def main(): # to  do
+
+def main():  # to  do
 
     # Loading Freesurfer data
-    dataset_fs_all_regions = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
+    dataset_fs_all_regions = pd.read_csv('/home/lea/PycharmProjects/'
+                                         'predicted_brain_age/data/BIOBANK/Scanner1/freesurferData.csv')
 
     # Loading demographic data
-    dataset_demographic = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv', sep='\t')
+    dataset_demographic = pd.read_csv('/home/lea/PycharmProjects/'
+                                      'predicted_brain_age/data/BIOBANK/Scanner1/participants.tsv', sep='\t')
+    dataset_demographic_excl_nan = dataset_demographic.dropna()
 
     # create a new col in FS dataset to contain Participant_ID
     dataset_fs_all_regions['Participant_ID'] = dataset_fs_all_regions['Image_ID']. \
         str.split('_', expand=True)[0]
 
     # check if any participants are missing demographic data
-    check_missing(dataset_fs_all_regions, dataset_demographic_excl_nan)
+    # check_missing(dataset_fs_all_regions, dataset_demographic_excl_nan)
 
     # merge FS dataset and demographic dataset to access age
     dataset_fs_dem = pd.merge(dataset_fs_all_regions, dataset_demographic_excl_nan, on='Participant_ID')
 
-    # to do: iterate over regions in df and run the below
-    normalise_region(region_volume)
+    # to do: iterate over regions in df and run the below, changing 'region_name' in each iteration
+    region_name = 'Left-Lateral-Ventricle'
+    normalise_region(dataset_fs_dem, region_name)
 
     pass
 
