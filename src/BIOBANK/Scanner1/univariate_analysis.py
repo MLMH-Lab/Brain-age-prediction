@@ -1,7 +1,7 @@
 """
 Script to implement univariate analysis/linear mixed-effects regression based on [1], one per FS brain region
 Step 1: normalise each brain region (create arrays of total brain region and specific brain region, then divide)
-Step 2: create df with normalised brain region (dep var) and age of participant (indep var) (+ quadratic and cubic age?)
+Step 2: create df with normalised brain region (indep var) and age of participant (dep var) (+ quadratic and cubic age?)
 Step 3: output coefficient per subject
 
 
@@ -89,7 +89,6 @@ def csv_normalised(normalised_array, region_name):
 csv_normalised(normalised_array, 'Left-Lateral-Ventricle')
 
 
-
 def main():  # to  do
 
     # Loading Freesurfer data
@@ -119,14 +118,12 @@ def main():  # to  do
     csv_normalised(normalised_array, region_name)
 
     # linear regression - ordinary least squares (OLS)
-    x_indep_var = np.array(normalise_region_df[['Age']], dtype=float)
-    y_dep_var = np.array(normalise_region_df[['Normalised_vol_' + region_name]], dtype=float)
-    OLS_model = sm.OLS(y_dep_var, x_indep_var)
+    age = np.array(normalise_region_df['Age'], dtype=float)
+    volume = np.array(normalise_region_df['Normalised_vol_' + region_name], dtype=float)
+    OLS_model = sm.OLS(age, volume)
     OLS_result = OLS_model.fit()
     OLS_predict = OLS_result.predict()
     print(OLS_result.summary())
-
-    result = sm.ols(formula="Age" ~ "Normalised_vol_Left-Lateral-Ventricle", data=normalise_region_df).fit()
 
 
 if __name__ == "__main__":
