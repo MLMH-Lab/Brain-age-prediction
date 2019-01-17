@@ -122,9 +122,14 @@ def main():  # to  do
     volume = np.array(normalise_region_df['Normalised_vol_' + region_name], dtype=float)
     OLS_model = sm.OLS(age, volume)
     OLS_result = OLS_model.fit()
-    OLS_predict = OLS_result.predict()
-    print(OLS_result.summary())
+    OLS_summary = OLS_result.summary()
+    print(OLS_summary)
 
+    # attempts to output as csv - still to do
+    output_name = region_name + '_OLS_result.csv'
+    OLS_summary.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/test1')
+    results_as_html = OLS_summary.tables[1].as_html()
+    pd.read_html(results_as_html, header=0, index_col=0)[0].to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/test1')
 
 if __name__ == "__main__":
     main()
