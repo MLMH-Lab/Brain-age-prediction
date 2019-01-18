@@ -52,7 +52,7 @@ def normalise_region(df, region_name):
 
     total = np.array(df['EstimatedTotalIntraCranialVol'])
     region = np.array(df[region_name])
-    region_normalised = region / total
+    region_normalised = region / total * 100
 
     # Create new array with relevant variables
     participant_id = np.array(df['Participant_ID'])
@@ -71,17 +71,17 @@ normalise_region(dataset_fs_dem, 'Left-Lateral-Ventricle')
 
 
 def normalised_df(normalised_array, region_name):
-    """Convert normalised array to df"""
+    """Convert normalised array to df with var names"""
 
     normalised_array_transposed = normalised_array.transpose()
-    columns = ['Participant_ID', 'Age', 'Age2', 'Age3', 'Normalised_vol_' + region_name]
+    columns = ['Participant_ID', 'Age', 'Age2', 'Age3', 'Norm_vol_' + region_name]
 
     global normalise_region_df
     normalise_region_df = pd.DataFrame(normalised_array_transposed, columns=columns)
 
     return normalise_region_df
 
-# test csv_normalised function
+# test normalised_df function
 normalised_df(normalised_array, 'Left-Lateral-Ventricle')
 
 
@@ -120,7 +120,7 @@ def main():  # to  do
     csv_normalised(normalised_array, region_name)
 
     # linear regression - ordinary least squares (OLS)
-    endog = np.asarray(normalise_region_df['Normalised_vol_' + region_name], dtype=float)
+    endog = np.asarray(normalise_region_df['Norm_vol_' + region_name], dtype=float)
     exog = np.asarray(sm.add_constant(normalise_region_df[['Age', 'Age2', 'Age3']]), dtype=float)
     OLS_model = sm.OLS(endog, exog)
     OLS_results = OLS_model.fit()
