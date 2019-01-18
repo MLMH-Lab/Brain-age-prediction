@@ -53,9 +53,9 @@ def ols_reg(df, region_name):
     OLS_coeff = OLS_results.params
     OLS_pvalue = OLS_results.pvalues
     OLS_conf = OLS_results.conf_int()
-    OLS_result_df = pd.DataFrame({"pvalue": OLS_pvalue, "coeff": OLS_coeff})
+    OLS_result_df = pd.DataFrame({'pvalue': OLS_pvalue, 'coeff': OLS_coeff})
 
-    # to do: add to dataframe
+    # to do: add to dataframe reg_output
 
 ols_reg(normalised_df, 'Left-Lateral-Ventricle')
 
@@ -84,6 +84,15 @@ def main():  # to  do
     normalised_df = pd.DataFrame(dataset_fs_dem[['Participant_ID', 'Diagn', 'Gender', 'Age']])
     normalised_df['Age2'] = normalised_df['Age'] * normalised_df['Age']
     normalised_df['Age3'] = normalised_df['Age'] * normalised_df['Age'] * normalised_df['Age']
+
+    # create empty df for regression output; regions to be added
+    reg_output = pd.DataFrame({"Row_labels_stat": ['Coeff', 'Coeff', 'Coeff', 'Coeff',
+                                                   't', 't', 't', 't',
+                                                   'p_val', 'p_val', 'p_val', 'p_val'],
+                               "Row_labels_exog": ['Constant', 'Age', 'Age2', 'Age3',
+                                                   'Constant', 'Age', 'Age2', 'Age3',
+                                                   'Constant', 'Age', 'Age2', 'Age3']})
+    reg_output.set_index('Row_labels_stat', 'Row_labels_exog')
 
     # update normalised_df to contain normalised regions for all regions
     cols_to_ignore = ['Image_ID', 'Participant_ID', 'Dataset', 'Age', 'Gender', 'Diagn', 'EstimatedTotalIntraCranialVol']
