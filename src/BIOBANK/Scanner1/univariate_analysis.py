@@ -33,56 +33,12 @@ def check_missing(fs_df, dem_df):  # to do
 check_missing(dataset_fs_all_regions, dataset_demographic_excl_nan)
 
 
-# attempt to normalise within df to preserve var labels
 def normalise_region_df(df, region_name):
     """Normalise regional volume within df, add quadratic and cubic age vars"""
 
-    global normalised_df
-    normalised_df = df[region_name] / df['EstimatedTotalIntraCranialVol'] * 100
+    normalised_df["Norm_vol_" + region_name] = df[region_name] / df['EstimatedTotalIntraCranialVol'] * 100
 
     return normalised_df
-
-
-# test normalise_region function
-normalise_region_df(dataset_fs_dem, 'Left-Lateral-Ventricle')
-
-
-def normalise_region_array(df, region_name):
-    """Normalise regional volume, add quadratic and cubic age vars"""
-
-    total = np.array(df['EstimatedTotalIntraCranialVol'])
-    region = np.array(df[region_name])
-    region_normalised = region / total * 100
-
-    # Create new array with relevant variables
-    participant_id = np.array(df['Participant_ID'])
-    age = np.array(df['Age'])
-    age2 = age * age
-    age3 = age * age * age
-
-    global normalised_array
-    normalised_array = np.array([participant_id, age, age2, age3, region_normalised])
-
-    return normalised_array
-
-
-# test normalise_region function
-normalise_region(dataset_fs_dem, 'Left-Lateral-Ventricle')
-
-
-def normalised_df(normalised_array, region_name):
-    """Convert normalised array to df with var names"""
-
-    normalised_array_transposed = normalised_array.transpose()
-    columns = ['Participant_ID', 'Age', 'Age2', 'Age3', 'Norm_vol_' + region_name]
-
-    global normalise_region_df
-    normalise_region_df = pd.DataFrame(normalised_array_transposed, columns=columns)
-
-    return normalise_region_df
-
-# test normalised_df function
-normalised_df(normalised_array, 'Left-Lateral-Ventricle')
 
 
 def main():  # to  do
@@ -107,7 +63,7 @@ def main():  # to  do
     dataset_fs_dem = pd.merge(dataset_fs_all_regions, dataset_demographic_excl_nan, on='Participant_ID')
 
     # create new df to add normalised regional volumes to
-    normalised_df = pd.DataFrame(dataset_fs_dem[['Participant_ID', 'Age', 'Diagn', 'Gender']])
+    normalised_df = pd.DataFrame(dataset_fs_dem[['Participant_ID', 'Diagn', 'Gender', 'Age']])
     normalised_df['Age2'] = normalised_df['Age'] * normalised_df['Age']
     normalised_df['Age3'] = normalised_df['Age'] * normalised_df['Age'] * normalised_df['Age']
 
@@ -119,7 +75,7 @@ def main():  # to  do
             region_cols.append(col)
 
     region_name = 'rh_supramarginal_volume'
-    normalise_region(dataset_fs_dem, region_name)
+    normalise_region_df(dataset_fs_dem, region_name)
 
     # output csv file with participant_id, age, age2, age3, normalised regional volume
     csv_normalised(normalised_array, region_name)
