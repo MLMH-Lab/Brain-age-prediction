@@ -41,6 +41,24 @@ def normalise_region_df(df, region_name):
     return normalised_df
 
 
+def ols_reg(df, region_name):
+    """Perform linear regression using ordinary least squares (OLS) method"""
+
+    endog = np.asarray(df['Norm_vol_' + region_name], dtype=float)
+    exog = np.asarray(sm.add_constant(df[['Age', 'Age2', 'Age3']]), dtype=float)
+    OLS_model = sm.OLS(endog, exog)
+    OLS_results = OLS_model.fit()
+    OLS_summary = OLS_results.summary()
+    print(OLS_summary)
+    OLS_coeff = OLS_results.params
+    OLS_pvalue = OLS_results.pvalues
+    OLS_conf = OLS_results.conf_int()
+    OLS_result_df = pd.DataFrame({"pvalue": OLS_pvalue, "coeff": OLS_coeff})
+
+    # to do: add to dataframe
+
+ols_reg(normalised_df, 'Left-Lateral-Ventricle')
+
 def main():  # to  do
 
     # Loading Freesurfer data
@@ -67,33 +85,21 @@ def main():  # to  do
     normalised_df['Age2'] = normalised_df['Age'] * normalised_df['Age']
     normalised_df['Age3'] = normalised_df['Age'] * normalised_df['Age'] * normalised_df['Age']
 
-    # to do: iterate over regions in df and run the below, changing 'region_name' in each iteration
+    # update normalised_df to contain normalised regions for all regions
     cols_to_ignore = ['Image_ID', 'Participant_ID', 'Dataset', 'Age', 'Gender', 'Diagn', 'EstimatedTotalIntraCranialVol']
     region_cols = []
     for col in dataset_fs_dem.columns:
         if col not in cols_to_ignore:
             region_cols.append(col)
 
-    region_name = 'rh_supramarginal_volume'
-    normalise_region_df(dataset_fs_dem, region_name)
+    for region in region_cols:
+        normalise_region_df(dataset_fs_dem, region)
 
-    # output csv file with participant_id, age, age2, age3, normalised regional volume
-    csv_normalised(normalised_array, region_name)
-
-    # linear regression - ordinary least squares (OLS)
-    endog = np.asarray(normalise_region_df['Norm_vol_' + region_name], dtype=float)
-    exog = np.asarray(sm.add_constant(normalise_region_df[['Age', 'Age2', 'Age3']]), dtype=float)
-    OLS_model = sm.OLS(endog, exog)
-    OLS_results = OLS_model.fit()
-    OLS_summary = OLS_results.summary()
-    print(OLS_summary)
-    OLS_coeff = OLS_results.params
-    OLS_pvalue = OLS_results.pvalues
-    OLS_conf = OLS_results.conf_int()
-    OLS_result_df = pd.DataFrame({"pvalue":OLS_pvalue, "coeff":OLS_coeff})
+        # linear regression - ordinary least squares (OLS)
+        ols_reg(normalised_df, region)
 
     # example output to csv - different format required
-    output_name = region_name + '_OLS_result.csv'
+    output_name = region + '_OLS_result.csv'
     output_path = '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + output_name
     f = open(output_path, 'w')
     f.write(OLS_results.summary().as_csv())
