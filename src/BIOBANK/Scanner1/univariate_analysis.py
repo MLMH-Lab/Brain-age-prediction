@@ -98,13 +98,6 @@ def main():  # to  do
         # linear regression - ordinary least squares (OLS)
         ols_reg(normalised_df, region)
 
-    # example output to csv - different format required
-    output_name = region + '_OLS_result.csv'
-    output_path = '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + output_name
-    f = open(output_path, 'w')
-    f.write(OLS_results.summary().as_csv())
-    f.close()
-
 
 if __name__ == "__main__":
     main()
