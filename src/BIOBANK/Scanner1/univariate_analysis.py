@@ -106,6 +106,11 @@ def main():  # to  do
     # merge FS dataset and demographic dataset to access age
     dataset_fs_dem = pd.merge(dataset_fs_all_regions, dataset_demographic_excl_nan, on='Participant_ID')
 
+    # create new df to add normalised regional volumes to
+    normalised_df = pd.DataFrame(dataset_fs_dem[['Participant_ID', 'Age', 'Diagn', 'Gender']])
+    normalised_df['Age2'] = normalised_df['Age'] * normalised_df['Age']
+    normalised_df['Age3'] = normalised_df['Age'] * normalised_df['Age'] * normalised_df['Age']
+
     # to do: iterate over regions in df and run the below, changing 'region_name' in each iteration
     cols_to_ignore = ['Image_ID', 'Participant_ID', 'Dataset', 'Age', 'Gender', 'Diagn', 'EstimatedTotalIntraCranialVol']
     region_cols = []
