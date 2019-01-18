@@ -1,7 +1,7 @@
 """
 Script to implement univariate analysis/linear mixed-effects regression based on [1], one per FS brain region
 Step 1: normalise each brain region (create arrays of total brain region and specific brain region, then divide)
-Step 2: create df with normalised brain region (indep var) and age of participant (dep var) (+ quadratic and cubic age?)
+Step 2: create df with normalised brain region (dep var) and age of participant (indep var) (+ quadratic and cubic age?)
 Step 3: output coefficient per subject
 
 
@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 import statsmodels.api as sm
-# import statsmodels.formula.api as smf
+import statsmodels.formula.api as smf
 
 
 def check_missing(fs_df, dem_df):  # to do
@@ -111,25 +111,31 @@ def main():  # to  do
     dataset_fs_dem = pd.merge(dataset_fs_all_regions, dataset_demographic_excl_nan, on='Participant_ID')
 
     # to do: iterate over regions in df and run the below, changing 'region_name' in each iteration
-    region_name = 'Left-Lateral-Ventricle'
+    region_name = 'rh_supramarginal_volume'
     normalise_region(dataset_fs_dem, region_name)
 
     # output csv file with participant_id, age, age2, age3, normalised regional volume
     csv_normalised(normalised_array, region_name)
 
     # linear regression - ordinary least squares (OLS)
-    age = np.array(normalise_region_df['Age'], dtype=float)
-    volume = np.array(normalise_region_df['Normalised_vol_' + region_name], dtype=float)
-    OLS_model = sm.OLS(age, volume)
-    OLS_result = OLS_model.fit()
-    OLS_summary = OLS_result.summary()
-    print(OLS_summary)
+    endog = np.asarray(normalise_region_df['Normalised_vol_' + region_name], dtype=float)
+    exog = np.asarray(sm.add_constant(normalise_region_df[['Age', 'Age2', 'Age3']]), dtype=float)
+    OLS_model = sm.OLS(endog, exog)
+    OLS_results = OLS_model.fit()
+    OLS_summary = OLS_results.summary()
+    print(OLS_results.summary())
+    OLS_coeff = OLS_results.params
+    OLS_pvalue = OLS_results.pvalues
+    OLS_conf = OLS_results.conf_int()
+    OLS_result_df = pd.DataFrame({"pvalue":OLS_pvalue, "coeff":OLS_coeff})
 
-    # attempts to output as csv - still to do
+
     output_name = region_name + '_OLS_result.csv'
-    OLS_summary.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/test1')
-    results_as_html = OLS_summary.tables[1].as_html()
-    pd.read_html(results_as_html, header=0, index_col=0)[0].to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/test1')
+    output_path = '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + output_name
+    f = open(output_path, 'w')
+    f.write(OLS_results.summary().as_csv())
+    f.close()
+
 
 if __name__ == "__main__":
     main()
