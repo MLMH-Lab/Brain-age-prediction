@@ -70,23 +70,19 @@ def normalise_region(df, region_name):
 normalise_region(dataset_fs_dem, 'Left-Lateral-Ventricle')
 
 
-def csv_normalised(normalised_array, region_name):
-    """Write normalised array to csv file by converting into df, one file per region required"""
+def normalised_df(normalised_array, region_name):
+    """Convert normalised array to df"""
 
-    file_name = region_name + '_normalised_array.csv'
     normalised_array_transposed = normalised_array.transpose()
     columns = ['Participant_ID', 'Age', 'Age2', 'Age3', 'Normalised_vol_' + region_name]
 
     global normalise_region_df
     normalise_region_df = pd.DataFrame(normalised_array_transposed, columns=columns)
 
-    # output csv
-    normalise_region_df.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
-
     return normalise_region_df
 
 # test csv_normalised function
-csv_normalised(normalised_array, 'Left-Lateral-Ventricle')
+normalised_df(normalised_array, 'Left-Lateral-Ventricle')
 
 
 def main():  # to  do
@@ -111,6 +107,12 @@ def main():  # to  do
     dataset_fs_dem = pd.merge(dataset_fs_all_regions, dataset_demographic_excl_nan, on='Participant_ID')
 
     # to do: iterate over regions in df and run the below, changing 'region_name' in each iteration
+    cols_to_ignore = ['Image_ID', 'Participant_ID', 'Dataset', 'Age', 'Gender', 'Diagn', 'EstimatedTotalIntraCranialVol']
+    region_cols = []
+    for col in dataset_fs_dem.columns:
+        if col not in cols_to_ignore:
+            region_cols.append(col)
+
     region_name = 'rh_supramarginal_volume'
     normalise_region(dataset_fs_dem, region_name)
 
@@ -123,13 +125,13 @@ def main():  # to  do
     OLS_model = sm.OLS(endog, exog)
     OLS_results = OLS_model.fit()
     OLS_summary = OLS_results.summary()
-    print(OLS_results.summary())
+    print(OLS_summary)
     OLS_coeff = OLS_results.params
     OLS_pvalue = OLS_results.pvalues
     OLS_conf = OLS_results.conf_int()
     OLS_result_df = pd.DataFrame({"pvalue":OLS_pvalue, "coeff":OLS_coeff})
 
-
+    # example output to csv - different format required
     output_name = region_name + '_OLS_result.csv'
     output_path = '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + output_name
     f = open(output_path, 'w')
