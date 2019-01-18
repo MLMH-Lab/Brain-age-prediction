@@ -33,22 +33,22 @@ def check_missing(fs_df, dem_df):  # to do
 check_missing(dataset_fs_all_regions, dataset_demographic_excl_nan)
 
 
-# attempt to normalise within df to preserve var labels - TO DO
+# attempt to normalise within df to preserve var labels
 def normalise_region_df(df, region_name):
-    """Normalise regional volume using df"""
+    """Normalise regional volume within df, add quadratic and cubic age vars"""
 
-    new_norm_df = dataset_fs_dem['EstimatedTotalIntraCranialVol']. \
-        divide(dataset_fs_dem[region_name])
+    global normalised_df
+    normalised_df = df[region_name] / df['EstimatedTotalIntraCranialVol'] * 100
 
-    return new_norm_df
+    return normalised_df
 
 
 # test normalise_region function
-normalise_region_df('Left-Lateral-Ventricle')
+normalise_region_df(dataset_fs_dem, 'Left-Lateral-Ventricle')
 
 
-def normalise_region(df, region_name):
-    """Normalise regional volume"""
+def normalise_region_array(df, region_name):
+    """Normalise regional volume, add quadratic and cubic age vars"""
 
     total = np.array(df['EstimatedTotalIntraCranialVol'])
     region = np.array(df[region_name])
