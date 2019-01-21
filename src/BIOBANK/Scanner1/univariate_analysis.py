@@ -14,7 +14,6 @@ import numpy as np
 import pandas as pd
 
 import statsmodels.api as sm
-import statsmodels.formula.api as smf
 
 
 def check_missing(fs_df, dem_df):  # to do
@@ -48,15 +47,17 @@ def ols_reg(df, region_name):
     exog = np.asarray(sm.add_constant(df[['Age', 'Age2', 'Age3']]), dtype=float)
     OLS_model = sm.OLS(endog, exog)
     OLS_results = OLS_model.fit()
-    OLS_summary = OLS_results.summary()
-    print(OLS_summary)
+
+    # access regression results
     OLS_coeff = pd.DataFrame(OLS_results.params)
     OLS_pvalue = pd.DataFrame(OLS_results.pvalues)
     OLS_tvalue = pd.DataFrame(OLS_results.tvalues)
     OLS_se = pd.DataFrame(OLS_results.bse)
-    # OLS_conf = pd.DataFrame(OLS_results.conf_int()) # still to do - array needs to be split into lower and upper
+
+    # add to reg_output df
     OLS_df = pd.concat([OLS_coeff, OLS_se, OLS_tvalue, OLS_pvalue], ignore_index=True)
     reg_output[region_name] = OLS_df
+
     return reg_output
 
 
