@@ -50,12 +50,14 @@ def ols_reg(df, region_name):
     OLS_results = OLS_model.fit()
     OLS_summary = OLS_results.summary()
     print(OLS_summary)
-    OLS_coeff = OLS_results.params
-    OLS_pvalue = OLS_results.pvalues
-    OLS_conf = OLS_results.conf_int()
-    OLS_result_df = pd.DataFrame({'pvalue': OLS_pvalue, 'coeff': OLS_coeff})
-
-    # to do: add to dataframe reg_output
+    OLS_coeff = pd.DataFrame(OLS_results.params)
+    OLS_pvalue = pd.DataFrame(OLS_results.pvalues)
+    OLS_tvalue = pd.DataFrame(OLS_results.tvalues)
+    OLS_se = pd.DataFrame(OLS_results.bse)
+    # OLS_conf = pd.DataFrame(OLS_results.conf_int()) # still to do - array needs to be split into lower and upper
+    OLS_df = pd.concat([OLS_coeff, OLS_se, OLS_tvalue, OLS_pvalue], ignore_index=True)
+    reg_output[region_name] = OLS_df
+    return reg_output
 
 ols_reg(normalised_df, 'Left-Lateral-Ventricle')
 
@@ -87,9 +89,11 @@ def main():  # to  do
 
     # create empty df for regression output; regions to be added
     reg_output = pd.DataFrame({"Row_labels_stat": ['Coeff', 'Coeff', 'Coeff', 'Coeff',
+                                                   'std_err', 'std_err', 'std_err', 'std_err',
                                                    't', 't', 't', 't',
                                                    'p_val', 'p_val', 'p_val', 'p_val'],
                                "Row_labels_exog": ['Constant', 'Age', 'Age2', 'Age3',
+                                                   'Constant', 'Age', 'Age2', 'Age3',
                                                    'Constant', 'Age', 'Age2', 'Age3',
                                                    'Constant', 'Age', 'Age2', 'Age3']})
     reg_output.set_index('Row_labels_stat', 'Row_labels_exog')
