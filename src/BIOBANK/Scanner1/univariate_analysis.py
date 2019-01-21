@@ -59,7 +59,6 @@ def ols_reg(df, region_name):
     reg_output[region_name] = OLS_df
     return reg_output
 
-ols_reg(normalised_df, 'Left-Lateral-Ventricle')
 
 def main():  # to  do
 
@@ -110,6 +109,9 @@ def main():  # to  do
 
         # linear regression - ordinary least squares (OLS)
         ols_reg(normalised_df, region)
+
+    # output to csv
+    reg_output.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/OLS_result.csv')
 
 
 if __name__ == "__main__":
