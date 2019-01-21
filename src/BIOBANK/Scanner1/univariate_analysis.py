@@ -66,8 +66,8 @@ def main():
     # Create new df to add normalised regional volumes to
     global normalised_df
     normalised_df = pd.DataFrame(dataset_fs_dem[['Participant_ID', 'Diagn', 'Gender', 'Age']])
-    normalised_df['Age2'] = normalised_df['Age'] * normalised_df['Age']
-    normalised_df['Age3'] = normalised_df['Age'] * normalised_df['Age'] * normalised_df['Age']
+    normalised_df['Age2'] = normalised_df['Age'] ** 2
+    normalised_df['Age3'] = normalised_df['Age'] ** 3
 
     # Create empty df for regression output; regions to be added
     global reg_output
