@@ -41,6 +41,7 @@ def ols_reg(df, region_name):
     # add to reg_output df
     OLS_df = pd.concat([OLS_coeff, OLS_se, OLS_tvalue, OLS_pvalue], ignore_index=True)
     reg_output[region_name] = OLS_df
+    reg_output.reset_index(drop=True)
 
     return reg_output
 
