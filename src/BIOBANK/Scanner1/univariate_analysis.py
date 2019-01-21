@@ -1,7 +1,7 @@
 """
-Script to implement univariate analysis/linear mixed-effects regression based on [1], one per FS brain region
-Step 1: normalise each brain region (create arrays of total brain region and specific brain region, then divide)
-Step 2: create df with normalised brain region (dep var) and age of participant (indep var) (+ quadratic and cubic age?)
+Script to implement univariate analysis based on [1], regression for age and volume per region
+Step 1: normalise each brain region
+Step 2: create df with normalised brain region (dep var) and age of participant (indep var) (+ quadratic and cubic age)
 Step 3: output coefficient per subject
 
 
@@ -41,7 +41,6 @@ def ols_reg(df, region_name):
     # add to reg_output df
     OLS_df = pd.concat([OLS_coeff, OLS_se, OLS_tvalue, OLS_pvalue], ignore_index=True)
     reg_output[region_name] = OLS_df
-    # reg_output.reset_index(drop=True)
 
     return reg_output
 
