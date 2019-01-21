@@ -16,22 +16,6 @@ import pandas as pd
 import statsmodels.api as sm
 
 
-def check_missing(fs_df, dem_df):  # to do
-    """Check if any participants in the FS dataset are not in the demographic dataset"""
-
-    age_missing = []
-    # for subject in fs_df['Participant_ID'].iteritems():
-    #     if subject not in dem_df['Participant_ID'].iteritems():
-    #         age_missing.append(subject)
-    # print("Age missing for Participant_ID: ", age_missing)
-
-    return age_missing
-
-
-# test check_missing function
-check_missing(dataset_fs_all_regions, dataset_demographic_excl_nan)
-
-
 def normalise_region_df(df, region_name):
     """Normalise regional volume within df, add quadratic and cubic age vars"""
 
