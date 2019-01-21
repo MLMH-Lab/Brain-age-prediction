@@ -70,6 +70,7 @@ def main():  # to  do
     normalised_df['Age3'] = normalised_df['Age'] * normalised_df['Age'] * normalised_df['Age']
 
     # create empty df for regression output; regions to be added
+    global reg_output
     reg_output = pd.DataFrame({"Row_labels_stat": ['Coeff', 'Coeff', 'Coeff', 'Coeff',
                                                    'std_err', 'std_err', 'std_err', 'std_err',
                                                    't', 't', 't', 't',
