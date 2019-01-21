@@ -41,7 +41,7 @@ def ols_reg(df, region_name):
     # add to reg_output df
     OLS_df = pd.concat([OLS_coeff, OLS_se, OLS_tvalue, OLS_pvalue], ignore_index=True)
     reg_output[region_name] = OLS_df
-    reg_output.reset_index(drop=True)
+    # reg_output.reset_index(drop=True)
 
     return reg_output
 
@@ -96,7 +96,7 @@ def main():  # to  do
         ols_reg(normalised_df, region)
 
     # output to csv
-    reg_output.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/OLS_result.csv')
+    reg_output.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/OLS_result.csv', index=False)
 
 
 if __name__ == "__main__":
