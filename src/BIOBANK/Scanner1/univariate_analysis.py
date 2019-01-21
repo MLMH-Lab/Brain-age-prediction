@@ -64,6 +64,7 @@ def main():  # to  do
     dataset_fs_dem = pd.merge(dataset_fs_all_regions, dataset_demographic_excl_nan, on='Participant_ID')
 
     # create new df to add normalised regional volumes to
+    global normalised_df
     normalised_df = pd.DataFrame(dataset_fs_dem[['Participant_ID', 'Diagn', 'Gender', 'Age']])
     normalised_df['Age2'] = normalised_df['Age'] * normalised_df['Age']
     normalised_df['Age3'] = normalised_df['Age'] * normalised_df['Age'] * normalised_df['Age']
