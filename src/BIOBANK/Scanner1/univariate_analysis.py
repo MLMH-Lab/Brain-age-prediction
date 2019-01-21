@@ -60,9 +60,6 @@ def main():  # to  do
     dataset_fs_all_regions['Participant_ID'] = dataset_fs_all_regions['Image_ID']. \
         str.split('_', expand=True)[0]
 
-    # check if any participants are missing demographic data
-    # check_missing(dataset_fs_all_regions, dataset_demographic_excl_nan)
-
     # merge FS dataset and demographic dataset to access age
     dataset_fs_dem = pd.merge(dataset_fs_all_regions, dataset_demographic_excl_nan, on='Participant_ID')
 
