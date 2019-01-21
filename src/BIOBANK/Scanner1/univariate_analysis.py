@@ -32,20 +32,20 @@ def ols_reg(df, region_name):
     OLS_model = sm.OLS(endog, exog)
     OLS_results = OLS_model.fit()
 
-    # access regression results
+    # Access regression results
     OLS_coeff = pd.DataFrame(OLS_results.params)
     OLS_pvalue = pd.DataFrame(OLS_results.pvalues)
     OLS_tvalue = pd.DataFrame(OLS_results.tvalues)
     OLS_se = pd.DataFrame(OLS_results.bse)
 
-    # add to reg_output df
+    # Add to reg_output df
     OLS_df = pd.concat([OLS_coeff, OLS_se, OLS_tvalue, OLS_pvalue], ignore_index=True)
     reg_output[region_name] = OLS_df
 
     return reg_output
 
 
-def main():  # to  do
+def main():
 
     # Loading Freesurfer data
     dataset_fs_all_regions = pd.read_csv('/home/lea/PycharmProjects/'
@@ -56,20 +56,20 @@ def main():  # to  do
                                       'predicted_brain_age/data/BIOBANK/Scanner1/participants.tsv', sep='\t')
     dataset_demographic_excl_nan = dataset_demographic.dropna()
 
-    # create a new col in FS dataset to contain Participant_ID
+    # Create a new col in FS dataset to contain Participant_ID
     dataset_fs_all_regions['Participant_ID'] = dataset_fs_all_regions['Image_ID']. \
         str.split('_', expand=True)[0]
 
-    # merge FS dataset and demographic dataset to access age
+    # Merge FS dataset and demographic dataset to access age
     dataset_fs_dem = pd.merge(dataset_fs_all_regions, dataset_demographic_excl_nan, on='Participant_ID')
 
-    # create new df to add normalised regional volumes to
+    # Create new df to add normalised regional volumes to
     global normalised_df
     normalised_df = pd.DataFrame(dataset_fs_dem[['Participant_ID', 'Diagn', 'Gender', 'Age']])
     normalised_df['Age2'] = normalised_df['Age'] * normalised_df['Age']
     normalised_df['Age3'] = normalised_df['Age'] * normalised_df['Age'] * normalised_df['Age']
 
-    # create empty df for regression output; regions to be added
+    # Create empty df for regression output; regions to be added
     global reg_output
     reg_output = pd.DataFrame({"Row_labels_stat": ['Coeff', 'Coeff', 'Coeff', 'Coeff',
                                                    'std_err', 'std_err', 'std_err', 'std_err',
@@ -81,7 +81,7 @@ def main():  # to  do
                                                    'Constant', 'Age', 'Age2', 'Age3']})
     reg_output.set_index('Row_labels_stat', 'Row_labels_exog')
 
-    # update normalised_df to contain normalised regions for all regions
+    # Update normalised_df to contain normalised regions for all regions
     cols_to_ignore = ['Image_ID', 'Participant_ID', 'Dataset', 'Age', 'Gender', 'Diagn', 'EstimatedTotalIntraCranialVol']
     region_cols = []
     for col in dataset_fs_dem.columns:
@@ -91,10 +91,10 @@ def main():  # to  do
     for region in region_cols:
         normalise_region_df(dataset_fs_dem, region)
 
-        # linear regression - ordinary least squares (OLS)
+        # Linear regression - ordinary least squares (OLS)
         ols_reg(normalised_df, region)
 
-    # output to csv
+    # Output to csv
     reg_output.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/OLS_result.csv', index=False)
 
 
