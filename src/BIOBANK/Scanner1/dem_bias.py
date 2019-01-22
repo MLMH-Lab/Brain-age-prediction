@@ -16,6 +16,16 @@ fre_plot(dataset_dem_excl_nan, 'Gender')
 fre_plot(dataset_dem_excl_nan, 'Ethnicity')
 
 
+def fre_plot_split(df, col_name1, col_name2):
+    """Frequency plot of df column1 grouped by column2"""
+
+    pd.crosstab(df[col_name1], df[col_name2]).plot.bar()
+    plt.show()
+
+# Test fre_plot_split function
+fre_plot_split(dataset_dem_excl_nan_grouped, 'Ethnicity', 'Gender')
+
+
 def main():
 
     # Loading supplementary demographic data
