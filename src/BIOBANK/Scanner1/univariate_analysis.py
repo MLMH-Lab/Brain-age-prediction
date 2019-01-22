@@ -4,6 +4,7 @@ Step 1: normalise each brain region
 Step 2: create df with normalised brain region (dep var) and age of participant (indep var) (+ quadratic and cubic age)
 Step 3: output coefficient per subject
 
+TODO: Refactor code removing global variables
 
 References
 [1] - Zhao, Lu, et al. "Age-Related Differences in Brain Morphology and the Modifiers in Middle-Aged and Older Adults."
