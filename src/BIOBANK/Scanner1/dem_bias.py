@@ -70,6 +70,11 @@ def main():
         -1: 'Not known', -3: 'Not known'
     }
 
+    gender_dict = {
+        0: 'Female', 1: 'Male'
+    }
+
+    dataset_dem_excl_nan = dataset_dem_excl_nan.replace({'Gender': gender_dict})
     dataset_dem_excl_nan = dataset_dem_excl_nan.replace({'Ethnicity': ethnicity_dict})
     dataset_dem_excl_nan_grouped = dataset_dem_excl_nan.replace({'Ethnicity': grouped_ethnicity_dict})
 
