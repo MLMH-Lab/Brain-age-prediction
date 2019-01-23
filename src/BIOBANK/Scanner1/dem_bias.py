@@ -24,18 +24,12 @@ def fre_table(df, col_name):
 def chi2_test(df, gender):
     """Perform Pearson chi-squared test for gender distribution per age"""
 
-    ages_list = list(df.groupby('Gender').get_group(gender).Age)
-    n_total = len(df['Age'])
-
-    age_numbers = len(df['Age'].value_counts())
-    subjects_expected_per_age = n_total / age_numbers
-    gender_expected_per_age = subjects_expected_per_age / 2
-    gender_expected = [gender_expected_per_age] * age_numbers
-
+    ages_fre = df['Age'].value_counts()
+    gender_expected_per_age = ages_fre / 2
     gender_observed_overview = pd.crosstab(df['Gender'], df['Age']).transpose()
     gender_observed_per_age = gender_observed_overview[gender]
 
-    chi2, p = stats.chisquare(gender_observed_per_age, gender_expected)
+    chi2, p = stats.chisquare(gender_observed_per_age, gender_expected_per_age)
     msg = "Chi-square test for: {}\nTest Statistic: {}\np-value: {}"
     print(msg.format(gender, chi2, p))
 
@@ -48,6 +42,9 @@ def main():
         usecols=['eid', '31-0.0', '21003-2.0', '21000-0.0'])
     dataset_dem.columns = ['ID', 'Gender', 'Ethnicity', 'Age']
     dataset_dem_excl_nan = dataset_dem.dropna()
+
+    # # Exclude ages with <100 participants
+    # dataset_dem_ab46 = dataset_dem_excl_nan_grouped[dataset_dem_excl_nan_grouped['Age'] > 46]
 
     # Labeling data
     grouped_ethnicity_dict = {
