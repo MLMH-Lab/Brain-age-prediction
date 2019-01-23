@@ -22,6 +22,7 @@ def fre_plot_split(df, col_name1, col_name2):
     pd.crosstab(df[col_name1], df[col_name2]).plot.bar()
     plt.show()
 
+
 # Test fre_plot_split function
 fre_plot_split(dataset_dem_excl_nan_grouped, 'Ethnicity', 'Gender')
 
@@ -32,6 +33,7 @@ def fre_table(df, col_name):
     fre_table = df[col_name].value_counts()
     file_name = col_name + '_fre_table.csv'
     fre_table.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
+
 
 # Test fre_plot_split function
 fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
@@ -46,6 +48,7 @@ def main():
     dataset_dem.columns = ['ID', 'Gender', 'Ethnicity', 'Age']
     dataset_dem_excl_nan = dataset_dem.dropna()
 
+    # Labeling data
     grouped_ethnicity_dict = {
         1: 'White', 1001: 'White', 1002: 'White', 1003: 'White',
         2: 'Mixed', 2001: 'Mixed', 2002: 'Mixed', 2003: 'Mixed', 2004: 'Mixed',
@@ -62,6 +65,9 @@ def main():
 
     dataset_dem_excl_nan = dataset_dem_excl_nan.replace({'Gender': gender_dict})
     dataset_dem_excl_nan_grouped = dataset_dem_excl_nan.replace({'Ethnicity': grouped_ethnicity_dict})
+
+    # Export ethnicity distribution
+    fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
 
 
 
