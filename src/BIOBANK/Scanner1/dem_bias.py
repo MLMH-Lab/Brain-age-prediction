@@ -3,6 +3,7 @@ Supplementary data and labels acquired from https://biobank.ctsu.ox.ac.uk/crysta
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 
 
 def fre_plot(df, col_name):
@@ -68,6 +69,13 @@ def main():
 
     # Export ethnicity distribution
     fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
+
+    # create lists of male and female ages
+    male_code = 1
+    female_code = 0
+
+    male_ages = list(dataset_dem_excl_nan_grouped.groupby('Gender').get_group(male_code).Age)
+    female_ages = list(dataset_dem_excl_nan_grouped.groupby('Gender').get_group(female_code).Age)
 
 
 
