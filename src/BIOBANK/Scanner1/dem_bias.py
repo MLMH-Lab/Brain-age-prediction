@@ -92,6 +92,9 @@ def main():
     # Export ethnicity distribution
     fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
 
+    chi2_test(dataset_dem_excl_nan_grouped, 'Female')
+    chi2_test(dataset_dem_excl_nan_grouped, 'Male')
+
 
 if __name__ == "__main__":
     main()
