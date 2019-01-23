@@ -40,6 +40,28 @@ def fre_table(df, col_name):
 fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
 
 
+def chi2_test(df, gender):
+    """Perform Pearson chi-squared test for gender distribution per age"""
+
+    ages_list = list(df.groupby('Gender').get_group(gender).Age)
+    n_total = len(df['Age'])
+
+    age_numbers = len(df['Age'].value_counts())
+    subjects_expected_per_age = n_total / age_numbers
+    gender_expected_per_age = subjects_expected_per_age / 2
+    gender_expected = [gender_expected_per_age] * age_numbers
+
+    gender_observed_overview = pd.crosstab(df['Gender'], df['Age']).transpose()
+    gender_observed_per_age = gender_observed_overview[gender]
+
+    chi2, p = stats.chisquare(gender_observed_per_age, gender_expected)
+    msg = "Test Statistic: {}\np-value: {}"
+    print(msg.format(chi2, p))
+
+# Test chi2_test function
+chi2_test(dataset_dem_excl_nan_grouped, 'Female')
+
+
 def main():
 
     # Loading supplementary demographic data
@@ -69,36 +91,6 @@ def main():
 
     # Export ethnicity distribution
     fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
-
-    # Create lists of male and female ages
-    male_code = 1
-    female_code = 0
-
-    male_ages = list(dataset_dem_excl_nan_grouped.groupby('Gender').get_group(male_code).Age)
-    female_ages = list(dataset_dem_excl_nan_grouped.groupby('Gender').get_group(female_code).Age)
-
-    # Perform Pearson chi-squared test
-    n_total = len(dataset_dem_excl_nan_grouped['Age'])
-    n_gender_expected = n_total / 2
-    n_male_observed = len(male_ages)
-    n_female_observed = len(female_ages)
-
-    age_numbers = len(dataset_dem_excl_nan_grouped['Age'].value_counts())
-    subjects_expected_per_age = n_total / age_numbers
-    gender_expected_per_age = subjects_expected_per_age / 2
-    gender_expected = [gender_expected_per_age] * age_numbers
-
-    gender_observed_per_age = pd.crosstab(dataset_dem_excl_nan_grouped['Gender'], dataset_dem_excl_nan_grouped['Age']).transpose()
-    female_observed_per_age = gender_observed_per_age['Female']
-    male_observed_per_age = gender_observed_per_age['Male']
-
-    chi2, p = stats.chisquare(male_observed_per_age, gender_expected)
-    msg = "Test Statistic: {}\np-value: {}"
-    print(msg.format(chi2, p))
-
-    chi2, p = stats.chisquare(female_observed_per_age, gender_expected)
-    msg = "Test Statistic: {}\np-value: {}"
-    print(msg.format(chi2, p))
 
 
 if __name__ == "__main__":
