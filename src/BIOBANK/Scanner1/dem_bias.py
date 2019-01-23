@@ -6,26 +6,11 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 
 
-def fre_plot(df, col_name):
-    """Frequency plot of a dataframe column to visually assess distribution"""
-
-    df[col_name].value_counts().plot('bar')
-    plt.show()
-
-# Test fre_plot function
-fre_plot(dataset_dem_excl_nan, 'Gender')
-fre_plot(dataset_dem_excl_nan_grouped, 'Ethnicity')
-
-
 def fre_plot_split(df, col_name1, col_name2):
     """Frequency plot of df column1 grouped by column2"""
 
     pd.crosstab(df[col_name1], df[col_name2]).plot.bar()
     plt.show()
-
-
-# Test fre_plot_split function
-fre_plot_split(dataset_dem_excl_nan_grouped, 'Ethnicity', 'Gender')
 
 
 def fre_table(df, col_name):
@@ -34,10 +19,6 @@ def fre_table(df, col_name):
     fre_table = df[col_name].value_counts()
     file_name = col_name + '_fre_table.csv'
     fre_table.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
-
-
-# Test fre_plot_split function
-fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
 
 
 def chi2_test(df, gender):
@@ -57,9 +38,6 @@ def chi2_test(df, gender):
     chi2, p = stats.chisquare(gender_observed_per_age, gender_expected)
     msg = "Chi-square test for: {}\nTest Statistic: {}\np-value: {}"
     print(msg.format(gender, chi2, p))
-
-# Test chi2_test function
-chi2_test(dataset_dem_excl_nan_grouped, 'Female')
 
 
 def main():
