@@ -13,7 +13,7 @@ def fre_plot(df, col_name):
 
 # Test fre_plot function
 fre_plot(dataset_dem_excl_nan, 'Gender')
-fre_plot(dataset_dem_excl_nan, 'Ethnicity')
+fre_plot(dataset_dem_excl_nan_grouped, 'Ethnicity')
 
 
 def fre_plot_split(df, col_name1, col_name2):
@@ -24,6 +24,17 @@ def fre_plot_split(df, col_name1, col_name2):
 
 # Test fre_plot_split function
 fre_plot_split(dataset_dem_excl_nan_grouped, 'Ethnicity', 'Gender')
+
+
+def fre_table(df, col_name):
+    """Export frequency table of column as csv"""
+
+    fre_table = df[col_name].value_counts()
+    file_name = col_name + '_fre_table.csv'
+    fre_table.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
+
+# Test fre_plot_split function
+fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
 
 
 def main():
@@ -51,6 +62,8 @@ def main():
 
     dataset_dem_excl_nan = dataset_dem_excl_nan.replace({'Gender': gender_dict})
     dataset_dem_excl_nan_grouped = dataset_dem_excl_nan.replace({'Ethnicity': grouped_ethnicity_dict})
+
+
 
 
 if __name__ == "__main__":
