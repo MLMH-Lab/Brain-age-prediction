@@ -55,8 +55,8 @@ def chi2_test(df, gender):
     gender_observed_per_age = gender_observed_overview[gender]
 
     chi2, p = stats.chisquare(gender_observed_per_age, gender_expected)
-    msg = "Test Statistic: {}\np-value: {}"
-    print(msg.format(chi2, p))
+    msg = "Chi-square test for: {}\nTest Statistic: {}\np-value: {}"
+    print(msg.format(gender, chi2, p))
 
 # Test chi2_test function
 chi2_test(dataset_dem_excl_nan_grouped, 'Female')
