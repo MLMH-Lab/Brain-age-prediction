@@ -96,9 +96,11 @@ def main():
     gender_observed = pd.crosstab(dataset_dem_ab46_ethn['Gender'], dataset_dem_ab46_ethn['Age'])
     age_list = list(gender_observed.columns)
     age_combinations = list(itertools.product(age_list, age_list))
+    age_combinations_new = []
     for age_tuple in age_combinations:
-        if age_tuple[0] == age_tuple[1]:
-            age_combinations.remove(age_tuple)
+        if (age_tuple[1], age_tuple[0]) not in age_combinations_new:
+            if age_tuple[0] != age_tuple[1]:
+                age_combinations_new.append(age_tuple)
 
     for age_tuple in age_combinations:
         chi2_contingency_test(gender_observed, age_tuple[0], age_tuple[1])
