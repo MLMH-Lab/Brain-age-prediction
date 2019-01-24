@@ -22,16 +22,18 @@ def fre_table(df, col_name):
     fre_table.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
 
 
-def chi2_contingency_test(crosstab_df, age_combinations, age1, age2):
+def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
     """Perform multiple 2x2 Pearson chi-square analyses"""
 
     cont_table = crosstab_df[[age1, age2]]
     chi2, p, dof, expected = stats.chi2_contingency(cont_table, correction=False)
 
-    # Bonferroni correction for multiple comparisons
+    # Bonferroni correction for multiple comparisons; use sig_list to check which ages are most different
     sig_level = 0.05 / len(age_combinations)
     msg = "Chi-square test for ages {} vs {} is significant:\nTest Statistic: {}\np-value: {}\n"
     if p < sig_level:
+        sig_list.append(age1)
+        sig_list.append(age2)
         print(msg.format(age1, age2, chi2, p))
 
 
@@ -82,8 +84,18 @@ def main():
             if age_tuple[0] != age_tuple[1]:
                 age_combinations_new.append(age_tuple)
 
+    sig_list = []
     for age_tuple in age_combinations_new:
-        chi2_contingency_test(gender_observed, age_combinations_new, age_tuple[0], age_tuple[1])
+        chi2_contingency_test(gender_observed, age_combinations_new, sig_list, age_tuple[0], age_tuple[1])
+
+    dict_sig = {}
+    for item in sig_list:
+        if item in dict_sig:
+            dict_sig[item] += 1
+        elif item not in dict_sig:
+            dict_sig[item] = 0
+        else:
+            print("error with " + str(item))
 
 
 if __name__ == "__main__":
