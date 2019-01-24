@@ -5,7 +5,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 import itertools
-from imblearn.under_sampling import RandomUnderSampler
 
 
 def fre_plot_split(df, col_name1, col_name2):
@@ -96,6 +95,12 @@ def main():
             print("error with " + str(item))
 
     # Undersample the more prominent gender per age in dict_sig and store removed Participant_Ids
+    # for each age group in dict_dig, create list with Participant_IDs per gender - WIP
+
+    # list_72_male = []
+    # for row in dataset_dem_ab46_ethn.iterrows():
+    #     if (dataset_dem_ab46_ethn[row]['Age'] == 72.0 and dataset_dem_ab46_ethn['Gender'] == 'Male'):
+    #         list_72.append(dataset_dem_ab46_ethn['ID'])
 
 
 if __name__ == "__main__":
