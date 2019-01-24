@@ -4,6 +4,7 @@ Supplementary data and labels acquired from https://biobank.ctsu.ox.ac.uk/crysta
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.stats as stats
+import itertools
 
 
 def fre_plot_split(df, col_name1, col_name2):
@@ -33,8 +34,6 @@ def chi2_test(df, gender):
     msg = "Chi-square test for: {}\nTest Statistic: {}\np-value: {}"
     print(msg.format(gender, chi2, p))
 
-# Create crosstab of age vs gender - put into main function
-gender_observed = pd.crosstab(dataset_dem_ab46_ethn['Gender'], dataset_dem_ab46_ethn['Age'])
 
 def chi2_contingency_test(crosstab_df, age1, age2):
     """Perform multiple 2x2 Pearson chi-square analyses"""
@@ -46,6 +45,7 @@ def chi2_contingency_test(crosstab_df, age1, age2):
 
 # test chi2_contingency_test function
 chi2_contingency_test(gender_observed, 47.0, 48.0)
+
 
 
 def main():
@@ -84,6 +84,14 @@ def main():
 
     chi2_test(dataset_dem_ab46_ethn, 'Female')
     chi2_test(dataset_dem_ab46_ethn, 'Male')
+
+    # Perform chi2 contingency analysis for each age combination
+    gender_observed = pd.crosstab(dataset_dem_ab46_ethn['Gender'], dataset_dem_ab46_ethn['Age'])
+    age_list = list(gender_observed.columns)
+    age_combinations = list(itertools.product(age_list, age_list))
+
+    for age_tuple in age_combinations:
+        chi2_contingency_test(gender_observed, age_tuple[0], age_tuple[1])
 
 
 if __name__ == "__main__":
