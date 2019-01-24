@@ -97,8 +97,8 @@ def main():
             if age_tuple[0] != age_tuple[1]:
                 age_combinations_new.append(age_tuple)
 
-    for age_tuple in age_combinations:
-        chi2_contingency_test(gender_observed, age_tuple[0], age_tuple[1])
+    for age_tuple in age_combinations_new:
+        chi2_contingency_test(gender_observed, age_combinations_new, age_tuple[0], age_tuple[1])
 
 
 if __name__ == "__main__":
