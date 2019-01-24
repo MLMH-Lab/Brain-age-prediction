@@ -33,6 +33,20 @@ def chi2_test(df, gender):
     msg = "Chi-square test for: {}\nTest Statistic: {}\np-value: {}"
     print(msg.format(gender, chi2, p))
 
+# Create crosstab of age vs gender - put into main function
+gender_observed = pd.crosstab(dataset_dem_ab46_ethn['Gender'], dataset_dem_ab46_ethn['Age'])
+
+def chi2_contingency_test(crosstab_df, age1, age2):
+    """Perform multiple 2x2 Pearson chi-square analyses"""
+
+    cont_table = crosstab_df[[age1, age2]]
+    chi2, p, dof, expected = stats.chi2_contingency(cont_table, correction=False)
+    msg = "Chi-square test for ages {} vs {}\nTest Statistic: {}\np-value: {}"
+    print(msg.format(age1, age2, chi2, p))
+
+# test chi2_contingency_test function
+chi2_contingency_test(gender_observed, 47.0, 48.0)
+
 
 def main():
 
