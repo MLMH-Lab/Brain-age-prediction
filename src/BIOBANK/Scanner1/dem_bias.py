@@ -22,19 +22,6 @@ def fre_table(df, col_name):
     fre_table.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
 
 
-def chi2_test(df, gender):
-    """Perform Pearson chi-squared test for gender distribution per age"""
-
-    ages_fre = df['Age'].value_counts()
-    gender_expected_per_age = ages_fre / 2
-    gender_observed_overview = pd.crosstab(df['Gender'], df['Age']).transpose()
-    gender_observed_per_age = gender_observed_overview[gender]
-
-    chi2, p = stats.chisquare(gender_observed_per_age, gender_expected_per_age)
-    msg = "Chi-square test for: {}\nTest Statistic: {}\np-value: {}"
-    print(msg.format(gender, chi2, p))
-
-
 def chi2_contingency_test(crosstab_df, age_combinations, age1, age2):
     """Perform multiple 2x2 Pearson chi-square analyses"""
 
