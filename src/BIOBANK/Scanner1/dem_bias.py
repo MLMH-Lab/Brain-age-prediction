@@ -61,14 +61,15 @@ def main():
     dataset_dem_excl_nan = dataset_dem_excl_nan.replace({'Gender': gender_dict})
     dataset_dem_excl_nan_grouped = dataset_dem_excl_nan.replace({'Ethnicity': grouped_ethnicity_dict})
 
-    # Exclude ages with <100 participants
+    # Exclude ages with <100 participants, exclude non-white ethnicities due to small subgroups
     dataset_dem_ab46 = dataset_dem_excl_nan_grouped[dataset_dem_excl_nan_grouped['Age'] > 46]
+    dataset_dem_ab46_ethn = dataset_dem_ab46[dataset_dem_ab46['Ethnicity'] == 'White']
 
     # Export ethnicity distribution
-    fre_table(dataset_dem_ab46, 'Ethnicity')
+    fre_table(dataset_dem_ab46_ethn, 'Ethnicity')
 
-    chi2_test(dataset_dem_ab46, 'Female')
-    chi2_test(dataset_dem_ab46, 'Male')
+    chi2_test(dataset_dem_ab46_ethn, 'Female')
+    chi2_test(dataset_dem_ab46_ethn, 'Male')
 
 
 if __name__ == "__main__":
