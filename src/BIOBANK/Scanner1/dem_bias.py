@@ -50,11 +50,6 @@ def chi2_contingency_test(crosstab_df, age_combinations, age1, age2):
         print(msg.format(age1, age2, chi2, p))
 
 
-# test chi2_contingency_test function
-chi2_contingency_test(gender_observed, age_combinations, 47.0, 48.0)
-
-
-
 def main():
 
     # Loading supplementary demographic data
