@@ -35,16 +35,23 @@ def chi2_test(df, gender):
     print(msg.format(gender, chi2, p))
 
 
-def chi2_contingency_test(crosstab_df, age1, age2):
+def chi2_contingency_test(crosstab_df, age_combinations, age1, age2):
     """Perform multiple 2x2 Pearson chi-square analyses"""
 
     cont_table = crosstab_df[[age1, age2]]
     chi2, p, dof, expected = stats.chi2_contingency(cont_table, correction=False)
-    msg = "Chi-square test for ages {} vs {}\nTest Statistic: {}\np-value: {}"
-    print(msg.format(age1, age2, chi2, p))
+    # msg = "Chi-square test for ages {} vs {}\nTest Statistic: {}\np-value: {}"
+    # print(msg.format(age1, age2, chi2, p))
+
+    # Bonferroni correction for multiple comparisons
+    sig_level = 0.05 / len(age_combinations)
+    msg = "Chi-square test for ages {} vs {} is significant:\nTest Statistic: {}\np-value: {}"
+    if p < sig_level:
+        print(msg.format(age1, age2, chi2, p))
+
 
 # test chi2_contingency_test function
-chi2_contingency_test(gender_observed, 47.0, 48.0)
+chi2_contingency_test(gender_observed, age_combinations, 47.0, 48.0)
 
 
 
