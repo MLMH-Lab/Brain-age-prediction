@@ -93,7 +93,7 @@ def main():
         if item in dict_sig:
             dict_sig[item] += 1
         elif item not in dict_sig:
-            dict_sig[item] = 0
+            dict_sig[item] = 1
         else:
             print("error with " + str(item))
 
