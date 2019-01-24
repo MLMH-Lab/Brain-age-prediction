@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 import itertools
+from imblearn.under_sampling import RandomUnderSampler
 
 
 def fre_plot_split(df, col_name1, col_name2):
@@ -71,9 +72,6 @@ def main():
     # Export ethnicity distribution
     fre_table(dataset_dem_ab46_ethn, 'Ethnicity')
 
-    chi2_test(dataset_dem_ab46_ethn, 'Female')
-    chi2_test(dataset_dem_ab46_ethn, 'Male')
-
     # Perform chi2 contingency analysis for each age combination
     gender_observed = pd.crosstab(dataset_dem_ab46_ethn['Gender'], dataset_dem_ab46_ethn['Age'])
     age_list = list(gender_observed.columns)
@@ -96,6 +94,8 @@ def main():
             dict_sig[item] = 1
         else:
             print("error with " + str(item))
+
+    # Undersample the more prominent gender per age in dict_sig and store removed Participant_Ids
 
 
 if __name__ == "__main__":
