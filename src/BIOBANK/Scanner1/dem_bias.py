@@ -41,7 +41,7 @@ def main():
 
     # Loading supplementary demographic data
     dataset_dem = pd.read_csv(
-        '/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/ukb22321.csv',
+        '/Users/leabaecker/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/ukb22321.csv',
         usecols=['eid', '31-0.0', '21003-2.0', '21000-0.0'])
     dataset_dem.columns = ['ID', 'Gender', 'Ethnicity', 'Age']
     dataset_dem_excl_nan = dataset_dem.dropna()
@@ -64,12 +64,13 @@ def main():
     dataset_dem_excl_nan = dataset_dem_excl_nan.replace({'Gender': gender_dict})
     dataset_dem_excl_nan_grouped = dataset_dem_excl_nan.replace({'Ethnicity': grouped_ethnicity_dict})
 
+    # Export ethnicity and age distribution
+    fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
+    fre_table(dataset_dem_excl_nan_grouped, 'Age')
+
     # Exclude ages with <100 participants, exclude non-white ethnicities due to small subgroups
     dataset_dem_ab46 = dataset_dem_excl_nan_grouped[dataset_dem_excl_nan_grouped['Age'] > 46]
     dataset_dem_ab46_ethn = dataset_dem_ab46[dataset_dem_ab46['Ethnicity'] == 'White']
-
-    # Export ethnicity distribution
-    fre_table(dataset_dem_ab46_ethn, 'Ethnicity')
 
     # Perform chi2 contingency analysis for each age combination
     gender_observed = pd.crosstab(dataset_dem_ab46_ethn['Gender'], dataset_dem_ab46_ethn['Age'])
@@ -97,10 +98,10 @@ def main():
     # Undersample the more prominent gender per age in dict_sig and store removed Participant_Ids
     # for each age group in dict_dig, create list with Participant_IDs per gender - WIP
 
-    # list_72_male = []
-    # for row in dataset_dem_ab46_ethn.iterrows():
-    #     if (dataset_dem_ab46_ethn[row]['Age'] == 72.0 and dataset_dem_ab46_ethn['Gender'] == 'Male'):
-    #         list_72.append(dataset_dem_ab46_ethn['ID'])
+    list_72_male = []
+    for row in dataset_dem_ab46_ethn.iterrows():
+        if (dataset_dem_ab46_ethn[row]['Age'] == 72.0 and dataset_dem_ab46_ethn['Gender'] == 'Male'):
+            list_72_male.append(dataset_dem_ab46_ethn['ID'])
 
 
 if __name__ == "__main__":
