@@ -1,5 +1,9 @@
-"""Script to assess potential bias in confounding factors: gender vs age, ethnicity vs age;
-Supplementary data and labels acquired from https://biobank.ctsu.ox.ac.uk/crystal/search.cgi"""
+"""Script to assess sample homogeneity in UK BIOBANK Scanner1: gender vs age, ethnicity vs age;
+Supplementary data and labels acquired from https://biobank.ctsu.ox.ac.uk/crystal/search.cgi
+
+Step 1: Organising dataset
+Step 2: Visualisation of distribution
+Step 3: Chi-square contingency analysis"""
 
 import pandas as pd
 import matplotlib.pyplot as plt
