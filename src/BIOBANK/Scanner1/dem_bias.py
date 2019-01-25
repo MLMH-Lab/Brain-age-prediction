@@ -23,7 +23,7 @@ def fre_table(df, col_name):
 
     fre_table = df[col_name].value_counts()
     file_name = col_name + '_fre_table.csv'
-    fre_table.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
+    fre_table.to_csv('/Users/leabaecker/PycharmProjects/predicted_brain_age/outputs/' + file_name)
 
 
 def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
@@ -39,6 +39,26 @@ def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
         sig_list.append(age1)
         sig_list.append(age2)
         print(msg.format(age1, age2, chi2, p))
+
+
+ids_to_drop = []
+def get_ids_to_drop(df, age, gender, n_to_keep, id_list):
+    """Extract random sample of participant IDs per age per gender to drop from total sample"""
+
+    df_filter1 = df[df['Age'] == age]
+    df_filter2 = df_filter1[df_filter1['Gender'] == gender]
+
+    n_to_drop = len(df_filter2) - n_to_keep
+
+    # random sample of IDs to drop
+    df_to_drop = df.sample(n_to_drop)
+    id_list.append(list(df_to_drop['ID']))
+
+    return id_list
+
+
+# test get_ids function
+get_ids_to_drop(dataset_dem_ab46_ethn, 72.0, 'Male', 200, ids_to_drop)
 
 
 def main():
@@ -100,13 +120,10 @@ def main():
             print("error with " + str(item))
 
     # Undersample the more prominent gender per age in dict_sig and store removed Participant_Ids
-    # for each age group in dict_dig, create list with Participant_IDs per gender - WIP
 
-    list_72_male = []
-    for row in dataset_dem_ab46_ethn.iterrows():
-        if (dataset_dem_ab46_ethn[row]['Age'] == 72.0 and dataset_dem_ab46_ethn['Gender'] == 'Male'):
-            list_72_male.append(dataset_dem_ab46_ethn['ID'])
 
+
+  # & dataset_dem_ab46_ethn['Gender'] == 'Male'
 
 if __name__ == "__main__":
     main()
