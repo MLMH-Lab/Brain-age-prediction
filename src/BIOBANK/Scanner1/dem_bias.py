@@ -132,7 +132,7 @@ def main():
             break
 
         gender_diff = gender_observed.loc['Female', key] - gender_observed.loc['Male', key]
-        diff_to_remove = int(abs(gender_diff) / 2)
+        diff_to_remove = int(abs(gender_diff))
 
         get_ids_to_drop(dataset_dem_ab46_ethn, key, gender_higher, diff_to_remove, ids_to_drop)
 
@@ -141,9 +141,32 @@ def main():
         for id in id_list:
             flattened_ids_to_drop.append(id)
 
+    # Create new dataset with ids from flattened_ids_to_drop removed
+    reduced_dataset = dataset_dem_ab46_ethn[~dataset_dem_ab46_ethn.ID.isin(flattened_ids_to_drop)]
 
+    # Perform chi2 contingency analysis again on reduced dataset
+    gender_observed_2 = pd.crosstab(reduced_dataset['Gender'], reduced_dataset['Age'])
+    age_list_2 = list(gender_observed_2.columns)
+    age_combinations_2 = list(itertools.product(age_list_2, age_list_2))
+    age_combinations_new_2 = []
+    for age_tuple in age_combinations_2:
+        if (age_tuple[1], age_tuple[0]) not in age_combinations_new_2:
+            if age_tuple[0] != age_tuple[1]:
+                age_combinations_new_2.append(age_tuple)
 
-  # & dataset_dem_ab46_ethn['Gender'] == 'Male'
+    sig_list_2 = []
+    for age_tuple in age_combinations_new_2:
+        chi2_contingency_test(gender_observed_2, age_combinations_new_2, sig_list_2, age_tuple[0], age_tuple[1])
+
+    dict_sig_2 = {}
+    for item in sig_list_2:
+        if item in dict_sig_2:
+            dict_sig_2[item] += 1
+        elif item not in dict_sig_2:
+            dict_sig_2[item] = 1
+        else:
+            print("error with " + str(item))
+
 
 if __name__ == "__main__":
     main()
