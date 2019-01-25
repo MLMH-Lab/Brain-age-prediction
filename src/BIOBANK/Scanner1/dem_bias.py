@@ -136,15 +136,16 @@ def main():
 
         get_ids_to_drop(dataset_dem_ab46_ethn, key, gender_higher, diff_to_remove, ids_to_drop)
 
+    # Flatten ids_to_drop because it is a list of lists
     flattened_ids_to_drop = []
     for id_list in ids_to_drop:
         for id in id_list:
             flattened_ids_to_drop.append(id)
 
-    # Create new dataset with ids from flattened_ids_to_drop removed
+    # Create new dataset with ids from flattened_ids_to_drop removed - NOT WORKING PROPERLY - only removes half
     reduced_dataset = dataset_dem_ab46_ethn[~dataset_dem_ab46_ethn.ID.isin(flattened_ids_to_drop)]
 
-    # Perform chi2 contingency analysis again on reduced dataset
+    # Perform chi2 contingency analysis again on reduced dataset - same code as above with new variables
     gender_observed_2 = pd.crosstab(reduced_dataset['Gender'], reduced_dataset['Age'])
     age_list_2 = list(gender_observed_2.columns)
     age_combinations_2 = list(itertools.product(age_list_2, age_list_2))
