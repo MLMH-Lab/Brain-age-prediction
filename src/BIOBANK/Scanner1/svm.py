@@ -17,17 +17,23 @@ Step 16: Print CV results"""
 
 from pathlib import Path
 import pandas as pd
-import tables
+import random
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def main():
 
-    # Load freesurfer data
+    # Load freesurfer data as hdf5
     dataset = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
     dataset_hdf = dataset.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table', mode='w')
     dataset_test = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table')
+    # question: what's the difference between these?
+
+    # Initialise random number generator with random seed
+    random.seed(30)
+    # question: should I use np.random instead (depending on what we will use later)?
+    # do we have a specific seed value to choose?
 
 if __name__ == "__main__":
     main()
