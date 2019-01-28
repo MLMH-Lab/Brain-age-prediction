@@ -3,7 +3,8 @@ Supplementary data and labels acquired from https://biobank.ctsu.ox.ac.uk/crysta
 
 Step 1: Organising dataset
 Step 2: Visualisation of distribution
-Step 3: Chi-square contingency analysis"""
+Step 3: Chi-square contingency analysis
+Step 4: Remove subjects based on chi-square results to achieve homogeneous sample in terms of gender and ethnicity"""
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -27,10 +28,10 @@ def fre_table(df, col_name):
 
 
 def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
-    """Perform multiple 2x2 Pearson chi-square analyses"""
+    """Perform multiple 2x2 Pearson chi-square analyses, corrected for multiple comparisons"""
 
-    cont_table = crosstab_df[[age1, age2]]
-    chi2, p, dof, expected = stats.chi2_contingency(cont_table, correction=False)
+    contingency_table = crosstab_df[[age1, age2]]
+    chi2, p, dof, expected = stats.chi2_contingency(contignency_table, correction=False)
 
     # Bonferroni correction for multiple comparisons; use sig_list to check which ages are most different
     sig_level = 0.05 / len(age_combinations)
@@ -52,10 +53,6 @@ def get_ids_to_drop(df, age, gender, n_to_drop, id_list):
     id_list.append(list(df_to_drop['ID']))
 
     return id_list
-
-
-# test get_ids function
-get_ids_to_drop(dataset_dem_ab46_ethn, 72.0, 'Male', 200, ids_to_drop)
 
 
 def main():
@@ -85,7 +82,7 @@ def main():
     dataset_dem_excl_nan = dataset_dem_excl_nan.replace({'Gender': gender_dict})
     dataset_dem_excl_nan_grouped = dataset_dem_excl_nan.replace({'Ethnicity': grouped_ethnicity_dict})
 
-    # Export ethnicity and age distribution
+    # Export ethnicity and age distribution for future reference
     fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
     fre_table(dataset_dem_excl_nan_grouped, 'Age')
 
@@ -93,7 +90,7 @@ def main():
     dataset_dem_ab46 = dataset_dem_excl_nan_grouped[dataset_dem_excl_nan_grouped['Age'] > 46]
     dataset_dem_ab46_ethn = dataset_dem_ab46[dataset_dem_ab46['Ethnicity'] == 'White']
 
-    # Perform chi2 contingency analysis for each age combination
+    # Create list of unique age combinations for chi2 contingency analysis
     gender_observed = pd.crosstab(dataset_dem_ab46_ethn['Gender'], dataset_dem_ab46_ethn['Age'])
     age_list = list(gender_observed.columns)
     age_combinations = list(itertools.product(age_list, age_list))
@@ -103,10 +100,13 @@ def main():
             if age_tuple[0] != age_tuple[1]:
                 age_combinations_new.append(age_tuple)
 
+    # Perform chi2 contingency analysis for each age combination
+    # sig_list is used to keep track of ages where gender proportion is significantly different
     sig_list = []
     for age_tuple in age_combinations_new:
         chi2_contingency_test(gender_observed, age_combinations_new, sig_list, age_tuple[0], age_tuple[1])
 
+    # Assess how often each age is significantly different from the others
     dict_sig = {}
     for item in sig_list:
         if item in dict_sig:
@@ -116,14 +116,15 @@ def main():
         else:
             print("error with " + str(item))
 
-    # obtain gender proportion per age group
+    # Obtain gender proportion per age group
     gender_prop = gender_observed.transpose()
     gender_prop['proportion'] = gender_prop['Female'] / gender_prop['Male']
 
-    # Undersample the more prominent gender per age in dict_sig and store removed Participant_Ids
-    ids_to_drop =[]
+    # Undersample the more prominent gender per age in dict_sig and store removed IDs in ids_to_drop
+    ids_to_drop = []
 
     for key in dict_sig.keys():
+
         if dict_sig[key] > 2:
             if gender_observed.loc['Female', key] > gender_observed.loc['Male', key]:
                 gender_higher = 'Female'
@@ -131,11 +132,9 @@ def main():
                 gender_higher = 'Male'
             else:
                 print("Error with: " + str(key))
-                break
 
             gender_diff = gender_observed.loc['Female', key] - gender_observed.loc['Male', key]
             diff_to_remove = int(abs(gender_diff))
-            # print(key, diff_to_remove)
 
             get_ids_to_drop(dataset_dem_ab46_ethn, key, gender_higher, diff_to_remove, ids_to_drop)
 
@@ -145,10 +144,11 @@ def main():
         for id in id_list:
             flattened_ids_to_drop.append(id)
 
-    # Create new dataset with ids from flattened_ids_to_drop removed - NOT WORKING PROPERLY - only removes half
+    # Create new dataset with ids from flattened_ids_to_drop removed
     reduced_dataset = dataset_dem_ab46_ethn[~dataset_dem_ab46_ethn.ID.isin(flattened_ids_to_drop)]
 
-    # Perform chi2 contingency analysis again on reduced dataset - same code as above with new variables
+    # Perform chi2 contingency analysis again on reduced dataset to check if gender proportion are homogeneous
+    # Same code as above with new variables
     gender_observed_2 = pd.crosstab(reduced_dataset['Gender'], reduced_dataset['Age'])
     age_list_2 = list(gender_observed_2.columns)
     age_combinations_2 = list(itertools.product(age_list_2, age_list_2))
