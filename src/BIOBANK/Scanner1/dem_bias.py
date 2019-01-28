@@ -23,7 +23,7 @@ def fre_table(df, col_name):
 
     fre_table = df[col_name].value_counts()
     file_name = col_name + '_fre_table.csv'
-    fre_table.to_csv('/Users/leabaecker/PycharmProjects/predicted_brain_age/outputs/' + file_name)
+    fre_table.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
 
 
 def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
@@ -64,7 +64,7 @@ def main():
 
     # Loading supplementary demographic data
     dataset_dem = pd.read_csv(
-        '/Users/leabaecker/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/ukb22321.csv',
+        '/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/ukb22321.csv',
         usecols=['eid', '31-0.0', '21003-2.0', '21000-0.0'])
     dataset_dem.columns = ['ID', 'Gender', 'Ethnicity', 'Age']
     dataset_dem_excl_nan = dataset_dem.dropna()
@@ -118,23 +118,27 @@ def main():
         else:
             print("error with " + str(item))
 
+    # obtain gender proportion per age group
+    gender_prop = gender_observed.transpose()
+    gender_prop['proportion'] = gender_prop['Female'] / gender_prop['Male']
+
     # Undersample the more prominent gender per age in dict_sig and store removed Participant_Ids
     ids_to_drop =[]
 
     for key in dict_sig.keys():
+        if dict_sig[key] > 2:
+            if gender_observed.loc['Female', key] > gender_observed.loc['Male', key]:
+                gender_higher = 'Female'
+            elif gender_observed.loc['Female', key] < gender_observed.loc['Male', key]:
+                gender_higher = 'Male'
+            else:
+                print("Error with: " + str(key))
+                break
 
-        if gender_observed.loc['Female', key] > gender_observed.loc['Male', key]:
-            gender_higher = 'Female'
-        elif gender_observed.loc['Female', key] < gender_observed.loc['Male', key]:
-            gender_higher = 'Male'
-        else:
-            print("Error with: " + str(key))
-            break
+            gender_diff = gender_observed.loc['Female', key] - gender_observed.loc['Male', key]
+            diff_to_remove = int(abs(gender_diff))
 
-        gender_diff = gender_observed.loc['Female', key] - gender_observed.loc['Male', key]
-        diff_to_remove = int(abs(gender_diff))
-
-        get_ids_to_drop(dataset_dem_ab46_ethn, key, gender_higher, diff_to_remove, ids_to_drop)
+            get_ids_to_drop(dataset_dem_ab46_ethn, key, gender_higher, diff_to_remove, ids_to_drop)
 
     # Flatten ids_to_drop because it is a list of lists
     flattened_ids_to_drop = []
