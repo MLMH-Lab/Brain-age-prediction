@@ -14,3 +14,11 @@ Step 11: Predict test set
 Step 12: Print R_squared, MAE, RMSE
 Step 13: Save model file, scaler file, predictions file
 Step 16: Print CV results"""
+
+
+def main():
+    pass
+
+
+if __name__ == "__main__":
+    main()
