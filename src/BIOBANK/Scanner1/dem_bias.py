@@ -5,18 +5,17 @@ Step 1: Organising dataset
 Step 2: Visualisation of distribution
 Step 3: Chi-square contingency analysis
 Step 4: Remove subjects based on chi-square results to achieve homogeneous sample in terms of gender and ethnicity"""
-
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-import scipy.stats as stats
 import itertools
 
+import pandas as pd
+import numpy as np
+import scipy.stats as stats
 
-def fre_table(df, col_name):
+
+def save_fre_table(input_df, col_name):
     """Export frequency table of column as csv"""
 
-    fre_table = df[col_name].value_counts()
+    fre_table = input_df[col_name].value_counts()
     file_name = col_name + '_fre_table.csv'
     fre_table.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
 
@@ -30,13 +29,45 @@ def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
     # Bonferroni correction for multiple comparisons; use sig_list to check which ages are most different
     sig_level = 0.05 / len(age_combinations)
     msg = "Chi-square test for ages {} vs {} is significant:\nTest Statistic: {}\np-value: {}\n"
-    if p < sig_level:
+    if p_value < sig_level:
         sig_list.append(age1)
         sig_list.append(age2)
-        # print(msg.format(age1, age2, chi2, p))
+        # print(msg.format(age1, age2, chi2, p_value))
 
 
-def get_ids_to_drop(df, age, gender, n_to_drop):
+def chi2_contingency_analysis(demographics_data_df):
+    """Perform contingency analysis of the subjects gender."""
+
+    # Create list of unique age combinations for chi2 contingency analysis
+    gender_observed = pd.crosstab(demographics_data_df['Gender'], demographics_data_df['Age'])
+    age_list = list(gender_observed.columns)
+    age_combinations = list(itertools.product(age_list, age_list))
+    age_combinations_new = []
+    for age_tuple in age_combinations:
+        if (age_tuple[1], age_tuple[0]) not in age_combinations_new:
+            if age_tuple[0] != age_tuple[1]:
+                age_combinations_new.append(age_tuple)
+
+    # Perform chi2 contingency analysis for each age combination
+    # sig_list is used to keep track of ages where gender proportion is significantly different
+    sig_list = []
+    for age_tuple in age_combinations_new:
+        chi2_contingency_test(gender_observed, age_combinations_new, sig_list, age_tuple[0], age_tuple[1])
+
+    # Assess how often each age is significantly different from the others
+    dict_sig = {}
+    for item in sig_list:
+        if item in dict_sig:
+            dict_sig[item] += 1
+        elif item not in dict_sig:
+            dict_sig[item] = 1
+        else:
+            print("error with " + str(item))
+
+    return dict_sig, gender_observed
+
+
+def get_ids_to_drop(input_df, age, gender, n_to_drop):
     """Extract random sample of participant IDs per age per gender to drop from total sample"""
 
     df_filtered = input_df[(input_df['Age'] == age) & (input_df['Gender'] == gender)]
@@ -46,6 +77,31 @@ def get_ids_to_drop(df, age, gender, n_to_drop):
     id_list = list(df_to_drop['ID'])
 
     return id_list
+
+def balancing_sample(demographics_data_df, dict_sig, gender_observed):
+    """Fix gender balance."""
+
+    print('Fixing unbalance...')
+    # Undersample the more prominent gender per age in dict_sig and store removed IDs in ids_to_drop
+    ids_to_drop = []
+
+    for key in dict_sig.keys():
+
+        if dict_sig[key] > 4:
+            if gender_observed.loc['Female', key] > gender_observed.loc['Male', key]:
+                gender_higher = 'Female'
+            elif gender_observed.loc['Female', key] < gender_observed.loc['Male', key]:
+                gender_higher = 'Male'
+            else:
+                print("Error with: " + str(key))
+
+            gender_diff = gender_observed.loc['Female', key] - gender_observed.loc['Male', key]
+            diff_to_remove = int(abs(gender_diff) * 0.5)
+
+            ids_list = get_ids_to_drop(demographics_data_df, key, gender_higher, diff_to_remove)
+            ids_to_drop.extend(ids_list)
+
+    return demographics_data_df[~demographics_data_df.ID.isin(ids_to_drop)]
 
 
 def main():
@@ -78,85 +134,23 @@ def main():
     dataset_dem_excl_nan_grouped = dataset_dem_excl_nan.replace({'Ethnicity': grouped_ethnicity_dict})
 
     # Export ethnicity and age distribution for future reference
-    fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
-    fre_table(dataset_dem_excl_nan_grouped, 'Age')
+    save_fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
+    save_fre_table(dataset_dem_excl_nan_grouped, 'Age')
 
     # Exclude ages with <100 participants, exclude non-white ethnicities due to small subgroups
     dataset_dem_ab46 = dataset_dem_excl_nan_grouped[dataset_dem_excl_nan_grouped['Age'] > 46]
     dataset_dem_ab46_ethn = dataset_dem_ab46[dataset_dem_ab46['Ethnicity'] == 'White']
 
-    # Create list of unique age combinations for chi2 contingency analysis
-    gender_observed = pd.crosstab(dataset_dem_ab46_ethn['Gender'], dataset_dem_ab46_ethn['Age'])
-    age_list = list(gender_observed.columns)
-    age_combinations = list(itertools.product(age_list, age_list))
-    age_combinations_new = []
-    for age_tuple in age_combinations:
-        if (age_tuple[1], age_tuple[0]) not in age_combinations_new:
-            if age_tuple[0] != age_tuple[1]:
-                age_combinations_new.append(age_tuple)
+    dict_sig, gender_observed = chi2_contingency_analysis(dataset_dem_ab46_ethn)
+    print('Unbalanced groups')
+    print(dict_sig)
 
-    # Perform chi2 contingency analysis for each age combination
-    # sig_list is used to keep track of ages where gender proportion is significantly different
-    sig_list = []
-    for age_tuple in age_combinations_new:
-        chi2_contingency_test(gender_observed, age_combinations_new, sig_list, age_tuple[0], age_tuple[1])
+    # Create new balanced dataset
+    reduced_dataset = balancing_sample(dataset_dem_ab46_ethn, dict_sig, gender_observed)
 
-    # Assess how often each age is significantly different from the others
-    dict_sig = {}
-    for item in sig_list:
-        if item in dict_sig:
-            dict_sig[item] += 1
-        elif item not in dict_sig:
-            dict_sig[item] = 1
-        else:
-            print("error with " + str(item))
-
-    # Undersample the more prominent gender per age in dict_sig and store removed IDs in ids_to_drop
-    ids_to_drop = []
-
-    for key in dict_sig.keys():
-
-        if dict_sig[key] > 4:
-            if gender_observed.loc['Female', key] > gender_observed.loc['Male', key]:
-                gender_higher = 'Female'
-            elif gender_observed.loc['Female', key] < gender_observed.loc['Male', key]:
-                gender_higher = 'Male'
-            else:
-                print("Error with: " + str(key))
-
-            gender_diff = gender_observed.loc['Female', key] - gender_observed.loc['Male', key]
-            diff_to_remove = int(abs(gender_diff) * 0.5)
-
-            ids_list = get_ids_to_drop(dataset_dem_ab46_ethn, key, gender_higher, diff_to_remove)
-            ids_to_drop.extend(ids_list)
-
-
-    # Create new dataset with ids from flattened_ids_to_drop removed
-    reduced_dataset = dataset_dem_ab46_ethn[~dataset_dem_ab46_ethn.ID.isin(ids_to_drop)]
-
-    # Perform chi2 contingency analysis again on reduced dataset to check if gender proportion are homogeneous
-    # Same code as above with new variables
-    gender_observed_2 = pd.crosstab(reduced_dataset['Gender'], reduced_dataset['Age'])
-    age_list_2 = list(gender_observed_2.columns)
-    age_combinations_2 = list(itertools.product(age_list_2, age_list_2))
-    age_combinations_new_2 = []
-    for age_tuple in age_combinations_2:
-        if (age_tuple[1], age_tuple[0]) not in age_combinations_new_2:
-            if age_tuple[0] != age_tuple[1]:
-                age_combinations_new_2.append(age_tuple)
-
-    sig_list_2 = []
-    for age_tuple in age_combinations_new_2:
-        chi2_contingency_test(gender_observed_2, age_combinations_new_2, sig_list_2, age_tuple[0], age_tuple[1])
-
-    dict_sig_2 = {}
-    for item in sig_list_2:
-        if item in dict_sig_2:
-            dict_sig_2[item] += 1
-        elif item not in dict_sig_2:
-            dict_sig_2[item] = 1
-        else:
-            print("error with " + str(item))
+    dict_sig, gender_observed = chi2_contingency_analysis(reduced_dataset)
+    print('Unbalanced groups')
+    print(dict_sig)
 
     # Output final dataset
     reduced_dataset.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/homogeneous_dataset.csv', index=False)
