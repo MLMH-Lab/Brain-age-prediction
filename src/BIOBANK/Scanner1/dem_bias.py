@@ -8,8 +8,10 @@ Step 4: Remove subjects based on chi-square results to achieve homogeneous sampl
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 import scipy.stats as stats
 import itertools
+
 
 
 def fre_plot_split(df, col_name1, col_name2):
@@ -42,7 +44,7 @@ def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
         # print(msg.format(age1, age2, chi2, p))
 
 
-def get_ids_to_drop(df, age, gender, n_to_drop, id_list):
+def get_ids_to_drop(df, age, gender, n_to_drop):
     """Extract random sample of participant IDs per age per gender to drop from total sample"""
 
     df_filter1 = df[df['Age'] == age]
@@ -50,12 +52,14 @@ def get_ids_to_drop(df, age, gender, n_to_drop, id_list):
 
     # random sample of IDs to drop
     df_to_drop = df_filter2.sample(n_to_drop)
-    id_list.append(list(df_to_drop['ID']))
+    id_list = list(df_to_drop['ID'])
 
     return id_list
 
 
 def main():
+    # Define random seed for sampling methods
+    np.random.seed = 123
 
     # Loading supplementary demographic data
     dataset_dem = pd.read_csv(
@@ -132,16 +136,12 @@ def main():
             gender_diff = gender_observed.loc['Female', key] - gender_observed.loc['Male', key]
             diff_to_remove = int(abs(gender_diff) * 0.5)
 
-            get_ids_to_drop(dataset_dem_ab46_ethn, key, gender_higher, diff_to_remove, ids_to_drop)
+            ids_list = get_ids_to_drop(dataset_dem_ab46_ethn, key, gender_higher, diff_to_remove)
+            ids_to_drop.extend(ids_list)
 
-    # Flatten ids_to_drop because it is a list of lists
-    flattened_ids_to_drop = []
-    for id_list in ids_to_drop:
-        for id in id_list:
-            flattened_ids_to_drop.append(id)
 
     # Create new dataset with ids from flattened_ids_to_drop removed
-    reduced_dataset = dataset_dem_ab46_ethn[~dataset_dem_ab46_ethn.ID.isin(flattened_ids_to_drop)]
+    reduced_dataset = dataset_dem_ab46_ethn[~dataset_dem_ab46_ethn.ID.isin(ids_to_drop)]
 
     # Perform chi2 contingency analysis again on reduced dataset to check if gender proportion are homogeneous
     # Same code as above with new variables
