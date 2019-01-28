@@ -25,7 +25,7 @@ def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
     """Perform multiple 2x2 Pearson chi-square analyses, corrected for multiple comparisons"""
 
     contingency_table = crosstab_df[[age1, age2]]
-    chi2, p, dof, expected = stats.chi2_contingency(contingency_table, correction=False)
+    chi2, p_value, _, _ = stats.chi2_contingency(contingency_table, correction=False)
 
     # Bonferroni correction for multiple comparisons; use sig_list to check which ages are most different
     sig_level = 0.05 / len(age_combinations)
@@ -165,5 +165,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
