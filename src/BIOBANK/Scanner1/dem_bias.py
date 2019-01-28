@@ -13,14 +13,6 @@ import scipy.stats as stats
 import itertools
 
 
-
-def fre_plot_split(df, col_name1, col_name2):
-    """Frequency plot of df column1 grouped by column2"""
-
-    pd.crosstab(df[col_name1], df[col_name2]).plot.bar()
-    plt.show()
-
-
 def fre_table(df, col_name):
     """Export frequency table of column as csv"""
 
