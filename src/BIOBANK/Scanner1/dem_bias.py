@@ -121,7 +121,7 @@ def main():
 
     for key in dict_sig.keys():
 
-        if dict_sig[key] > 2:
+        if dict_sig[key] > 4:
             if gender_observed.loc['Female', key] > gender_observed.loc['Male', key]:
                 gender_higher = 'Female'
             elif gender_observed.loc['Female', key] < gender_observed.loc['Male', key]:
@@ -130,7 +130,7 @@ def main():
                 print("Error with: " + str(key))
 
             gender_diff = gender_observed.loc['Female', key] - gender_observed.loc['Male', key]
-            diff_to_remove = int(abs(gender_diff))
+            diff_to_remove = int(abs(gender_diff) * 0.5)
 
             get_ids_to_drop(dataset_dem_ab46_ethn, key, gender_higher, diff_to_remove, ids_to_drop)
 
