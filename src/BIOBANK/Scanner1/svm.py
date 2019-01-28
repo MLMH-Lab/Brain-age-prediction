@@ -22,6 +22,14 @@ import random
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
+def normalise_region_df(df, region_name): # to do: to be adapted for h5
+    """Normalise regional volume within df"""
+
+    normalised_df["Norm_vol_" + region_name] = df[region_name] / df['EstimatedTotalIntraCranialVol'] * 100
+
+    return normalised_df
+
+
 def main():
 
     # Load freesurfer data as hdf5
