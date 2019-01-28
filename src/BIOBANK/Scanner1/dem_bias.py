@@ -167,6 +167,9 @@ def main():
         else:
             print("error with " + str(item))
 
+    # Output final dataset
+    reduced_dataset.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/homogeneous_dataset.csv', index=False)
+
 
 if __name__ == "__main__":
     main()
