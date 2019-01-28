@@ -41,16 +41,14 @@ def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
         print(msg.format(age1, age2, chi2, p))
 
 
-def get_ids_to_drop(df, age, gender, n_to_keep, id_list):
+def get_ids_to_drop(df, age, gender, n_to_drop, id_list):
     """Extract random sample of participant IDs per age per gender to drop from total sample"""
 
     df_filter1 = df[df['Age'] == age]
     df_filter2 = df_filter1[df_filter1['Gender'] == gender]
 
-    n_to_drop = len(df_filter2) - n_to_keep
-
     # random sample of IDs to drop
-    df_to_drop = df.sample(n_to_drop)
+    df_to_drop = df_filter2.sample(n_to_drop)
     id_list.append(list(df_to_drop['ID']))
 
     return id_list
@@ -137,6 +135,7 @@ def main():
 
             gender_diff = gender_observed.loc['Female', key] - gender_observed.loc['Male', key]
             diff_to_remove = int(abs(gender_diff))
+            # print(key, diff_to_remove)
 
             get_ids_to_drop(dataset_dem_ab46_ethn, key, gender_higher, diff_to_remove, ids_to_drop)
 
