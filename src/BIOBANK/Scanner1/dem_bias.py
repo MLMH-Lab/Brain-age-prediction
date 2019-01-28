@@ -39,7 +39,7 @@ def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
     if p < sig_level:
         sig_list.append(age1)
         sig_list.append(age2)
-        print(msg.format(age1, age2, chi2, p))
+        # print(msg.format(age1, age2, chi2, p))
 
 
 def get_ids_to_drop(df, age, gender, n_to_drop, id_list):
