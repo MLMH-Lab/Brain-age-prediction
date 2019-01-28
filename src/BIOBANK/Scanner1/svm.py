@@ -34,7 +34,7 @@ def main():
     dataset = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
     dataset_hdf = dataset.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table', mode='w')
     dataset_test = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table')
-    # question: what's the difference between these?
+    # question: what's the difference between these? and hdfstore?
 
     # Initialise random number generator with random seed
     np.random.seed(30) # np used instead of random to match scikit input
