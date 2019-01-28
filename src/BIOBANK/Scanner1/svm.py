@@ -17,17 +17,15 @@ Step 16: Print CV results"""
 
 from pathlib import Path
 import pandas as pd
-import random
+import numpy as np
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
-def normalise_region_df(df, region_name): # to do: to be adapted for h5
+def normalise_region_df(normalised_df, df, region_name): # to do: to be adapted for h5
     """Normalise regional volume within df"""
 
     normalised_df["Norm_vol_" + region_name] = df[region_name] / df['EstimatedTotalIntraCranialVol'] * 100
-
-    return normalised_df
 
 
 def main():
@@ -39,8 +37,7 @@ def main():
     # question: what's the difference between these?
 
     # Initialise random number generator with random seed
-    random.seed(30)
-    # question: should I use np.random instead (depending on what we will use later)?
+    np.random.seed(30) # np used instead of random to match scikit input
     # do we have a specific seed value to choose?
 
 if __name__ == "__main__":

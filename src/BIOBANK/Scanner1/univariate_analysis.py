@@ -17,7 +17,7 @@ import pandas as pd
 import statsmodels.api as sm
 
 
-def normalise_region_df(df, region_name):
+def normalise_region_df(normalised_df, df, region_name):
     """Normalise regional volume within df, add quadratic and cubic age vars"""
 
     normalised_df["Norm_vol_" + region_name] = df[region_name] / df['EstimatedTotalIntraCranialVol'] * 100
