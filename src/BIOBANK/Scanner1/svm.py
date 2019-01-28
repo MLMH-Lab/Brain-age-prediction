@@ -15,8 +15,14 @@ Step 12: Print R_squared, MAE, RMSE
 Step 13: Save model file, scaler file, predictions file
 Step 16: Print CV results"""
 
+import pandas as pd
+
 
 def main():
+
+    # Load freesurfer data
+    dataset = pd.read_csv('/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/freesurferData.csv')
+
     pass
 
 
