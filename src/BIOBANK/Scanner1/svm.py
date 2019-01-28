@@ -15,16 +15,18 @@ Step 12: Print R_squared, MAE, RMSE
 Step 13: Save model file, scaler file, predictions file
 Step 16: Print CV results"""
 
+from pathlib import Path
 import pandas as pd
+import tables
+
+PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def main():
 
     # Load freesurfer data
-    dataset = pd.read_csv('/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/freesurferData.csv')
-
-    pass
-
+    dataset = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
+    dataset_hdf = dataset.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='df', mode='w')
 
 if __name__ == "__main__":
     main()
