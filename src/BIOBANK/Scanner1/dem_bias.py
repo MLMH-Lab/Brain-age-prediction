@@ -31,7 +31,7 @@ def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
     """Perform multiple 2x2 Pearson chi-square analyses, corrected for multiple comparisons"""
 
     contingency_table = crosstab_df[[age1, age2]]
-    chi2, p, dof, expected = stats.chi2_contingency(contignency_table, correction=False)
+    chi2, p, dof, expected = stats.chi2_contingency(contingency_table, correction=False)
 
     # Bonferroni correction for multiple comparisons; use sig_list to check which ages are most different
     sig_level = 0.05 / len(age_combinations)
@@ -115,10 +115,6 @@ def main():
             dict_sig[item] = 1
         else:
             print("error with " + str(item))
-
-    # Obtain gender proportion per age group
-    gender_prop = gender_observed.transpose()
-    gender_prop['proportion'] = gender_prop['Female'] / gender_prop['Male']
 
     # Undersample the more prominent gender per age in dict_sig and store removed IDs in ids_to_drop
     ids_to_drop = []
