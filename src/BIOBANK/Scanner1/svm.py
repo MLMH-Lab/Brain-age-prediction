@@ -35,8 +35,8 @@ def main():
     regions = dataset[dataset.columns[4:]].values
     region_labels = dataset.columns[4:] # for future reference, if needed
     tiv = dataset.EstimatedTotalIntraCranialVol.values
-    tiv = tiv.reshape(13540,1)
-    np.true_divide(regions, tiv)
+    tiv = tiv.reshape(len(dataset),1)
+    regions_norm = np.true_divide(regions, tiv)
 
 if __name__ == "__main__":
     main()
