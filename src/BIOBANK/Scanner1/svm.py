@@ -26,5 +26,12 @@ def main():
     np.random.seed(30)
     random.seed(30)
 
+    # Normalise regional volumes by total intracranial volume (tiv)
+    regions = dataset_hdf_df[dataset_hdf_df.columns[2:]].values
+    region_labels = dataset_hdf_df.columns[2:]
+    tiv = dataset_test.EstimatedTotalIntraCranialVol.values
+    tiv = tiv.reshape(13540,1)
+    np.true_divide(regions, tiv)
+
 if __name__ == "__main__":
     main()
