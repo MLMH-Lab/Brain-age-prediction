@@ -39,7 +39,8 @@ def main():
     regions_norm = np.true_divide(regions, tiv) # Independent vars X
     age = dataset[dataset.columns[1]].values # Dependent var Y
 
-
+    # Split into training and test set
+    X_train, X_test, y_train, y_test = train_test_split(regions_norm, age, test_size=0.3)
 
 
 if __name__ == "__main__":
