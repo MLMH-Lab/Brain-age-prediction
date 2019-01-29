@@ -19,17 +19,22 @@ import pandas as pd
 import numpy as np
 import random
 
+PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
+
 
 def main():
+
+    # Load hdf5 file
+    dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table')
 
     # Initialise random number generator with random seed
     np.random.seed(30)
     random.seed(30)
 
     # Normalise regional volumes by total intracranial volume (tiv)
-    regions = dataset_hdf_df[dataset_hdf_df.columns[2:]].values
-    region_labels = dataset_hdf_df.columns[2:]
-    tiv = dataset_test.EstimatedTotalIntraCranialVol.values
+    regions = dataset[dataset.columns[2:]].values
+    region_labels = dataset.columns[2:]
+    tiv = dataset.EstimatedTotalIntraCranialVol.values
     tiv = tiv.reshape(13540,1)
     np.true_divide(regions, tiv)
 
