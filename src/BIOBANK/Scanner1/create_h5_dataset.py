@@ -13,8 +13,7 @@ def main():
     dataset_freesurfer = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
 
     # Loading demographic data to access age per participant
-    dataset_demographic = pd.read_csv('/home/lea/PycharmProjects/'
-                                      'predicted_brain_age/data/BIOBANK/Scanner1/participants.tsv', sep='\t')
+    dataset_demographic = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/participants.tsv', sep='\t')
     dataset_demographic_excl_nan = dataset_demographic.dropna()
 
     # Create a new col in FS dataset to contain Participant_ID
