@@ -18,6 +18,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import random
+from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
@@ -29,8 +30,8 @@ def main():
     dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table')
 
     # Initialise random seed
-    np.random.seed(30)
-    random.seed(30)
+    np.random.seed(42)
+    random.seed(42)
 
     # Normalise regional volumes by total intracranial volume (tiv)
     regions = dataset[dataset.columns[4:]].values
@@ -40,7 +41,13 @@ def main():
     regions_norm = np.true_divide(regions, tiv) # Independent vars X
     age = dataset[dataset.columns[1]].values # Dependent var Y
 
-    # Split into training and test set
+    # 10-fold cross-validator
+    kf = KFold(n_splits=10)
+    kf.get_n_splits(regions_norm)
+    for train_index, test_index in kf.split(regions_norm):
+        print("TRAIN:", train_index, "TEST:", test_index)
+
+    # Split into training and test set with 70-30 ratio
     X_train, X_test, y_train, y_test = train_test_split(regions_norm, age, test_size=0.3)
 
     # Scaling in range [-1, 1]
