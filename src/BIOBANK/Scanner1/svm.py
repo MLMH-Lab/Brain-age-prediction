@@ -18,25 +18,29 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import random
+from sklearn.model_selection import train_test_split
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def main():
-
     # Load hdf5 file
     dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table')
 
-    # Initialise random number generator with random seed
+    # Initialise random seed
     np.random.seed(30)
     random.seed(30)
 
     # Normalise regional volumes by total intracranial volume (tiv)
     regions = dataset[dataset.columns[4:]].values
-    region_labels = dataset.columns[4:] # for future reference, if needed
+    region_labels = dataset.columns[4:]  # for future reference, if needed
     tiv = dataset.EstimatedTotalIntraCranialVol.values
-    tiv = tiv.reshape(len(dataset),1)
-    regions_norm = np.true_divide(regions, tiv)
+    tiv = tiv.reshape(len(dataset), 1)
+    regions_norm = np.true_divide(regions, tiv) # Independent vars X
+    age = dataset[dataset.columns[1]].values # Dependent var Y
+
+
+
 
 if __name__ == "__main__":
     main()
