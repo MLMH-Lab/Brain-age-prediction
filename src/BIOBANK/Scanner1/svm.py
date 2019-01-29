@@ -32,8 +32,8 @@ def main():
     random.seed(30)
 
     # Normalise regional volumes by total intracranial volume (tiv)
-    regions = dataset[dataset.columns[2:]].values
-    region_labels = dataset.columns[2:]
+    regions = dataset[dataset.columns[4:]].values
+    region_labels = dataset.columns[4:] # for future reference, if needed
     tiv = dataset.EstimatedTotalIntraCranialVol.values
     tiv = tiv.reshape(13540,1)
     np.true_divide(regions, tiv)
