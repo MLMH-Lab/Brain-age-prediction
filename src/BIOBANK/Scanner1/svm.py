@@ -19,6 +19,7 @@ import pandas as pd
 import numpy as np
 import random
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
@@ -41,6 +42,11 @@ def main():
 
     # Split into training and test set
     X_train, X_test, y_train, y_test = train_test_split(regions_norm, age, test_size=0.3)
+
+    # Scaling in range [-1, 1]
+    scaling = MinMaxScaler(feature_range=(-1, 1)).fit(X_train)
+    X_train = scaling.transform(X_train)
+    X_test = scaling.transform(X_test)
 
 
 if __name__ == "__main__":
