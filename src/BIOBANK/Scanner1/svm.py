@@ -15,8 +15,7 @@ Step 12: Print R_squared, MAE, RMSE
 Step 13: Save model file, scaler file, predictions file
 Step 16: Print CV results"""
 
-from pathlib import Path
-import pandas as pd
+
 import numpy as np
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
@@ -30,11 +29,8 @@ def normalise_region_df(normalised_df, df, region_name): # to do: to be adapted 
 
 def main():
 
-    # Load freesurfer data as hdf5
-    dataset = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
-    dataset_hdf = dataset.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table', mode='w')
-    dataset_test = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table')
-    # question: what's the difference between these? and hdfstore?
+
+
 
     # Initialise random number generator with random seed
     np.random.seed(30) # np used instead of random to match scikit input
