@@ -15,26 +15,15 @@ Step 12: Print R_squared, MAE, RMSE
 Step 13: Save model file, scaler file, predictions file
 Step 16: Print CV results"""
 
-
+from pathlib import Path
+import pandas as pd
 import numpy as np
-
-PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
-
-
-def normalise_region_df(normalised_df, df, region_name): # to do: to be adapted for h5
-    """Normalise regional volume within df"""
-
-    normalised_df["Norm_vol_" + region_name] = df[region_name] / df['EstimatedTotalIntraCranialVol'] * 100
 
 
 def main():
 
-
-
-
     # Initialise random number generator with random seed
-    np.random.seed(30) # np used instead of random to match scikit input
-    # do we have a specific seed value to choose?
+    np.random.seed(30)
 
 if __name__ == "__main__":
     main()

@@ -10,7 +10,8 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 def main():
 
     # Load freesurfer data as hdf5
-    dataset_hdf = dataset.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table', mode='w')
+    dataset_csv = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
+    dataset_hdf = dataset_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table', mode='w')
     dataset_hdf_df = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table')
 
 
