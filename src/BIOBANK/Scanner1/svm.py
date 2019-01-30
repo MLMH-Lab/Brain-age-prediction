@@ -59,29 +59,30 @@ def main():
     X_train = scaling.transform(X_train)
     X_test = scaling.transform(X_test)
 
-    # Example code for svc using default hyper-parameters
+    # Svc using default hyper-parameters
     svm = SVC()
-    cv_performance=cross_val_score(svm, X_train, y_train, skf)
+    cv_performance=cross_val_score(svm, X_train, y_train, cv=skf)
+    cv_performance_mean = np.mean(cv_performance)
     test_performance = svm.fit(X_train, y_train).score(X_test, y_test)
     print('CV accuracy score: %0.3f,'
           ' test accuracy score: %0.3f'
-          % (np.mean(cv_performance), test_performance))
-    #
-    # # Example code for systematic search for better hyper-parameters
-    # learning_algo = SVC(kernel='linear', random_state = 101)
-    # search_space = [{'kernel': ['linear'],
-    #                  'C': np.logspace(-3, 3, 7)},
-    #                 {'kernel': ['rbf'],
-    #                  'C': np.logspace(-3, 3, 7),
-    #                  'gamma': np.logspace(-3, 2, 6)}]
-    # gridsearch = GridSearchCV(learning_algo, param_grid=search_space, refit=True, cv=10)
-    # gridsearch.fit(X_train, y_train)
-    # print('Best parameter: %s' % str(gridsearch.best_params_))
-    # cv_performance = gridsearch.best_score_
-    # test_performance = gridsearch.score(X_test, y_test)
-    # print('CV accuracy score: %0.3f,'
-    #       ' test accuracy score: %0.3f'
-    #       % (cv_performance, test_performance))
+          % (cv_performance_mean, test_performance))
+
+    # Systematic search for better hyper-parameters
+    learning_algo = SVC(kernel='linear')
+    search_space = [{'kernel': ['linear'],
+                     'C': np.logspace(-3, 3, 7)},
+                    {'kernel': ['rbf'],
+                     'C': np.logspace(-3, 3, 7),
+                     'gamma': np.logspace(-3, 2, 6)}]
+    gridsearch = GridSearchCV(learning_algo, param_grid=search_space, refit=True, cv=skf)
+    gridsearch.fit(X_train, y_train)
+    print('Best parameter: %s' % str(gridsearch.best_params_))
+    cv_performance_grid = gridsearch.best_score_
+    test_performance_grid = gridsearch.score(X_test, y_test)
+    print('CV accuracy score: %0.3f,'
+          ' test accuracy score: %0.3f'
+          % (cv_performance_grid, test_performance_grid))
 
 
 if __name__ == "__main__":
