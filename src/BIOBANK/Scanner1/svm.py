@@ -77,7 +77,7 @@ def main():
         cv_mae.append(absolute_error)
         cv_rmse.append(root_squared_error)
 
-        # Save model
+        # Save model - not yet working
         file_name = str(i_fold) + '_svm.joblib'
         dump(svm_train, PROJECT_ROOT / 'output/BIOBANK/Scanner1/' + file_name)
 
