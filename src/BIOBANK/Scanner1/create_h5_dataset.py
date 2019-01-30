@@ -14,13 +14,14 @@ def main():
 
     # Loading demographic data to access age per participant
     dataset_demographic = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/homogeneous_dataset.csv')
+    dataset_demographic['Participant_ID'] = 'sub-' + dataset_demographic['ID'].astype(str)
 
     # Create a new col in FS dataset to contain participant ID
-    dataset_freesurfer['ID'] = dataset_freesurfer['Image_ID']. \
+    dataset_freesurfer['Participant_ID'] = dataset_freesurfer['Image_ID']. \
         str.split('_', expand=True)[0]
 
     # Merge FS dataset and demographic dataset to access age
-    dataset_csv = pd.merge(dataset_demographic[['ID', 'Age']], dataset_freesurfer, on='ID')
+    dataset_csv = pd.merge(dataset_demographic[['Participant_ID', 'Age']], dataset_freesurfer, on='Participant_ID')
 
     # Create dataset as hdf5
     dataset_hdf = dataset_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table', mode='w')
