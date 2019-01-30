@@ -20,9 +20,9 @@ import numpy as np
 import random
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.cross_validation import cross_val_score
+from sklearn.model_selection import cross_val_score
 from sklearn.svm import SVC
-from sklearn.grid_search import GridSearchCV
+from sklearn.model_selection import GridSearchCV
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
@@ -62,7 +62,7 @@ def main():
 
     # Example code for svc using default hyper-parameters
     svm = SVC()
-    cv_performance=cross_val_score(svm, X_train, y_train, cv=10)
+    cv_performance=cross_val_score(svm, X_train, y_train, skf)
     test_performance = svm.fit(X_train, y_train).score(X_test, y_test)
     print('CV accuracy score: %0.3f,'
           ' test accuracy score: %0.3f'
