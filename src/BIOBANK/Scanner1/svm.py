@@ -24,6 +24,7 @@ from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from math import sqrt
+from joblib import dump, load
 from sklearn.model_selection import GridSearchCV
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
@@ -76,27 +77,32 @@ def main():
         cv_mae.append(absolute_error)
         cv_rmse.append(root_squared_error)
 
-        print('Fold %02d, mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (i_fold, r2_score, absolute_error, root_squared_error))
+        # Save model
+        file_name = str(i_fold) + '_svm.joblib'
+        dump(svm_train, PROJECT_ROOT / 'output/BIOBANK/Scanner1/' + file_name)
+
+        print('Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (i_fold, r2_score, absolute_error, root_squared_error))
 
     cv_r2_mean = np.mean(cv_r2_scores)
     cv_mae_mean = np.mean(cv_mae)
     cv_rmse_mean = np.mean(cv_rmse)
+    print('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
 
-    # Systematic search for better hyper-parameters
-    learning_algo = SVR(kernel='linear')
-    search_space = [{'kernel': ['linear'],
-                     'C': np.logspace(-3, 3, 7)},
-                    {'kernel': ['rbf'],
-                     'C': np.logspace(-3, 3, 7),
-                     'gamma': np.logspace(-3, 2, 6)}]
-    gridsearch = GridSearchCV(learning_algo, param_grid=search_space, refit=True, cv=skf)
-    gridsearch.fit(X_train, y_train)
-    print('Best parameter: %s' % str(gridsearch.best_params_))
-    cv_performance_grid = gridsearch.best_score_
-    test_performance_grid = gridsearch.score(X_test, y_test)
-    print('CV accuracy score: %0.3f,'
-          ' test accuracy score: %0.3f'
-          % (cv_performance_grid, test_performance_grid))
+    # # Systematic search for better hyper-parameters
+    # learning_algo = SVR(kernel='linear')
+    # search_space = [{'kernel': ['linear'],
+    #                  'C': np.logspace(-3, 3, 7)},
+    #                 {'kernel': ['rbf'],
+    #                  'C': np.logspace(-3, 3, 7),
+    #                  'gamma': np.logspace(-3, 2, 6)}]
+    # gridsearch = GridSearchCV(learning_algo, param_grid=search_space, refit=True, cv=skf)
+    # gridsearch.fit(X_train, y_train)
+    # print('Best parameter: %s' % str(gridsearch.best_params_))
+    # cv_performance_grid = gridsearch.best_score_
+    # test_performance_grid = gridsearch.score(X_test, y_test)
+    # print('CV accuracy score: %0.3f,'
+    #       ' test accuracy score: %0.3f'
+    #       % (cv_performance_grid, test_performance_grid))
 
 
 if __name__ == "__main__":
