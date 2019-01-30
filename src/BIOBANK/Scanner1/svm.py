@@ -18,7 +18,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import random
-from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 # from sklearn.cross_validation import cross_val_score
@@ -45,10 +45,13 @@ def main():
     age = dataset[dataset.columns[1]].values # Dependent var Y
 
     # 10-fold cross-validator - how can this be linked to the below steps? Does it apply to SVC?
-    kf = KFold(n_splits=10)
-    kf.get_n_splits(regions_norm)
-    for train_index, test_index in kf.split(regions_norm):
+    skf = KFold(n_splits=10)
+    skf.get_n_splits(regions_norm, age)
+    print(skf)
+    for train_index, test_index in skf.split(regions_norm, age):
         print("TRAIN:", train_index, "TEST:", test_index)
+    regions_train, regions_test = regions_norm[train_index], regions_norm[test_index]
+    age_train, age_test = age[train_index], age[test_index]
 
     # Split into training and test set with 70-30 ratio
     X_train, X_test, y_train, y_test = train_test_split(regions_norm, age, test_size=0.3)
