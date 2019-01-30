@@ -19,11 +19,10 @@ import pandas as pd
 import numpy as np
 import random
 from sklearn.model_selection import StratifiedKFold
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-# from sklearn.cross_validation import cross_val_score
-# from sklearn.svm import SVC
-# from sklearn.grid_search import GridSearchCV
+from sklearn.cross_validation import cross_val_score
+from sklearn.svm import SVC
+from sklearn.grid_search import GridSearchCV
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
@@ -44,27 +43,30 @@ def main():
     regions_norm = np.true_divide(regions, tiv) # Independent vars X
     age = dataset[dataset.columns[1]].values # Dependent var Y
 
-    # 10-fold cross-validator - how can this be linked to the below steps? Does it apply to SVC?
+    # Create variable to hold CV scores
+    cv_scores = []
+
+    # Create 10-fold cross-validator, stratified by age
     skf = StratifiedKFold(n_splits=10)
     skf.get_n_splits(regions_norm, age)
     print(skf)
     for train_index, test_index in skf.split(regions_norm, age):
         print("TRAIN:", train_index, "TEST:", test_index)
-    regions_train, regions_test = regions_norm[train_index], regions_norm[test_index]
-    age_train, age_test = age[train_index], age[test_index]
+    X_train, X_test = regions_norm[train_index], regions_norm[test_index]
+    y_train, y_test = age[train_index], age[test_index]
 
     # Scaling in range [-1, 1]
     scaling = MinMaxScaler(feature_range=(-1, 1)).fit(X_train)
     X_train = scaling.transform(X_train)
     X_test = scaling.transform(X_test)
 
-    # # Example code for svc using default hyper-parameters
-    # svm = SVC()
-    # cv_performance=cross_val_score(svm, X_train, y_train, cv=10)
-    # test_performance = svm.fit(X_train, y_train).score(X_test, y_test)
-    # print('CV accuracy score: %0.3f,'
-    #       ' test accuracy score: %0.3f'
-    #       % (np.mean(cv_performance), test_performance))
+    # Example code for svc using default hyper-parameters
+    svm = SVC()
+    cv_performance=cross_val_score(svm, X_train, y_train, cv=10)
+    test_performance = svm.fit(X_train, y_train).score(X_test, y_test)
+    print('CV accuracy score: %0.3f,'
+          ' test accuracy score: %0.3f'
+          % (np.mean(cv_performance), test_performance))
     #
     # # Example code for systematic search for better hyper-parameters
     # learning_algo = SVC(kernel='linear', random_state = 101)
