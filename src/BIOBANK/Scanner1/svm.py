@@ -21,7 +21,7 @@ import random
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import cross_val_score
-from sklearn.svm import SVC
+from sklearn.svm import SVR
 from sklearn.model_selection import GridSearchCV
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
@@ -60,7 +60,8 @@ def main():
     X_test = scaling.transform(X_test)
 
     # Svc using default hyper-parameters
-    svm = SVC()
+    svm = SVR(kernel='linear')
+    # svm.fit(X_train, y_train)
     cv_performance=cross_val_score(svm, X_train, y_train, cv=skf)
     cv_performance_mean = np.mean(cv_performance)
     test_performance = svm.fit(X_train, y_train).score(X_test, y_test)
@@ -69,7 +70,7 @@ def main():
           % (cv_performance_mean, test_performance))
 
     # Systematic search for better hyper-parameters
-    learning_algo = SVC(kernel='linear')
+    learning_algo = SVR(kernel='linear')
     search_space = [{'kernel': ['linear'],
                      'C': np.logspace(-3, 3, 7)},
                     {'kernel': ['rbf'],
