@@ -20,8 +20,8 @@ import numpy as np
 import random
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import cross_val_score
 from sklearn.svm import SVR
+from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import GridSearchCV
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
@@ -43,28 +43,34 @@ def main():
     regions_norm = np.true_divide(regions, tiv) # Independent vars X
     age = dataset[dataset.columns[1]].values # Dependent var Y
 
-    # Create variable to hold CV scores
-    cv_scores = []
+    # Create variable to hold CV variables
+    cv_r2_scores = []
 
     # Create 10-fold cross-validator, stratified by age
     skf = StratifiedKFold(n_splits=10)
     skf.get_n_splits(regions_norm, age)
-    for train_index, test_index in skf.split(regions_norm, age):
+    for i, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
+        print(i)
         print("TRAIN:", train_index, "TEST:", test_index)
-    X_train, X_test = regions_norm[train_index], regions_norm[test_index]
-    y_train, y_test = age[train_index], age[test_index]
+        x_train, x_test = regions_norm[train_index], regions_norm[test_index]
+        y_train, y_test = age[train_index], age[test_index]
 
-    # Scaling in range [-1, 1]
-    scaling = MinMaxScaler(feature_range=(-1, 1)).fit(X_train)
-    X_train = scaling.transform(X_train)
-    X_test = scaling.transform(X_test)
+        # Scaling in range [-1, 1]
+        scaling = MinMaxScaler(feature_range=(-1, 1))
+        x_train = scaling.fit_transform(x_train)
+        x_test = scaling.transform(x_test)
 
-    # Svc using default hyper-parameters
-    svm = SVR(kernel='linear')
-    # svm.fit(X_train, y_train)
-    cv_performance=cross_val_score(svm, X_train, y_train, cv=skf)
-    cv_performance_mean = np.mean(cv_performance)
-    test_performance = svm.fit(X_train, y_train).score(X_test, y_test)
+        # Svc using default hyper-parameters
+        svm = SVR(kernel='linear')
+        svm_train = svm.fit(x_train, y_train)
+        params = svm.get_params()
+        predictions = svm.predict(x_test)
+        mean_absolute_error(y_test, predictions)
+        r2_score = svm_train.score(x_test, y_test)
+        cv_r2_scores.append(r2_score)
+
+    cv_r2_mean = np.mean(cv_r2_scores)
+
     print('CV accuracy score: %0.3f,'
           ' test accuracy score: %0.3f'
           % (cv_performance_mean, test_performance))
