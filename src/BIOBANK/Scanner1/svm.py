@@ -45,16 +45,13 @@ def main():
     age = dataset[dataset.columns[1]].values # Dependent var Y
 
     # 10-fold cross-validator - how can this be linked to the below steps? Does it apply to SVC?
-    skf = KFold(n_splits=10)
+    skf = StratifiedKFold(n_splits=10)
     skf.get_n_splits(regions_norm, age)
     print(skf)
     for train_index, test_index in skf.split(regions_norm, age):
         print("TRAIN:", train_index, "TEST:", test_index)
     regions_train, regions_test = regions_norm[train_index], regions_norm[test_index]
     age_train, age_test = age[train_index], age[test_index]
-
-    # Split into training and test set with 70-30 ratio
-    X_train, X_test, y_train, y_test = train_test_split(regions_norm, age, test_size=0.3)
 
     # Scaling in range [-1, 1]
     scaling = MinMaxScaler(feature_range=(-1, 1)).fit(X_train)
