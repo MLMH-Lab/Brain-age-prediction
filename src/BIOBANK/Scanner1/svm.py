@@ -10,7 +10,7 @@ Step 7: Declare search space
 Step 8: Perform search with nested CV
 Step 9: Retrain best model with whole training set
 Step 10: Predict test set
-Step 11: Print R_squared, MAE, RMSE
+Step 11: Print R_squared, mean absolute error (MAE), root mean squared error (RMSE)
 Step 12: Save model file, scaler file, predictions file
 Step 13: Print CV results"""
 
@@ -22,6 +22,8 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+from math import sqrt
 from sklearn.model_selection import GridSearchCV
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
@@ -45,13 +47,15 @@ def main():
 
     # Create variable to hold CV variables
     cv_r2_scores = []
+    cv_mae = []
+    cv_rmse = []
 
     # Create 10-fold cross-validator, stratified by age
     skf = StratifiedKFold(n_splits=10)
     skf.get_n_splits(regions_norm, age)
-    for i, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
-        print(i)
-        print("TRAIN:", train_index, "TEST:", test_index)
+    for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
+        print(i_fold)
+
         x_train, x_test = regions_norm[train_index], regions_norm[test_index]
         y_train, y_test = age[train_index], age[test_index]
 
@@ -60,20 +64,23 @@ def main():
         x_train = scaling.fit_transform(x_train)
         x_test = scaling.transform(x_test)
 
-        # Svc using default hyper-parameters
+        # Linear SVR using default hyper-parameter C
         svm = SVR(kernel='linear')
         svm_train = svm.fit(x_train, y_train)
-        params = svm.get_params()
+        params = svm.get_params() # for future reference, if needed
         predictions = svm.predict(x_test)
-        mean_absolute_error(y_test, predictions)
+        absolute_error = mean_absolute_error(y_test, predictions)
+        root_squared_error = sqrt(mean_squared_error(y_test, predictions))
         r2_score = svm_train.score(x_test, y_test)
         cv_r2_scores.append(r2_score)
+        cv_mae.append(absolute_error)
+        cv_rmse.append(root_squared_error)
+
+        print('Fold %02d, mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (i_fold, r2_score, absolute_error, root_squared_error))
 
     cv_r2_mean = np.mean(cv_r2_scores)
-
-    print('CV accuracy score: %0.3f,'
-          ' test accuracy score: %0.3f'
-          % (cv_performance_mean, test_performance))
+    cv_mae_mean = np.mean(cv_mae)
+    cv_rmse_mean = np.mean(cv_rmse)
 
     # Systematic search for better hyper-parameters
     learning_algo = SVR(kernel='linear')
