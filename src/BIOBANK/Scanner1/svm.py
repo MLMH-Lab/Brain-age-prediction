@@ -51,6 +51,11 @@ def main():
     cv_mae = []
     cv_rmse = []
 
+    # Create dataframe to hold actual and predicted ages + df for loop to add predictions to
+    age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
+    age_predictions['Index'] = age_predictions.index
+    age_pred_fold = pd.DataFrame(columns=['Index', 'Prediction'])
+
     # Create 10-fold cross-validator, stratified by age
     skf = StratifiedKFold(n_splits=10)
     skf.get_n_splits(regions_norm, age)
@@ -76,17 +81,24 @@ def main():
         cv_mae.append(absolute_error)
         cv_rmse.append(root_squared_error)
 
-        # Save model, scaler, predictions
+        # Save model and scaler - does not work using PROJECT_ROOT
         scaler_file_name = str(i_fold) + '_scaler.joblib'
         model_file_name = str(i_fold) + '_svm.joblib'
         dump(x_train, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + scaler_file_name)
         dump(predictions, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + model_file_name)
 
-        # predictions_file_name = str(i_fold) + '_predictions.csv'
-        # dump(svm_train, PROJECT_ROOT / 'output/BIOBANK/Scanner1/' + predictions_file_name)
+        # Create predictions df to save after loop
+        pred_df = pd.DataFrame()
+        pred_df['Index'] = test_index
+        pred_df['Prediction'] = predictions
+        age_pred_fold = pd.concat([age_pred_fold, pred_df])
 
         print('Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
               % (i_fold, r2_score, absolute_error, root_squared_error))
+
+    # Save predictions
+    age_predictions_id = pd.merge(age_predictions, age_pred_fold, on='Index')
+    age_predictions_id.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/age_predictions.csv', index=False)
 
     cv_r2_mean = np.mean(cv_r2_scores)
     cv_mae_mean = np.mean(cv_mae)
