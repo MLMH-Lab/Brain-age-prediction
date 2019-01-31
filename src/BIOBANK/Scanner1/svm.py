@@ -24,7 +24,7 @@ from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from math import sqrt
-from sklearn.externals.joblib import dump, load
+from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
@@ -77,9 +77,13 @@ def main():
         cv_mae.append(absolute_error)
         cv_rmse.append(root_squared_error)
 
-        # Save model - not yet working
-        file_name = str(i_fold) + '_svm.joblib'
-        dump(svm_train, PROJECT_ROOT / 'output/BIOBANK/Scanner1/' + file_name)
+        # Save model, scaler, predictions
+        scaler_file_name = str(i_fold) + '_scaler.joblib'
+        model_file_name = str(i_fold) + '_svm.joblib'
+        predictions_file_name = str(i_fold) + '_predictions.joblib'
+        dump(x_train, PROJECT_ROOT / 'output/BIOBANK/Scanner1/' + scaler_file_name)
+        dump(predictions, PROJECT_ROOT / 'output/BIOBANK/Scanner1/' + model_file_name)
+        dump(svm_train, PROJECT_ROOT / 'output/BIOBANK/Scanner1/' + predictions_file_name)
 
         print('Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (i_fold, r2_score, absolute_error, root_squared_error))
 
