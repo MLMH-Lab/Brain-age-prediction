@@ -68,7 +68,6 @@ def main():
         # Linear SVR using default hyper-parameter C
         svm = SVR(kernel='linear')
         svm_train = svm.fit(x_train, y_train)
-        params = svm.get_params() # for future reference, if needed
         predictions = svm.predict(x_test)
         absolute_error = mean_absolute_error(y_test, predictions)
         root_squared_error = sqrt(mean_squared_error(y_test, predictions))
@@ -80,12 +79,14 @@ def main():
         # Save model, scaler, predictions
         scaler_file_name = str(i_fold) + '_scaler.joblib'
         model_file_name = str(i_fold) + '_svm.joblib'
-        predictions_file_name = str(i_fold) + '_predictions.joblib'
-        dump(x_train, PROJECT_ROOT / 'output/BIOBANK/Scanner1/' + scaler_file_name)
-        dump(predictions, PROJECT_ROOT / 'output/BIOBANK/Scanner1/' + model_file_name)
-        dump(svm_train, PROJECT_ROOT / 'output/BIOBANK/Scanner1/' + predictions_file_name)
+        dump(x_train, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + scaler_file_name)
+        dump(predictions, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + model_file_name)
 
-        print('Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (i_fold, r2_score, absolute_error, root_squared_error))
+        # predictions_file_name = str(i_fold) + '_predictions.csv'
+        # dump(svm_train, PROJECT_ROOT / 'output/BIOBANK/Scanner1/' + predictions_file_name)
+
+        print('Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
+              % (i_fold, r2_score, absolute_error, root_squared_error))
 
     cv_r2_mean = np.mean(cv_r2_scores)
     cv_mae_mean = np.mean(cv_mae)
