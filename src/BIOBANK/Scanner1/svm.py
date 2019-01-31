@@ -100,6 +100,7 @@ def main():
     age_predictions_id = pd.merge(age_predictions, age_pred_fold, on='Index')
     age_predictions_id.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/age_predictions.csv', index=False)
 
+    # Variables for CV means
     cv_r2_mean = np.mean(cv_r2_scores)
     cv_mae_mean = np.mean(cv_mae)
     cv_rmse_mean = np.mean(cv_rmse)
