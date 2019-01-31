@@ -56,45 +56,48 @@ def main():
     age_predictions['Index'] = age_predictions.index
     age_pred_fold = pd.DataFrame(columns=['Index', 'Prediction'])
 
-    # Create 10-fold cross-validator, stratified by age
-    skf = StratifiedKFold(n_splits=10)
-    skf.get_n_splits(regions_norm, age)
-    for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
-        print(i_fold)
+    # Loop to repeat 10-fold CV 10 times
+    for i_repetition in range(10):
 
-        x_train, x_test = regions_norm[train_index], regions_norm[test_index]
-        y_train, y_test = age[train_index], age[test_index]
+        # Create 10-fold cross-validator, stratified by age
+        skf = StratifiedKFold(n_splits=10, random_state=i_repetition)
+        skf.get_n_splits(regions_norm, age)
+        for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
+            print('Running repetition %02d, fold %02d' % (i_repetition, i_fold))
 
-        # Scaling in range [-1, 1]
-        scaling = MinMaxScaler(feature_range=(-1, 1))
-        x_train = scaling.fit_transform(x_train)
-        x_test = scaling.transform(x_test)
+            x_train, x_test = regions_norm[train_index], regions_norm[test_index]
+            y_train, y_test = age[train_index], age[test_index]
 
-        # Linear SVR using default hyper-parameter C
-        svm = SVR(kernel='linear')
-        svm_train = svm.fit(x_train, y_train)
-        predictions = svm.predict(x_test)
-        absolute_error = mean_absolute_error(y_test, predictions)
-        root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-        r2_score = svm_train.score(x_test, y_test)
-        cv_r2_scores.append(r2_score)
-        cv_mae.append(absolute_error)
-        cv_rmse.append(root_squared_error)
+            # Scaling in range [-1, 1]
+            scaling = MinMaxScaler(feature_range=(-1, 1))
+            x_train = scaling.fit_transform(x_train)
+            x_test = scaling.transform(x_test)
 
-        # Save model and scaler - does not work using PROJECT_ROOT
-        scaler_file_name = str(i_fold) + '_scaler.joblib'
-        model_file_name = str(i_fold) + '_svm.joblib'
-        dump(x_train, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + scaler_file_name)
-        dump(predictions, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + model_file_name)
+            # Linear SVR using default hyper-parameter C
+            svm = SVR(kernel='linear')
+            svm_train = svm.fit(x_train, y_train)
+            predictions = svm.predict(x_test)
+            absolute_error = mean_absolute_error(y_test, predictions)
+            root_squared_error = sqrt(mean_squared_error(y_test, predictions))
+            r2_score = svm_train.score(x_test, y_test)
+            cv_r2_scores.append(r2_score)
+            cv_mae.append(absolute_error)
+            cv_rmse.append(root_squared_error)
 
-        # Create predictions df to save after loop
-        pred_df = pd.DataFrame()
-        pred_df['Index'] = test_index
-        pred_df['Prediction'] = predictions
-        age_pred_fold = pd.concat([age_pred_fold, pred_df])
+            # Save model and scaler - does not work using PROJECT_ROOT
+            scaler_file_name = str(i_repetition) + str(i_fold) + '_scaler.joblib'
+            model_file_name = str(i_repetition) + str(i_fold) + '_svm.joblib'
+            dump(x_train, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + scaler_file_name)
+            dump(predictions, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + model_file_name)
 
-        print('Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
-              % (i_fold, r2_score, absolute_error, root_squared_error))
+            # Create predictions df to save after loop - does not yet separate the iterations
+            pred_df = pd.DataFrame()
+            pred_df['Index'] = test_index
+            pred_df['Prediction'] = predictions
+            age_pred_fold = pd.concat([age_pred_fold, pred_df])
+
+            print('Repetition %02d, Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
+                  % (i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
 
     # Save predictions
     age_predictions_id = pd.merge(age_predictions, age_pred_fold, on='Index')
