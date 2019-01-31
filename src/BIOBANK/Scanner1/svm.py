@@ -24,7 +24,7 @@ from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from math import sqrt
-from joblib import dump, load
+from sklearn.externals.joblib import dump, load
 from sklearn.model_selection import GridSearchCV
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
