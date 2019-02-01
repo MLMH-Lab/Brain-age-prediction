@@ -5,6 +5,7 @@ Step 1: Organising dataset
 Step 2: Visualisation of distribution
 Step 3: Chi-square contingency analysis
 Step 4: Remove subjects based on chi-square results to achieve homogeneous sample in terms of gender and ethnicity"""
+
 import itertools
 
 import pandas as pd
@@ -96,7 +97,7 @@ def balancing_sample(demographics_data_df, dict_sig, gender_observed):
                 print("Error with: " + str(key))
 
             gender_diff = gender_observed.loc['Female', key] - gender_observed.loc['Male', key]
-            diff_to_remove = int(abs(gender_diff) * 0.5)
+            diff_to_remove = int(abs(gender_diff) * 0.6)
 
             ids_list = get_ids_to_drop(demographics_data_df, key, gender_higher, diff_to_remove)
             ids_to_drop.extend(ids_list)
@@ -108,12 +109,26 @@ def main():
     # Define random seed for sampling methods
     np.random.seed = 123
 
+    # Load freesurfer data
+    dataset_fs = pd.read_csv(
+        '/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/freesurferData.csv')
+
+    # Create a new 'eid' col in FS dataset to match supplementary demographic data
+    dataset_fs['Participant_ID'] = dataset_fs['Image_ID']. \
+        str.split('_', expand=True)[0]
+    dataset_fs['ID'] = dataset_fs['Participant_ID']. \
+        str.split('-', expand=True)[1]
+    dataset_fs['ID'] = pd.to_numeric(dataset_fs['ID'])
+
     # Loading supplementary demographic data
     dataset_dem = pd.read_csv(
         '/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/ukb22321.csv',
         usecols=['eid', '31-0.0', '21003-2.0', '21000-0.0'])
     dataset_dem.columns = ['ID', 'Gender', 'Ethnicity', 'Age']
     dataset_dem_excl_nan = dataset_dem.dropna()
+
+    # Merge supplementary demographic data with freesurfer data
+    dataset = pd.merge(dataset_fs, dataset_dem_excl_nan, on='ID')
 
     # Labeling data
     grouped_ethnicity_dict = {
@@ -130,15 +145,15 @@ def main():
         0: 'Female', 1: 'Male'
     }
 
-    dataset_dem_excl_nan = dataset_dem_excl_nan.replace({'Gender': gender_dict})
-    dataset_dem_excl_nan_grouped = dataset_dem_excl_nan.replace({'Ethnicity': grouped_ethnicity_dict})
+    dataset = dataset.replace({'Gender': gender_dict})
+    dataset_grouped = dataset.replace({'Ethnicity': grouped_ethnicity_dict})
 
     # Export ethnicity and age distribution for future reference
-    save_fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
-    save_fre_table(dataset_dem_excl_nan_grouped, 'Age')
+    save_fre_table(dataset_grouped, 'Ethnicity')
+    save_fre_table(dataset_grouped, 'Age')
 
     # Exclude ages with <100 participants, exclude non-white ethnicities due to small subgroups
-    dataset_dem_ab46 = dataset_dem_excl_nan_grouped[dataset_dem_excl_nan_grouped['Age'] > 46]
+    dataset_dem_ab46 = dataset_grouped[dataset_grouped['Age'] > 46]
     dataset_dem_ab46_ethn = dataset_dem_ab46[dataset_dem_ab46['Ethnicity'] == 'White']
 
     dict_sig, gender_observed = chi2_contingency_analysis(dataset_dem_ab46_ethn)
@@ -152,8 +167,10 @@ def main():
     print('Unbalanced groups')
     print(dict_sig)
 
+    homogeneous_ids = pd.DataFrame(reduced_dataset['Image_ID'])
+
     # Output final dataset
-    reduced_dataset.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/homogeneous_dataset.csv', index=False)
+    homogeneous_ids.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/homogeneous_dataset.csv', index=False)
 
 
 if __name__ == "__main__":
