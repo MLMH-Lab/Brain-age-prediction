@@ -54,14 +54,17 @@ def main():
     # Create dataframe to hold actual and predicted ages + df for loop to add predictions to
     age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
     age_predictions['Index'] = age_predictions.index
-    age_pred_fold = pd.DataFrame(columns=['Index', 'Prediction'])
 
     # Loop to repeat 10-fold CV 10 times
-    for i_repetition in range(10):
+    for i_repetition in range(3):
+
+        # Create new empty column in age_predictions df to save age predictions of this repetition
+        age_predictions['Prediction repetition %02d' % i_repetition] = np.nan
 
         # Create 10-fold cross-validator, stratified by age
         skf = StratifiedKFold(n_splits=10, random_state=i_repetition)
         skf.get_n_splits(regions_norm, age)
+
         for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
             print('Running repetition %02d, fold %02d' % (i_repetition, i_fold))
 
@@ -85,25 +88,30 @@ def main():
             cv_rmse.append(root_squared_error)
 
             # Save model and scaler - does not work using PROJECT_ROOT
-            scaler_file_name = str(i_repetition) + str(i_fold) + '_scaler.joblib'
-            model_file_name = str(i_repetition) + str(i_fold) + '_svm.joblib'
+            scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
+            model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
             dump(x_train, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + scaler_file_name)
             dump(predictions, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + model_file_name)
 
-            # Create predictions df to save after loop - does not yet separate the iterations
-            pred_df = pd.DataFrame()
-            pred_df['Index'] = test_index
-            pred_df['Prediction'] = predictions
-            age_pred_fold = pd.concat([age_pred_fold, pred_df])
+            # Create new df to hold test_index and corresponding age prediction
+            new_df = pd.DataFrame()
+            new_df['index'] = test_index
+            new_df['predictions'] = predictions
 
+            # Add predictions per test_index to age_predictions
+            for index, row in new_df.iterrows():
+                col_index = i_repetition + 3
+                sub_index = int(row['index'])
+                age_predictions.iloc[[sub_index], [col_index]] = row['predictions']
+
+            # Print results of the CV fold
             print('Repetition %02d, Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
                   % (i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
 
     # Save predictions
-    age_predictions_id = pd.merge(age_predictions, age_pred_fold, on='Index')
-    age_predictions_id.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/age_predictions.csv', index=False)
+    age_predictions.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/age_predictions.csv', index=False)
 
-    # Variables for CV means
+    # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
     cv_mae_mean = np.mean(cv_mae)
     cv_rmse_mean = np.mean(cv_rmse)
