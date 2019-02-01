@@ -167,8 +167,10 @@ def main():
     print('Unbalanced groups')
     print(dict_sig)
 
+    homogeneous_ids = pd.DataFrame(reduced_dataset['Image_ID'])
+
     # Output final dataset
-    reduced_dataset.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/homogeneous_dataset.csv', index=False)
+    homogeneous_ids.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/homogeneous_dataset.csv', index=False)
 
 
 if __name__ == "__main__":
