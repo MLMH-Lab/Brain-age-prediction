@@ -12,19 +12,44 @@ def main():
     # Load freesurfer data as csv
     dataset_freesurfer = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
 
+    # Load IDs for subjects from balanced dataset
+    ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/homogeneous_dataset.csv')
+
+    # Make freesurfer dataset homogeneous
+    dataset_balanced = pd.merge(dataset_freesurfer, ids_homogeneous, on='Image_ID')
+    dataset_balanced['ID'] = pd.to_numeric(dataset_balanced['ID'])
+
     # Loading demographic data to access age per participant
-    dataset_demographic = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/homogeneous_dataset.csv')
-    dataset_demographic['Participant_ID'] = 'sub-' + dataset_demographic['ID'].astype(str)
+    dataset_demographic = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/participants.tsv', sep='\t')
+
+    dataset_dem = pd.read_csv(
+        '/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/ukb22321.csv',
+        usecols=['eid', '21003-2.0'])
+    dataset_dem.columns = ['ID', 'Age']
+    dataset_dem = dataset_dem.dropna()
 
     # Create a new col in FS dataset to contain participant ID
-    dataset_freesurfer['Participant_ID'] = dataset_freesurfer['Image_ID']. \
+    dataset_balanced['Participant_ID'] = dataset_balanced['Image_ID']. \
         str.split('_', expand=True)[0]
+    dataset_balanced['ID'] = dataset_balanced['Participant_ID']. \
+        str.split('-', expand=True)[1]
+    dataset_balanced['ID'] = pd.to_numeric(dataset_balanced['ID'])
+
+    # list_dem = list(dataset_demographic['Participant_ID'])
+    # list_bal = list(dataset_balanced['Participant_ID'])
+    #
+    # for item in list_bal:
+    #     if item not in list_dem:
+    #         print(item)
+    # # 1087305, 1097080
+
 
     # Merge FS dataset and demographic dataset to access age
-    dataset_csv = pd.merge(dataset_demographic[['Participant_ID', 'Age']], dataset_freesurfer, on='Participant_ID')
+    dataset_csv = pd.merge(dataset_dem, dataset_balanced, on='ID')
 
     # Create dataset as hdf5
-    dataset_hdf = dataset_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table', mode='w')
+    dataset_hdf = dataset_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5',
+                                     key='table', mode='w')
 
 
 if __name__ == "__main__":
