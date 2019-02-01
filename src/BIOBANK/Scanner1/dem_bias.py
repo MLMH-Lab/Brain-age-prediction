@@ -96,7 +96,7 @@ def balancing_sample(demographics_data_df, dict_sig, gender_observed):
                 print("Error with: " + str(key))
 
             gender_diff = gender_observed.loc['Female', key] - gender_observed.loc['Male', key]
-            diff_to_remove = int(abs(gender_diff) * 0.5)
+            diff_to_remove = int(abs(gender_diff) * 0.6)
 
             ids_list = get_ids_to_drop(demographics_data_df, key, gender_higher, diff_to_remove)
             ids_to_drop.extend(ids_list)
