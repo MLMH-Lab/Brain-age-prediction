@@ -115,7 +115,7 @@ def main():
     # Create a new 'eid' col in FS dataset to match supplementary demographic data
     dataset_fs['Participant_ID'] = dataset_fs['Image_ID']. \
         str.split('_', expand=True)[0]
-    dataset_fs['eid'] = dataset_fs['Participant_ID']. \
+    dataset_fs['ID'] = dataset_fs['Participant_ID']. \
         str.split('-', expand=True)[1]
 
     # Loading supplementary demographic data
