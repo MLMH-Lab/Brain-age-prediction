@@ -117,6 +117,7 @@ def main():
         str.split('_', expand=True)[0]
     dataset_fs['ID'] = dataset_fs['Participant_ID']. \
         str.split('-', expand=True)[1]
+    dataset_fs['ID'] = pd.to_numeric(dataset_fs['ID'])
 
     # Loading supplementary demographic data
     dataset_dem = pd.read_csv(
@@ -124,6 +125,9 @@ def main():
         usecols=['eid', '31-0.0', '21003-2.0', '21000-0.0'])
     dataset_dem.columns = ['ID', 'Gender', 'Ethnicity', 'Age']
     dataset_dem_excl_nan = dataset_dem.dropna()
+
+    # Merge supplementary demographic data with freesurfer data
+    dataset = pd.merge(dataset_fs, dataset_dem_excl_nan, on='ID')
 
     # Labeling data
     grouped_ethnicity_dict = {
@@ -140,15 +144,15 @@ def main():
         0: 'Female', 1: 'Male'
     }
 
-    dataset_dem_excl_nan = dataset_dem_excl_nan.replace({'Gender': gender_dict})
-    dataset_dem_excl_nan_grouped = dataset_dem_excl_nan.replace({'Ethnicity': grouped_ethnicity_dict})
+    dataset = dataset.replace({'Gender': gender_dict})
+    dataset_grouped = dataset.replace({'Ethnicity': grouped_ethnicity_dict})
 
     # Export ethnicity and age distribution for future reference
-    save_fre_table(dataset_dem_excl_nan_grouped, 'Ethnicity')
-    save_fre_table(dataset_dem_excl_nan_grouped, 'Age')
+    save_fre_table(dataset_grouped, 'Ethnicity')
+    save_fre_table(dataset_grouped, 'Age')
 
     # Exclude ages with <100 participants, exclude non-white ethnicities due to small subgroups
-    dataset_dem_ab46 = dataset_dem_excl_nan_grouped[dataset_dem_excl_nan_grouped['Age'] > 46]
+    dataset_dem_ab46 = dataset_grouped[dataset_grouped['Age'] > 46]
     dataset_dem_ab46_ethn = dataset_dem_ab46[dataset_dem_ab46['Ethnicity'] == 'White']
 
     dict_sig, gender_observed = chi2_contingency_analysis(dataset_dem_ab46_ethn)
