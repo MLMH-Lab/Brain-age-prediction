@@ -17,11 +17,8 @@ def main():
 
     # Make freesurfer dataset homogeneous
     dataset_balanced = pd.merge(dataset_freesurfer, ids_homogeneous, on='Image_ID')
-    dataset_balanced['ID'] = pd.to_numeric(dataset_balanced['ID'])
 
     # Loading demographic data to access age per participant
-    dataset_demographic = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/participants.tsv', sep='\t')
-
     dataset_dem = pd.read_csv(
         '/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/ukb22321.csv',
         usecols=['eid', '21003-2.0'])
@@ -34,15 +31,6 @@ def main():
     dataset_balanced['ID'] = dataset_balanced['Participant_ID']. \
         str.split('-', expand=True)[1]
     dataset_balanced['ID'] = pd.to_numeric(dataset_balanced['ID'])
-
-    # list_dem = list(dataset_demographic['Participant_ID'])
-    # list_bal = list(dataset_balanced['Participant_ID'])
-    #
-    # for item in list_bal:
-    #     if item not in list_dem:
-    #         print(item)
-    # # 1087305, 1097080
-
 
     # Merge FS dataset and demographic dataset to access age
     dataset_csv = pd.merge(dataset_dem, dataset_balanced, on='ID')
