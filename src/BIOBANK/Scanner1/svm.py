@@ -39,8 +39,8 @@ def main():
     random.seed = 42
 
     # Normalise regional volumes by total intracranial volume (tiv)
-    regions = dataset[dataset.columns[4:]].values
-    region_labels = dataset.columns[4:]  # for future reference, if needed
+    regions = dataset[dataset.columns[4:-2]].values
+    region_labels = dataset.columns[4:-2]  # for future reference, if needed
     tiv = dataset.EstimatedTotalIntraCranialVol.values
     tiv = tiv.reshape(len(dataset), 1)
     regions_norm = np.true_divide(regions, tiv) # Independent vars X
@@ -56,7 +56,7 @@ def main():
     age_predictions['Index'] = age_predictions.index
 
     # Loop to repeat 10-fold CV 10 times
-    for i_repetition in range(3):
+    for i_repetition in range(10):
 
         # Create new empty column in age_predictions df to save age predictions of this repetition
         age_predictions['Prediction repetition %02d' % i_repetition] = np.nan
@@ -86,12 +86,12 @@ def main():
             cv_r2_scores.append(r2_score)
             cv_mae.append(absolute_error)
             cv_rmse.append(root_squared_error)
-
-            # Save model and scaler - does not work using PROJECT_ROOT
-            scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
-            model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
-            dump(x_train, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + scaler_file_name)
-            dump(predictions, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + model_file_name)
+            #
+            # # Save model and scaler - does not work using PROJECT_ROOT
+            # scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
+            # model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
+            # dump(x_train, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + scaler_file_name)
+            # dump(predictions, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + model_file_name)
 
             # Create new df to hold test_index and corresponding age prediction
             new_df = pd.DataFrame()
