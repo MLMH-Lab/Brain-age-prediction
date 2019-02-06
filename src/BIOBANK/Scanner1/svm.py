@@ -56,7 +56,7 @@ def main():
     age_predictions['Index'] = age_predictions.index
 
     # Loop to repeat 10-fold CV 10 times
-    for i_repetition in range(10):
+    for i_repetition in range(2):
 
         # Create new empty column in age_predictions df to save age predictions of this repetition
         age_predictions['Prediction repetition %02d' % i_repetition] = np.nan
@@ -76,21 +76,31 @@ def main():
             x_train = scaling.fit_transform(x_train)
             x_test = scaling.transform(x_test)
 
-            # Linear SVR using default hyper-parameter C
+            # Systematic search for better hyper-parameters
             svm = SVR(kernel='linear')
-            svm_train = svm.fit(x_train, y_train)
-            predictions = svm.predict(x_test)
+
+            c_range = [0.001, 0.1, 1, 10, 100, 1000]
+            search_space = [{'C': c_range}]
+            gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=skf)
+            svm_train_best = gridsearch.fit(x_train, y_train)
+            best_params = svm_train_best.best_params_
+            print(best_params)
+            print(svm_train_best.get_params())
+
+            predictions = gridsearch.predict(x_test)
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = svm_train.score(x_test, y_test)
+            r2_score = svm_train_best.score(x_test, y_test)
             cv_r2_scores.append(r2_score)
             cv_mae.append(absolute_error)
             cv_rmse.append(root_squared_error)
-            #
-            # # Save model and scaler - does not work using PROJECT_ROOT
+
+            # Save scaler, model and model parameters
             # scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
             # model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
+            # params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
             # dump(x_train, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + scaler_file_name)
+            # dump(best_params, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + params_file_name)
             # dump(predictions, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + model_file_name)
 
             # Create new df to hold test_index and corresponding age prediction
@@ -109,6 +119,7 @@ def main():
                   % (i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
 
     # Save predictions
+    age_predictions.drop('Index', axis=1)
     age_predictions.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/age_predictions.csv', index=False)
 
     # Variables for CV means across all repetitions
@@ -116,22 +127,6 @@ def main():
     cv_mae_mean = np.mean(cv_mae)
     cv_rmse_mean = np.mean(cv_rmse)
     print('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
-
-    # # Systematic search for better hyper-parameters
-    # learning_algo = SVR(kernel='linear')
-    # search_space = [{'kernel': ['linear'],
-    #                  'C': np.logspace(-3, 3, 7)},
-    #                 {'kernel': ['rbf'],
-    #                  'C': np.logspace(-3, 3, 7),
-    #                  'gamma': np.logspace(-3, 2, 6)}]
-    # gridsearch = GridSearchCV(learning_algo, param_grid=search_space, refit=True, cv=skf)
-    # gridsearch.fit(X_train, y_train)
-    # print('Best parameter: %s' % str(gridsearch.best_params_))
-    # cv_performance_grid = gridsearch.best_score_
-    # test_performance_grid = gridsearch.score(X_test, y_test)
-    # print('CV accuracy score: %0.3f,'
-    #       ' test accuracy score: %0.3f'
-    #       % (cv_performance_grid, test_performance_grid))
 
 
 if __name__ == "__main__":
