@@ -83,9 +83,9 @@ def main():
             search_space = [{'C': c_range}]
             gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=skf)
             svm_train_best = gridsearch.fit(x_train, y_train)
-            best_params = svm_train_best.best_params_
+            best_params = gridsearch.best_params_
             print(best_params)
-            print(svm_train_best.get_params())
+            print(gridsearch.get_params())
 
             predictions = gridsearch.predict(x_test)
             absolute_error = mean_absolute_error(y_test, predictions)
