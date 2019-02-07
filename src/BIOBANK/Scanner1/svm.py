@@ -79,9 +79,9 @@ def main():
             # Systematic search for better hyper-parameters
             svm = SVR(kernel='linear')
 
-            c_range = [0.001, 0.1, 1, 10, 100, 1000]
+            c_range = [0.001, 0.1, 1, 10, 100]
             search_space = [{'C': c_range}]
-            gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=skf)
+            gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=skf, verbose=5)
             svm_train_best = gridsearch.fit(x_train, y_train)
             best_params = gridsearch.best_params_
             print(best_params)
@@ -96,12 +96,12 @@ def main():
             cv_rmse.append(root_squared_error)
 
             # Save scaler, model and model parameters
-            # scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
-            # model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
-            # params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
-            # dump(x_train, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + scaler_file_name)
-            # dump(best_params, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + params_file_name)
-            # dump(predictions, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + model_file_name)
+            scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
+            model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
+            params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
+            dump(x_train, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + scaler_file_name)
+            dump(best_params, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + params_file_name)
+            dump(predictions, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + model_file_name)
 
             # Create new df to hold test_index and corresponding age prediction
             new_df = pd.DataFrame()
