@@ -56,7 +56,7 @@ def main():
     age_predictions['Index'] = age_predictions.index
 
     # Loop to repeat 10-fold CV 10 times
-    for i_repetition in range(2):
+    for i_repetition in range(10):
 
         # Create new empty column in age_predictions df to save age predictions of this repetition
         age_predictions['Prediction repetition %02d' % i_repetition] = np.nan
