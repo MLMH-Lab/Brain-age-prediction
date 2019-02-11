@@ -62,7 +62,7 @@ def main():
         age_predictions['Prediction repetition %02d' % i_repetition] = np.nan
 
         # Create 10-fold cross-validator, stratified by age
-        skf = StratifiedKFold(n_splits=10, random_state=i_repetition)
+        skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=i_repetition)
         skf.get_n_splits(regions_norm, age)
 
         for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
@@ -76,16 +76,16 @@ def main():
             x_train = scaling.fit_transform(x_train)
             x_test = scaling.transform(x_test)
 
-            # Systematic search for better hyper-parameters
+            # Systematic search for best hyperparameters
             svm = SVR(kernel='linear')
 
             c_range = [0.001, 0.1, 1, 10, 100]
             search_space = [{'C': c_range}]
-            gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=skf, verbose=5)
+            nested_skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=i_repetition)
+
+            gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3)
             svm_train_best = gridsearch.fit(x_train, y_train)
             best_params = gridsearch.best_params_
-            print(best_params)
-            print(gridsearch.get_params())
 
             predictions = gridsearch.predict(x_test)
             absolute_error = mean_absolute_error(y_test, predictions)
