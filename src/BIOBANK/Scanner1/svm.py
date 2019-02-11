@@ -81,7 +81,7 @@ def main():
 
             c_range = [0.001, 0.1, 1, 10, 100]
             search_space = [{'C': c_range}]
-            nested_skf = StratifiedKFold(n_splits=3, shuffle=True, random_state=i_repetition)
+            nested_skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=i_repetition)
 
             gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3)
             svm_train_best = gridsearch.fit(x_train, y_train)
