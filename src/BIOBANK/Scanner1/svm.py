@@ -82,7 +82,7 @@ def main():
             # Systematic search for best hyperparameters
             svm = SVR(kernel='linear')
 
-            c_range = [0.001, 0.1, 1, 10, 100]
+            c_range = [0.001, 0.01, 0.1, 1, 10, 100]
             search_space = [{'C': c_range}]
             nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
