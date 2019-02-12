@@ -40,6 +40,7 @@ def main():
 
     # Add new column as mean of age predictions
     age_pred['Mean predicted age'] = age_pred.iloc[:, 2:].mean(axis=1)
+    age_pred['Std predicted age'] = age_pred.iloc[:, 2:].std(axis=1)
 
     # Loading demographic data to access variables
     dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'ukb22321.csv'),
