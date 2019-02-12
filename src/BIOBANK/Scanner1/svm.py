@@ -40,7 +40,6 @@ def main():
 
     # Normalise regional volumes by total intracranial volume (tiv)
     regions = dataset[dataset.columns[4:-2]].values
-    region_labels = dataset.columns[4:-2]  # for future reference, if needed
     tiv = dataset.EstimatedTotalIntraCranialVol.values
     tiv = tiv.reshape(len(dataset), 1)
     regions_norm = np.true_divide(regions, tiv) # Independent vars X
