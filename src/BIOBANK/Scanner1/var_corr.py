@@ -2,7 +2,7 @@
 predicted age with demographic variables in UK BIOBANK Scanner1
 
 Variables to assess [variable code - variable name, code names (where applicable)]:
-6138-2.0, 6138-2.1, 6138-2.2, 6138-2.3, 6138-2.4, 6138-2.4 - Which of the following qualifications do you have? (up to 5 selections possible)
+6138-2.0, 6138-2.1, 6138-2.2, 6138-2.3, 6138-2.4 - Which of the following qualifications do you have? (up to 5 selections possible)
 1	College or University degree
 2	A levels/AS levels or equivalent
 3	O levels/GCSEs or equivalent
@@ -41,7 +41,19 @@ def main():
     # Add new column as mean of age predictions
     age_pred['Mean predicted age'] = age_pred.iloc[:, 2:].mean(axis=1)
 
-    pass
+    # Loading demographic data to access variables
+    dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'ukb22321.csv'),
+        usecols=['eid',
+                 '6138-2.0', '6138-2.1', '6138-2.2', '6138-2.3', '6138-2.4',
+                 '24005-0.0',
+                 '24009-0.0', '24010-0.0', '24014-0.0',
+                 '24500-0.0', '24501-0.0', '24502-0.0', '24506-0.0'])
+    dataset_dem.columns = ['ID',
+                           'Education_1', 'Education_2', 'Education_3', 'Education_4', 'Education_5',
+                           'Air_pollution',
+                           'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
+                           'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
+    # dataset_dem = dataset_dem.dropna()
 
 
 if __name__ == "__main__":
