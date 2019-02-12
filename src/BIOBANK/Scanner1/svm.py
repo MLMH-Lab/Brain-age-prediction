@@ -101,9 +101,9 @@ def main():
             scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
             model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
             params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
-            dump(x_train, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + scaler_file_name)
-            dump(best_params, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + params_file_name)
-            dump(predictions, '/home/lea/PycharmProjects/predicted_brain_age/outputs/' + model_file_name)
+            dump(scaling, str(PROJECT_ROOT / 'outputs' / scaler_file_name))
+            dump(best_params, str(PROJECT_ROOT / 'outputs' / params_file_name))
+            dump(svm_train_best, str(PROJECT_ROOT / 'outputs' /  model_file_name))
 
             # Create new df to hold test_index and corresponding age prediction
             new_df = pd.DataFrame()
@@ -122,7 +122,7 @@ def main():
 
     # Save predictions
     age_predictions = age_predictions.drop('Index', axis=1)
-    age_predictions.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/age_predictions.csv', index=False)
+    age_predictions.to_csv(str(PROJECT_ROOT / 'outputs/age_predictions.csv'), index=False)
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
