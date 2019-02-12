@@ -38,6 +38,9 @@ def main():
     # Load SVR age predictions
     age_pred = pd.read_csv(PROJECT_ROOT / 'outputs/age_predictions.csv')
 
+    # Add new column as mean of age predictions
+    age_pred['Mean predicted age'] = age_pred.iloc[:, 2:].mean(axis=1)
+
     pass
 
 
