@@ -11,14 +11,13 @@ def main():
     dataset_freesurfer = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
 
     # Load IDs for subjects from balanced dataset
-    ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/homogeneous_dataset.csv')
+    ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'outputs/homogeneous_dataset.csv')
 
     # Make freesurfer dataset homogeneous
     dataset_balanced = pd.merge(dataset_freesurfer, ids_homogeneous, on='Image_ID')
 
     # Loading demographic data to access age per participant
-    dataset_dem = pd.read_csv(
-        '/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/ukb22321.csv',
+    dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'ukb22321.csv'),
         usecols=['eid', '21003-2.0'])
     dataset_dem.columns = ['ID', 'Age']
     dataset_dem = dataset_dem.dropna()
