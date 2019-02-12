@@ -14,16 +14,17 @@ Step 11: Print R_squared, mean absolute error (MAE), root mean squared error (RM
 Step 12: Save model file, scaler file, predictions file
 Step 13: Print CV results"""
 
+from math import sqrt
 from pathlib import Path
+import random
+
 import pandas as pd
 import numpy as np
-import random
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
-from math import sqrt
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
 
@@ -42,8 +43,8 @@ def main():
     regions = dataset[dataset.columns[4:-2]].values
     tiv = dataset.EstimatedTotalIntraCranialVol.values
     tiv = tiv.reshape(len(dataset), 1)
-    regions_norm = np.true_divide(regions, tiv) # Independent vars X
-    age = dataset[dataset.columns[1]].values # Dependent var Y
+    regions_norm = np.true_divide(regions, tiv)  # Independent vars X
+    age = dataset[dataset.columns[1]].values  # Dependent var Y
 
     # Create variable to hold CV variables
     cv_r2_scores = []
@@ -54,15 +55,18 @@ def main():
     age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
     age_predictions['Index'] = age_predictions.index
 
+    n_repetitions = 10
+    n_folds = 10
+    n_nested_folds = 5
+
     # Loop to repeat 10-fold CV 10 times
-    for i_repetition in range(10):
+    for i_repetition in range(n_repetitions):
 
         # Create new empty column in age_predictions df to save age predictions of this repetition
         age_predictions['Prediction repetition %02d' % i_repetition] = np.nan
 
         # Create 10-fold cross-validator, stratified by age
-        skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=i_repetition)
-        skf.get_n_splits(regions_norm, age)
+        skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
 
         for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
             print('Running repetition %02d, fold %02d' % (i_repetition, i_fold))
@@ -80,7 +84,7 @@ def main():
 
             c_range = [0.001, 0.1, 1, 10, 100]
             search_space = [{'C': c_range}]
-            nested_skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=i_repetition)
+            nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
             gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3)
             svm_train_best = gridsearch.fit(x_train, y_train)
