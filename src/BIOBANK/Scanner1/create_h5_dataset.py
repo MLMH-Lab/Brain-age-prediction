@@ -36,8 +36,7 @@ def main():
     dataset_csv = pd.merge(dataset_dem, dataset_balanced, on='ID')
 
     # Create dataset as hdf5
-    dataset_hdf = dataset_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5',
-                                     key='table', mode='w')
+    dataset_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table', mode='w')
 
 
 if __name__ == "__main__":
