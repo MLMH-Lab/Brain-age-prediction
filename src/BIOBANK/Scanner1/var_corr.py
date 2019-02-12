@@ -1,7 +1,7 @@
 """Script to assess correlations between difference in actual and
 predicted age with demographic variables in UK BIOBANK Scanner1
 
-Variables to assess [variable code - variable name, code names]:
+Variables to assess [variable code - variable name, code names (where applicable)]:
 6138-2.0, 6138-2.1, 6138-2.2, 6138-2.3, 6138-2.4, 6138-2.4 - Which of the following qualifications do you have? (up to 5 selections possible)
 1	College or University degree
 2	A levels/AS levels or equivalent
