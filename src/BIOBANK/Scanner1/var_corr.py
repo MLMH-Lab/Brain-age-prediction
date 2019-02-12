@@ -27,7 +27,17 @@ no data available for imaging assessment
 Variable information available at https://biobank.ctsu.ox.ac.uk/crystal/label.cgi;
 """
 
+from pathlib import Path
+
+import pandas as pd
+
+
+PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
+
 def main():
+    # Load SVR age predictions
+    age_pred = pd.read_csv(PROJECT_ROOT / 'outputs/age_predictions.csv')
+
     pass
 
 
