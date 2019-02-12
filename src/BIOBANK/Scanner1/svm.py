@@ -119,7 +119,7 @@ def main():
                   % (i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
 
     # Save predictions
-    age_predictions.drop('Index', axis=1)
+    age_predictions = age_predictions.drop('Index', axis=1)
     age_predictions.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/age_predictions.csv', index=False)
 
     # Variables for CV means across all repetitions
