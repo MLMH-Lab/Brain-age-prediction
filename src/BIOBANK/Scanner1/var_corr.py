@@ -26,3 +26,10 @@ no data available for imaging assessment
 
 Variable information available at https://biobank.ctsu.ox.ac.uk/crystal/label.cgi;
 """
+
+def main():
+    pass
+
+
+if __name__ == "__main__":
+    main()
