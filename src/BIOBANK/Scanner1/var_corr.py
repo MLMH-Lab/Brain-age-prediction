@@ -70,10 +70,10 @@ def main():
     dataset_dem['Education_3'] = dataset_dem['Education_3'].map(education_dict)
     dataset_dem['Education_4'] = dataset_dem['Education_4'].map(education_dict)
     dataset_dem['Education_5'] = dataset_dem['Education_5'].map(education_dict)
+
+    # Create col for maximum of education level per respondent
     dataset_dem['Education_highest'] = dataset_dem[['Education_1', 'Education_2', 'Education_3',
                                                    'Education_4', 'Education_5']].apply(max, axis=1)
-
-    # Use maximum of education level per respondent
 
     # Spearman correlation per variable
 
