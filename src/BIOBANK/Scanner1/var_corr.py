@@ -38,6 +38,18 @@ from scipy.stats import spearmanr
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
+
+def spearman(df, x, y):
+    spearman_rho, spearman_p = spearmanr(df[x], df[y])
+    alpha = 0.5
+    if spearman_p > alpha:
+        print('%s and %s are uncorrelated (fail to reject H0): p = %.3f, rho = %.3f'
+              % (x, y, spearman_p, spearman_rho))
+    else:
+        print('%s and %s are correlated (reject H0): p = %.3f, rho = %.3f'
+              % (x, y, spearman_p, spearman_rho))
+
+
 def main():
     # Load SVR age predictions
     age_pred = pd.read_csv(PROJECT_ROOT / 'outputs/age_predictions.csv')
@@ -85,10 +97,8 @@ def main():
     dataset = dataset.dropna()
 
     # Spearman correlation per variable
-    edu_mean_spearman_corr, edu_mean_spearman_p = \
-        spearmanr(dataset['Diff age-mean'], dataset['Education_highest'])
-    edu_median_spearman_corr, edu_median_spearman_p = \
-        spearmanr(dataset['Diff age-median'], dataset['Education_highest'])
+    spearman(dataset, 'Diff age-mean', 'Education_highest')
+
 
     # Linear regression per variable
 
