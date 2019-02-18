@@ -40,14 +40,17 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def spearman(df, x, y):
+    """Calculate and interpret spearman's correlation of cols x and y"""
     spearman_rho, spearman_p = spearmanr(df[x], df[y])
-    alpha = 0.5
-    if spearman_p > alpha:
+    alpha = 0.05
+    if spearman_p >= alpha:
         print('%s and %s are uncorrelated (fail to reject H0): p = %.3f, rho = %.3f'
               % (x, y, spearman_p, spearman_rho))
-    else:
+    elif spearman_p < alpha:
         print('%s and %s are correlated (reject H0): p = %.3f, rho = %.3f'
               % (x, y, spearman_p, spearman_rho))
+    else:
+        print('Error with %s and %s' % (x, y))
 
 
 def main():
@@ -98,7 +101,21 @@ def main():
 
     # Spearman correlation per variable
     spearman(dataset, 'Diff age-mean', 'Education_highest')
-
+    spearman(dataset, 'Diff age-median', 'Education_highest')
+    spearman(dataset, 'Diff age-mean', 'Traffic_intensity')
+    spearman(dataset, 'Diff age-median', 'Traffic_intensity')
+    spearman(dataset, 'Diff age-mean', 'Inverse_dist_road')
+    spearman(dataset, 'Diff age-median', 'Inverse_dist_road')
+    spearman(dataset, 'Diff age-mean', 'Close_road_bin')
+    spearman(dataset, 'Diff age-median', 'Close_road_bin')
+    spearman(dataset, 'Diff age-mean', 'Greenspace_perc')
+    spearman(dataset, 'Diff age-median', 'Greenspace_perc')
+    spearman(dataset, 'Diff age-mean', 'Garden_perc')
+    spearman(dataset, 'Diff age-median', 'Garden_perc')
+    spearman(dataset, 'Diff age-mean', 'Water_perc')
+    spearman(dataset, 'Diff age-median', 'Water_perc')
+    spearman(dataset, 'Diff age-mean', 'Natural_env_perc')
+    spearman(dataset, 'Diff age-median', 'Natural_env_perc')
 
     # Linear regression per variable
 
