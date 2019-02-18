@@ -33,7 +33,9 @@ Variable information available at https://biobank.ctsu.ox.ac.uk/crystal/label.cg
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 from scipy.stats import spearmanr
+import statsmodels.api as sm
 
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
@@ -41,6 +43,7 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 def spearman(df, x, y):
     """Calculate and interpret spearman's correlation of cols x and y"""
+
     spearman_rho, spearman_p = spearmanr(df[x], df[y])
     alpha = 0.05
     if spearman_p >= alpha:
@@ -51,6 +54,28 @@ def spearman(df, x, y):
               % (x, y, spearman_p, spearman_rho))
     else:
         print('Error with %s and %s' % (x, y))
+
+
+def ols_reg(df, x, y):
+    """Perform linear regression using ordinary least squares (OLS) method"""
+
+    endog = np.asarray(df[x], dtype=float)
+    exog = np.asarray(sm.add_constant(df[y]), dtype=float)
+    OLS_model = sm.OLS(endog, exog)
+    OLS_results = OLS_model.fit()
+    OLS_p = OLS_results.pvalues[1]
+    OLS_coeff = OLS_results.params[1]
+
+    alpha = 0.05
+    if OLS_p >= alpha:
+        print('%s and %s - fail to reject H0: p = %.3f, rho = %.3f'
+              % (x, y, OLS_p, OLS_coeff))
+    elif OLS_p < alpha:
+        print('%s and %s - reject H0: p = %.3f, rho = %.3f'
+              % (x, y, OLS_p, OLS_coeff))
+    else:
+        print('Error with %s and %s' % (x, y))
+
 
 
 def main():
@@ -111,8 +136,16 @@ def main():
             spearman(dataset, x, y)
 
     # Linear regression per variable
+    for x in x_list:
+        for y in y_list:
+            ols_reg(dataset, x, y)
 
     # output csv with actual age, mean predicted age, median, std
+    dataset.to_csv(str(PROJECT_ROOT / 'outputs/age_predictions_stats.csv'),
+                   columns=['Participant_ID', 'Age',
+                            'Mean predicted age', 'Median predicted age', 'Std predicted age',
+                            'Diff age-mean', 'Diff age-median'],
+                   index=False)
 
 
 if __name__ == "__main__":
