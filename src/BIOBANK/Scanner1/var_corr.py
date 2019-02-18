@@ -82,9 +82,13 @@ def main():
 
     # Merge age_pred and dataset_dem datasets
     dataset = pd.merge(age_pred, dataset_dem, on='ID')
+    dataset = dataset.dropna()
 
     # Spearman correlation per variable
-    spearmanr()
+    edu_mean_spearman_corr, edu_mean_spearman_p = \
+        spearmanr(dataset['Diff age-mean'], dataset['Education_highest'])
+    edu_median_spearman_corr, edu_median_spearman_p = \
+        spearmanr(dataset['Diff age-median'], dataset['Education_highest'])
 
     # Linear regression per variable
 
