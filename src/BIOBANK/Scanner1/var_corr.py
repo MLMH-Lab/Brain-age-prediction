@@ -33,6 +33,7 @@ Variable information available at https://biobank.ctsu.ox.ac.uk/crystal/label.cg
 from pathlib import Path
 
 import pandas as pd
+from scipy.stats import spearmanr
 
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
@@ -50,6 +51,10 @@ def main():
     age_pred['Diff age-mean'] = age_pred['Age'] - age_pred['Mean predicted age']
     age_pred['Diff age-median'] = age_pred['Age'] - age_pred['Median predicted age']
 
+    # Extract participant ID
+    age_pred['ID'] = age_pred['Participant_ID'].str.split('-', expand=True)[1]
+    age_pred['ID'] = pd.to_numeric(age_pred['ID'])
+
     # Loading demographic data to access variables
     dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'ukb22321.csv'),
         usecols=['eid',
@@ -63,7 +68,7 @@ def main():
                            'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
                            'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
 
-    # Create new education col to simulate ordinal scale
+    # Create new education cols to simulate ordinal scale
     education_dict = {1:4, 2:2, 3:1, 4:1, 5:3, 6:3}
     dataset_dem['Education_1'] = dataset_dem['Education_1'].map(education_dict)
     dataset_dem['Education_2'] = dataset_dem['Education_2'].map(education_dict)
@@ -75,7 +80,11 @@ def main():
     dataset_dem['Education_highest'] = dataset_dem[['Education_1', 'Education_2', 'Education_3',
                                                    'Education_4', 'Education_5']].apply(max, axis=1)
 
+    # Merge age_pred and dataset_dem datasets
+    dataset = pd.merge(age_pred, dataset_dem, on='ID')
+
     # Spearman correlation per variable
+    spearmanr()
 
     # Linear regression per variable
 
