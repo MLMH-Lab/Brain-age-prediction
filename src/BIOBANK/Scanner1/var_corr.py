@@ -99,23 +99,16 @@ def main():
     dataset = pd.merge(age_pred, dataset_dem, on='ID')
     dataset = dataset.dropna()
 
+    # Correlation variables
+    x_list = ['Diff age-mean', 'Diff age-median']
+    y_list = ['Air_pollution',
+              'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
+              'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
+
     # Spearman correlation per variable
-    spearman(dataset, 'Diff age-mean', 'Education_highest')
-    spearman(dataset, 'Diff age-median', 'Education_highest')
-    spearman(dataset, 'Diff age-mean', 'Traffic_intensity')
-    spearman(dataset, 'Diff age-median', 'Traffic_intensity')
-    spearman(dataset, 'Diff age-mean', 'Inverse_dist_road')
-    spearman(dataset, 'Diff age-median', 'Inverse_dist_road')
-    spearman(dataset, 'Diff age-mean', 'Close_road_bin')
-    spearman(dataset, 'Diff age-median', 'Close_road_bin')
-    spearman(dataset, 'Diff age-mean', 'Greenspace_perc')
-    spearman(dataset, 'Diff age-median', 'Greenspace_perc')
-    spearman(dataset, 'Diff age-mean', 'Garden_perc')
-    spearman(dataset, 'Diff age-median', 'Garden_perc')
-    spearman(dataset, 'Diff age-mean', 'Water_perc')
-    spearman(dataset, 'Diff age-median', 'Water_perc')
-    spearman(dataset, 'Diff age-mean', 'Natural_env_perc')
-    spearman(dataset, 'Diff age-median', 'Natural_env_perc')
+    for x in x_list:
+        for y in y_list:
+            spearman(dataset, x, y)
 
     # Linear regression per variable
 
