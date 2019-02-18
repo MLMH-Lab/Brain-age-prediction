@@ -39,9 +39,13 @@ def main():
     age_pred = pd.read_csv(PROJECT_ROOT / 'outputs/age_predictions.csv')
 
     # Add new columns as mean, median, std of age predictions + difference between actual age and mean, median
-    age_pred['Mean predicted age'] = age_pred.iloc[:, 2:].mean(axis=1)
-    age_pred['Std predicted age'] = age_pred.iloc[:, 2:].std(axis=1)
-    # add median
+    pred_repetition = 10
+    last_col = pred_repetition + 2
+    age_pred['Mean predicted age'] = age_pred.iloc[:, 2:last_col].mean(axis=1)
+    age_pred['Median predicted age'] = age_pred.iloc[:, 2:last_col].median(axis=1)
+    age_pred['Std predicted age'] = age_pred.iloc[:, 2:last_col].std(axis=1)
+    age_pred['Diff age-mean'] = age_pred['Age'] - age_pred['Mean predicted age']
+    age_pred['Diff age-median'] = age_pred['Age'] - age_pred['Median predicted age']
 
     # Loading demographic data to access variables
     dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'ukb22321.csv'),
