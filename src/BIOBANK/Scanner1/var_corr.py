@@ -64,8 +64,14 @@ def main():
                            'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
 
     # Create new education col to simulate ordinal scale
-    education_dict = {1:4, 2:2, 3:1, 4:1, 5:3, 6:3, -7:NaN, -3:NaN}
-    dataset_dem['Education_highest'] =
+    education_dict = {1:4, 2:2, 3:1, 4:1, 5:3, 6:3}
+    dataset_dem['Education_1'] = dataset_dem['Education_1'].map(education_dict)
+    dataset_dem['Education_2'] = dataset_dem['Education_2'].map(education_dict)
+    dataset_dem['Education_3'] = dataset_dem['Education_3'].map(education_dict)
+    dataset_dem['Education_4'] = dataset_dem['Education_4'].map(education_dict)
+    dataset_dem['Education_5'] = dataset_dem['Education_5'].map(education_dict)
+    dataset_dem['Education_highest'] = dataset_dem[['Education_1', 'Education_2', 'Education_3',
+                                                   'Education_4', 'Education_5']].apply(max, axis=1)
 
     # Use maximum of education level per respondent
 
