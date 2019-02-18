@@ -11,6 +11,9 @@ Variables to assess [variable code - variable name, code names (where applicable
 6	Other professional qualifications eg: nursing, teaching
 -7	None of the above
 -3	Prefer not to answer
+Researcher notes:
+- CSE is the predecessor of GCSE, so can be treated the same
+- NVQ/HND/HNC are work-based qualifications/degrees, comparable to short undergraduate degrees
 
 24005-0.0 - Particulate matter air pollution (pm10); 2010
 24009-0.0 - Traffic intensity on the nearest road
@@ -59,7 +62,10 @@ def main():
                            'Air_pollution',
                            'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
                            'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
-    # dataset_dem = dataset_dem.dropna()
+
+    # Create new education col to simulate ordinal scale
+    education_dict = {1:4, 2:2, 3:1, 4:1, 5:3, 6:3, -7:NaN, -3:NaN}
+    dataset_dem['Education_highest'] =
 
     # Use maximum of education level per respondent
 
