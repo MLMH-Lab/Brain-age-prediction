@@ -38,9 +38,10 @@ def main():
     # Load SVR age predictions
     age_pred = pd.read_csv(PROJECT_ROOT / 'outputs/age_predictions.csv')
 
-    # Add new column as mean of age predictions
+    # Add new columns as mean, median, std of age predictions + difference between actual age and mean, median
     age_pred['Mean predicted age'] = age_pred.iloc[:, 2:].mean(axis=1)
     age_pred['Std predicted age'] = age_pred.iloc[:, 2:].std(axis=1)
+    # add median
 
     # Loading demographic data to access variables
     dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'ukb22321.csv'),
@@ -55,6 +56,14 @@ def main():
                            'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
                            'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
     # dataset_dem = dataset_dem.dropna()
+
+    # Use maximum of education level per respondent
+
+    # Spearman correlation per variable
+
+    # Linear regression per variable
+
+    # output csv with actual age, mean predicted age, median, std
 
 
 if __name__ == "__main__":
