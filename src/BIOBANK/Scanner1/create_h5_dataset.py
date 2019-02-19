@@ -18,8 +18,8 @@ def main():
 
     # Loading demographic data to access age per participant
     dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'ukb22321.csv'),
-        usecols=['eid', '21003-2.0'])
-    dataset_dem.columns = ['ID', 'Age']
+        usecols=['eid', '31-0.0', '21003-2.0'])
+    dataset_dem.columns = ['ID', 'Gender', 'Age']
     dataset_dem = dataset_dem.dropna()
 
     # Create a new col in FS dataset to contain participant ID
