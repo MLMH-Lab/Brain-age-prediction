@@ -103,13 +103,13 @@ def main():
             cv_mae.append(absolute_error)
             cv_rmse.append(root_squared_error)
 
-            # Save scaler, model and model parameters
-            scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
-            model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
-            params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
-            dump(scaling, str(PROJECT_ROOT / 'outputs' / scaler_file_name))
-            dump(best_params, str(PROJECT_ROOT / 'outputs' / params_file_name))
-            dump(svm_train_best, str(PROJECT_ROOT / 'outputs' /  model_file_name))
+            # # Save scaler, model and model parameters
+            # scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
+            # model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
+            # params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
+            # dump(scaling, str(PROJECT_ROOT / 'outputs' / scaler_file_name))
+            # dump(best_params, str(PROJECT_ROOT / 'outputs' / params_file_name))
+            # dump(svm_train_best, str(PROJECT_ROOT / 'outputs' /  model_file_name))
 
             # Create new df to hold test_index and corresponding age prediction
             new_df = pd.DataFrame()
