@@ -43,7 +43,7 @@ def main():
     tiv = dataset.EstimatedTotalIntraCranialVol.values
     tiv = tiv.reshape(len(dataset), 1)
     regions_norm = np.true_divide(regions, tiv)  # Independent vars X
-    age = dataset[dataset.columns[1]].values  # Dependent var Y
+    age = dataset[dataset.columns[2]].values  # Dependent var Y
 
     # Create variable to hold CV variables
     cv_r2_scores = []
