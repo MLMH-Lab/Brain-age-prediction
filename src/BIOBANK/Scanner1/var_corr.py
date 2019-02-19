@@ -45,15 +45,17 @@ def spearman(df, x, y):
     """Calculate and interpret spearman's correlation of cols x and y"""
 
     spearman_rho, spearman_p = spearmanr(df[x], df[y])
+
     alpha = 0.05
+    n = len(df)
     if spearman_p < alpha:
-        print('%s and %s are correlated (reject H0): p = %.3f, rho = %.3f'
-              % (x, y, spearman_p, spearman_rho))
-    elif spearman_p >= alpha:
-        print('%s and %s are uncorrelated (fail to reject H0): p = %.3f, rho = %.3f'
-              % (x, y, spearman_p, spearman_rho))
-    else:
-        print('Error with %s and %s' % (x, y))
+        print('n=%s, %s and %s - reject H0: p = %.3f, rho = %.3f'
+              % (n, x, y, spearman_p, spearman_rho))
+    # elif spearman_p >= alpha:
+    #     print('%s and %s are uncorrelated (fail to reject H0): p = %.3f, rho = %.3f'
+    #           % (x, y, spearman_p, spearman_rho))
+    # else:
+    #     print('Error with %s and %s' % (x, y))
 
 
 def ols_reg(df, x, y):
@@ -67,14 +69,15 @@ def ols_reg(df, x, y):
     OLS_coeff = OLS_results.params[1]
 
     alpha = 0.05
+    n = len(df)
     if OLS_p < alpha:
-        print('%s and %s - reject H0: p = %.3f, rho = %.3f'
-              % (x, y, OLS_p, OLS_coeff))
-    elif OLS_p >= alpha:
-        print('%s and %s - fail to reject H0: p = %.3f, rho = %.3f'
-              % (x, y, OLS_p, OLS_coeff))
-    else:
-        print('Error with %s and %s' % (x, y))
+        print('n=%s, %s and %s - reject H0: p = %.3f, rho = %.3f'
+              % (n, x, y, OLS_p, OLS_coeff))
+    # elif OLS_p >= alpha:
+    #     print('%s and %s - fail to reject H0: p = %.3f, rho = %.3f'
+    #           % (x, y, OLS_p, OLS_coeff))
+    # else:
+    #     print('Error with %s and %s' % (x, y))
 
 
 
@@ -120,24 +123,31 @@ def main():
     dataset_dem['Education_highest'] = dataset_dem[['Education_1', 'Education_2', 'Education_3',
                                                    'Education_4', 'Education_5']].apply(max, axis=1)
 
+    education_fre = pd.crosstab(index=dataset["Education_highest"], columns="count")
+
     # Merge age_pred and dataset_dem datasets
     dataset = pd.merge(age_pred, dataset_dem, on='ID')
 
     # Correlation variables
     x_list = ['Diff age-mean', 'Diff age-median', 'Std predicted age']
-    y_list = ['Education_highest', 'Air_pollution',
+    y_list = ['Education_highest',
+              'Air_pollution',
               'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
               'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
 
     # Spearman correlation per variable
+    print("Spearman correlation")
     for x in x_list:
         for y in y_list:
-            spearman(dataset, x, y)
+            dataset_y = dataset.dropna(subset=[y])
+            spearman(dataset_y, x, y)
 
     # Linear regression per variable
+    print("\n OLS regression")
     for x in x_list:
         for y in y_list:
-            ols_reg(dataset, x, y)
+            dataset_y = dataset.dropna(subset=[y])
+            ols_reg(dataset_y, x, y)
 
     # output csv with actual age, mean predicted age, median, std
     dataset.to_csv(str(PROJECT_ROOT / 'outputs/age_predictions_stats.csv'),
