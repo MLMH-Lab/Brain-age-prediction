@@ -34,6 +34,12 @@ def main():
     # Load hdf5 file
     dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table')
 
+    # Split by gender - male only
+    male_code = 1
+    female_code = 0
+
+    dataset = dataset.groupby('Gender').get_group(male_code)
+
     # Initialise random seed
     np.random.seed = 42
     random.seed = 42
