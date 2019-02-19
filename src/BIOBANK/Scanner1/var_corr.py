@@ -46,11 +46,11 @@ def spearman(df, x, y):
 
     spearman_rho, spearman_p = spearmanr(df[x], df[y])
     alpha = 0.05
-    if spearman_p >= alpha:
-        print('%s and %s are uncorrelated (fail to reject H0): p = %.3f, rho = %.3f'
-              % (x, y, spearman_p, spearman_rho))
-    elif spearman_p < alpha:
+    if spearman_p < alpha:
         print('%s and %s are correlated (reject H0): p = %.3f, rho = %.3f'
+              % (x, y, spearman_p, spearman_rho))
+    elif spearman_p >= alpha:
+        print('%s and %s are uncorrelated (fail to reject H0): p = %.3f, rho = %.3f'
               % (x, y, spearman_p, spearman_rho))
     else:
         print('Error with %s and %s' % (x, y))
@@ -67,11 +67,11 @@ def ols_reg(df, x, y):
     OLS_coeff = OLS_results.params[1]
 
     alpha = 0.05
-    if OLS_p >= alpha:
-        print('%s and %s - fail to reject H0: p = %.3f, rho = %.3f'
-              % (x, y, OLS_p, OLS_coeff))
-    elif OLS_p < alpha:
+    if OLS_p < alpha:
         print('%s and %s - reject H0: p = %.3f, rho = %.3f'
+              % (x, y, OLS_p, OLS_coeff))
+    elif OLS_p >= alpha:
+        print('%s and %s - fail to reject H0: p = %.3f, rho = %.3f'
               % (x, y, OLS_p, OLS_coeff))
     else:
         print('Error with %s and %s' % (x, y))
@@ -122,11 +122,10 @@ def main():
 
     # Merge age_pred and dataset_dem datasets
     dataset = pd.merge(age_pred, dataset_dem, on='ID')
-    dataset = dataset.dropna()
 
     # Correlation variables
-    x_list = ['Diff age-mean', 'Diff age-median']
-    y_list = ['Air_pollution',
+    x_list = ['Diff age-mean', 'Diff age-median', 'Std predicted age']
+    y_list = ['Education_highest', 'Air_pollution',
               'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
               'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
 
