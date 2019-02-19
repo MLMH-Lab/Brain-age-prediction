@@ -149,6 +149,17 @@ def main():
             dataset_y = dataset.dropna(subset=[y])
             ols_reg(dataset_y, x, y)
 
+    # output csv for polr in R
+    dataset.to_csv(str(PROJECT_ROOT / 'outputs/age_predictions_demographics.csv'),
+                   columns=['Participant_ID', 'Age',
+                            'Mean predicted age', 'Median predicted age', 'Std predicted age',
+                            'Diff age-mean', 'Diff age-median',
+                            'Education_highest',
+                            'Air_pollution',
+                            'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
+                            'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc'],
+                   index=False)
+
     # output csv with actual age, mean predicted age, median, std
     dataset.to_csv(str(PROJECT_ROOT / 'outputs/age_predictions_stats.csv'),
                    columns=['Participant_ID', 'Age',
