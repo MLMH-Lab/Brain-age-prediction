@@ -34,11 +34,6 @@ def main():
     # Load hdf5 file
     dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table')
 
-    # Split by gender - male only
-    male_code = 1
-    female_code = 0
-
-    dataset = dataset.groupby('Gender').get_group(male_code)
 
     # Initialise random seed
     np.random.seed = 42
@@ -91,7 +86,7 @@ def main():
             search_space = [{'C': c_range}]
             nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
-            gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3)
+            gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3, n_jobs=6)
             svm_train_best = gridsearch.fit(x_train, y_train)
             best_params = gridsearch.best_params_
 
