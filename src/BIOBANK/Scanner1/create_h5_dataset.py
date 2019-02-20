@@ -40,7 +40,7 @@ def main():
     dataset_female_csv = dataset_csv.groupby('Gender').get_group(female_code)
 
     # Create datasets as hdf5
-    dataset_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table', mode='w')
+    dataset_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData_total.h5', key='table', mode='w')
     dataset_male_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData_male.h5', key='table', mode='w')
     dataset_female_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData_female.h5', key='table', mode='w')
 
