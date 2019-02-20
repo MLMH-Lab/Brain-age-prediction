@@ -34,7 +34,7 @@ from pathlib import Path
 
 import pandas as pd
 import numpy as np
-from scipy.stats import spearmanr
+from scipy.stats import spearmanr, f_oneway
 import statsmodels.api as sm
 
 
@@ -123,8 +123,6 @@ def main():
     dataset_dem['Education_highest'] = dataset_dem[['Education_1', 'Education_2', 'Education_3',
                                                    'Education_4', 'Education_5']].apply(max, axis=1)
 
-    education_fre = pd.crosstab(index=dataset["Education_highest"], columns="count")
-
     # Merge age_pred and dataset_dem datasets
     dataset = pd.merge(age_pred, dataset_dem, on='ID')
 
@@ -167,6 +165,24 @@ def main():
                             'Diff age-mean', 'Diff age-median'],
                    index=False)
 
+
+    # Exploratory analysis of education
+    education_fre = pd.crosstab(index=dataset["Education_highest"], columns="count")
+
+    # Perform one-way ANOVA for education groups
+    uni_code = 4
+    prof_qual_code = 3
+    a_level_code = 2
+    gcse_code = 1
+
+    dataset_uni = dataset.groupby('Education_highest').get_group(uni_code)
+    dataset_prof_qual = dataset.groupby('Education_highest').get_group(prof_qual_code)
+    dataset_a_level = dataset.groupby('Education_highest').get_group(a_level_code)
+    dataset_gcse = dataset.groupby('Education_highest').get_group(gcse_code)
+
+    for x in x_list:
+        f_stat, pvalue = f_oneway(dataset_uni[x], dataset_prof_qual[x], dataset_a_level[x], dataset_gcse[x])
+        print(x, f_stat, pvalue)
 
 if __name__ == "__main__":
     main()
