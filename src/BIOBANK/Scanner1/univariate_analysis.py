@@ -22,10 +22,8 @@ def normalise_region_df(normalised_df, df, region_name):
 
     normalised_df["Norm_vol_" + region_name] = df[region_name] / df['EstimatedTotalIntraCranialVol'] * 100
 
-    return normalised_df
 
-
-def ols_reg(df, region_name):
+def ols_reg(df, region_name, reg_output):
     """Perform linear regression using ordinary least squares (OLS) method"""
 
     endog = np.asarray(df['Norm_vol_' + region_name], dtype=float)
@@ -42,8 +40,6 @@ def ols_reg(df, region_name):
     # Add to reg_output df
     OLS_df = pd.concat([OLS_coeff, OLS_se, OLS_tvalue, OLS_pvalue], ignore_index=True)
     reg_output[region_name] = OLS_df
-
-    return reg_output
 
 
 def main():
@@ -65,13 +61,11 @@ def main():
     dataset_fs_dem = pd.merge(dataset_fs_all_regions, dataset_demographic_excl_nan, on='Participant_ID')
 
     # Create new df to add normalised regional volumes to
-    global normalised_df
     normalised_df = pd.DataFrame(dataset_fs_dem[['Participant_ID', 'Diagn', 'Gender', 'Age']])
     normalised_df['Age2'] = normalised_df['Age'] ** 2
     normalised_df['Age3'] = normalised_df['Age'] ** 3
 
     # Create empty df for regression output; regions to be added
-    global reg_output
     reg_output = pd.DataFrame({"Row_labels_stat": ['Coeff', 'Coeff', 'Coeff', 'Coeff',
                                                    'std_err', 'std_err', 'std_err', 'std_err',
                                                    't', 't', 't', 't',
@@ -90,10 +84,10 @@ def main():
             region_cols.append(col)
 
     for region in region_cols:
-        normalise_region_df(dataset_fs_dem, region)
+        normalise_region_df(normalised_df, dataset_fs_dem, region)
 
         # Linear regression - ordinary least squares (OLS)
-        ols_reg(normalised_df, region)
+        ols_reg(normalised_df, region, reg_output)
 
     # Output to csv
     reg_output.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/OLS_result.csv', index=False)
