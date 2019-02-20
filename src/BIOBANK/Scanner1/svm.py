@@ -31,9 +31,12 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def main():
-    # Load hdf5 file
-    dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table')
+    # Define what subjects dataset should contain: total, male or female
+    subjects = 'male'
 
+    # Load hdf5 file
+    file_name = 'freesurferData_' + subjects + '.h5'
+    dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1' / file_name, key='table')
 
     # Initialise random seed
     np.random.seed = 42
@@ -98,13 +101,13 @@ def main():
             cv_mae.append(absolute_error)
             cv_rmse.append(root_squared_error)
 
-            # # Save scaler, model and model parameters
-            # scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
-            # model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
-            # params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
-            # dump(scaling, str(PROJECT_ROOT / 'outputs' / scaler_file_name))
-            # dump(best_params, str(PROJECT_ROOT / 'outputs' / params_file_name))
-            # dump(svm_train_best, str(PROJECT_ROOT / 'outputs' /  model_file_name))
+            # Save scaler, model and model parameters
+            scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
+            model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
+            params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
+            dump(scaling, str(PROJECT_ROOT / 'outputs' / subjects / scaler_file_name))
+            dump(best_params, str(PROJECT_ROOT / 'outputs' / subjects / params_file_name))
+            dump(svm_train_best, str(PROJECT_ROOT / 'outputs' /  subjects / model_file_name))
 
             # Create new df to hold test_index and corresponding age prediction
             new_df = pd.DataFrame()
@@ -123,7 +126,7 @@ def main():
 
     # Save predictions
     age_predictions = age_predictions.drop('Index', axis=1)
-    age_predictions.to_csv(str(PROJECT_ROOT / 'outputs/age_predictions.csv'), index=False)
+    age_predictions.to_csv(str(PROJECT_ROOT / 'outputs' / subjects / 'age_predictions.csv'), index=False)
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
