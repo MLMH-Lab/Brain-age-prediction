@@ -88,11 +88,11 @@ def main():
     # Add new columns as mean, median, std of age predictions + difference between actual age and mean, median
     pred_repetition = 10
     last_col = pred_repetition + 2
-    age_pred['Mean predicted age'] = age_pred.iloc[:, 2:last_col].mean(axis=1)
-    age_pred['Median predicted age'] = age_pred.iloc[:, 2:last_col].median(axis=1)
-    age_pred['Std predicted age'] = age_pred.iloc[:, 2:last_col].std(axis=1)
-    age_pred['Diff age-mean'] = age_pred['Age'] - age_pred['Mean predicted age']
-    age_pred['Diff age-median'] = age_pred['Age'] - age_pred['Median predicted age']
+    age_pred['Mean_predicted_age'] = age_pred.iloc[:, 2:last_col].mean(axis=1)
+    age_pred['Median_predicted_age'] = age_pred.iloc[:, 2:last_col].median(axis=1)
+    age_pred['Std_predicted_age'] = age_pred.iloc[:, 2:last_col].std(axis=1)
+    age_pred['Diff_age-mean'] = age_pred['Age'] - age_pred['Mean predicted age']
+    age_pred['Diff_age-median'] = age_pred['Age'] - age_pred['Median predicted age']
 
     # Extract participant ID
     age_pred['ID'] = age_pred['Participant_ID'].str.split('-', expand=True)[1]
@@ -170,6 +170,7 @@ def main():
     education_fre = pd.crosstab(index=dataset["Education_highest"], columns="count")
 
     # Perform one-way ANOVA for education groups
+    # Alternative to: ols_reg(dataset_y, 'Diff age-mean', 'Education_highest') ?
     uni_code = 4
     prof_qual_code = 3
     a_level_code = 2
