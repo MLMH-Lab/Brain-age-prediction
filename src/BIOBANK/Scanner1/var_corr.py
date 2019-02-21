@@ -36,6 +36,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import spearmanr, f_oneway
 import statsmodels.api as sm
+import matplotlib.pyplot as plt
 
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
