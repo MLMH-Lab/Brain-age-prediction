@@ -35,6 +35,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from scipy.stats import spearmanr, f_oneway
+from statsmodels.stats.multicomp import pairwise_tukeyhsd, MultiComparison
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
@@ -196,6 +197,14 @@ def main():
 
     output_img_path = '/home/lea/PycharmProjects/predicted_brain_age/outputs/edu_agemean_BIOBANK.png'
     plt.savefig(str(output_img_path))
+
+    # Holm-Bonferroni method for multiple comparisons
+    dataset = dataset.dropna(subset='Education_highest')
+    # comp = MultiComp.allpairtest(mod.ttest_rel, method='Holm')
+
+    res2 = pairwise_tukeyhsd(dataset['Diff_age-mean'], dataset['Education_highest'])
+    mod = MultiComparison(dataset['Diff_age-mean'], dataset['Education_highest'])
+    print(mod.tukeyhsd())
 
 if __name__ == "__main__":
     main()
