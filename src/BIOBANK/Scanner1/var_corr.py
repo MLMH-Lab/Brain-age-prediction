@@ -91,8 +91,8 @@ def main():
     age_pred['Mean_predicted_age'] = age_pred.iloc[:, 2:last_col].mean(axis=1)
     age_pred['Median_predicted_age'] = age_pred.iloc[:, 2:last_col].median(axis=1)
     age_pred['Std_predicted_age'] = age_pred.iloc[:, 2:last_col].std(axis=1)
-    age_pred['Diff_age-mean'] = age_pred['Age'] - age_pred['Mean predicted age']
-    age_pred['Diff_age-median'] = age_pred['Age'] - age_pred['Median predicted age']
+    age_pred['Diff_age-mean'] = age_pred['Age'] - age_pred['Mean_predicted_age']
+    age_pred['Diff_age-median'] = age_pred['Age'] - age_pred['Median_predicted_age']
 
     # Extract participant ID
     age_pred['ID'] = age_pred['Participant_ID'].str.split('-', expand=True)[1]
@@ -102,11 +102,13 @@ def main():
     dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'ukb22321.csv'),
         usecols=['eid',
                  '6138-2.0', '6138-2.1', '6138-2.2', '6138-2.3', '6138-2.4',
+                 '22702-0.0', '22704-0.0',
                  '24005-0.0',
                  '24009-0.0', '24010-0.0', '24014-0.0',
                  '24500-0.0', '24501-0.0', '24502-0.0', '24506-0.0'])
     dataset_dem.columns = ['ID',
                            'Education_1', 'Education_2', 'Education_3', 'Education_4', 'Education_5',
+                           'East_coordinate', 'North_coordinate',
                            'Air_pollution',
                            'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
                            'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
@@ -127,7 +129,7 @@ def main():
     dataset = pd.merge(age_pred, dataset_dem, on='ID')
 
     # Correlation variables
-    x_list = ['Diff age-mean', 'Diff age-median', 'Std predicted age']
+    x_list = ['Diff_age-mean', 'Diff_age-median', 'Std_predicted_age']
     y_list = ['Education_highest',
               'Air_pollution',
               'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
@@ -149,9 +151,9 @@ def main():
 
     # output csv for polr in R
     dataset.to_csv(str(PROJECT_ROOT / 'outputs/age_predictions_demographics.csv'),
-                   columns=['Participant_ID', 'Age',
-                            'Mean predicted age', 'Median predicted age', 'Std predicted age',
-                            'Diff age-mean', 'Diff age-median',
+                   columns=['Participant_ID', 'Age', 'East_coordinate', 'North_coordinate',
+                            'Mean_predicted_age', 'Median_predicted_age', 'Std_predicted_age',
+                            'Diff_age-mean', 'Diff_age-median',
                             'Education_highest',
                             'Air_pollution',
                             'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
@@ -161,8 +163,8 @@ def main():
     # output csv with actual age, mean predicted age, median, std
     dataset.to_csv(str(PROJECT_ROOT / 'outputs/age_predictions_stats.csv'),
                    columns=['Participant_ID', 'Age',
-                            'Mean predicted age', 'Median predicted age', 'Std predicted age',
-                            'Diff age-mean', 'Diff age-median'],
+                            'Mean_predicted_age', 'Median_predicted_age', 'Std_predicted_age',
+                            'Diff_age-mean', 'Diff_age-median'],
                    index=False)
 
 
@@ -184,6 +186,15 @@ def main():
     for x in x_list:
         f_stat, pvalue = f_oneway(dataset_uni[x], dataset_prof_qual[x], dataset_a_level[x], dataset_gcse[x])
         print(x, f_stat, pvalue)
+
+    # Boxplot
+    df_edu = pd.concat([dataset_uni['Diff_age-mean'], dataset_prof_qual['Diff_age-mean'],
+                        dataset_a_level['Diff_age-mean'], dataset_gcse['Diff_age-mean']],
+                        axis=1, keys=['Uni', 'Prof_qual', 'A_levels', 'GCSE'])
+    plot = pd.DataFrame.boxplot(df_edu)
+
+    output_img_path = '/home/lea/PycharmProjects/predicted_brain_age/outputs/edu_agemean_BIOBANK.png'
+    plt.savefig(str(output_img_path))
 
 if __name__ == "__main__":
     main()
