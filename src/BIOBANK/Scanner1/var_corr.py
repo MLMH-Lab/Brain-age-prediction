@@ -174,7 +174,6 @@ def main():
                             'Diff_age-mean', 'Diff_age-median'],
                    index=False)
 
-
     # Exploratory analysis of education
     education_fre = pd.crosstab(index=dataset["Education_highest"], columns="count")
 
@@ -195,20 +194,20 @@ def main():
         print(x, f_stat, pvalue)
 
     # Boxplot
-    df_edu = pd.concat([dataset_uni['Diff_age-mean'], dataset_prof_qual['Diff_age-mean'],
-                        dataset_a_level['Diff_age-mean'], dataset_gcse['Diff_age-mean']],
+    df_edu = pd.concat([dataset_uni['AbsDiff_age-mean'], dataset_prof_qual['AbsDiff_age-mean'],
+                        dataset_a_level['AbsDiff_age-mean'], dataset_gcse['AbsDiff_age-mean']],
                         axis=1, keys=['Uni', 'Prof_qual', 'A_levels', 'GCSE'])
     plot = pd.DataFrame.boxplot(df_edu)
 
-    output_img_path = '/home/lea/PycharmProjects/predicted_brain_age/outputs/edu_agemean_BIOBANK.png'
+    output_img_path = '/home/lea/PycharmProjects/predicted_brain_age/outputs/edu_abs_agemean_BIOBANK.png'
     plt.savefig(str(output_img_path))
 
     # Holm-Bonferroni method for multiple comparisons
-    dataset = dataset.dropna(subset='Education_highest')
+    dataset = dataset.dropna(subset=['Education_highest'])
     # comp = MultiComp.allpairtest(mod.ttest_rel, method='Holm')
 
-    res2 = pairwise_tukeyhsd(dataset['Diff_age-mean'], dataset['Education_highest'])
-    mod = MultiComparison(dataset['Diff_age-mean'], dataset['Education_highest'])
+    res2 = pairwise_tukeyhsd(dataset['AbsDiff_age-mean'], dataset['Education_highest'])
+    mod = MultiComparison(dataset['AbsDiff_age-mean'], dataset['Education_highest'])
     print(mod.tukeyhsd())
 
 if __name__ == "__main__":
