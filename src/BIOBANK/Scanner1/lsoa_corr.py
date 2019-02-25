@@ -1,5 +1,5 @@
 """Script to assess correlations between age prediction error
-and LSOA variables (English index of multiple deprivation"""
+and English index of multiple deprivation (IMD) variables"""
 
 
 def main():
