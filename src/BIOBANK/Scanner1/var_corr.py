@@ -133,7 +133,7 @@ def main():
     dataset = pd.merge(age_pred, dataset_dem, on='ID')
 
     # Correlation variables
-    x_list = ['Diff_age-mean', 'Diff_age-median', 'Std_predicted_age']
+    x_list = ['AbsDiff_age-mean', 'AbsDiff_age-median', 'Diff_age-mean', 'Diff_age-median', 'Std_predicted_age']
     y_list = ['Education_highest',
               'Air_pollution',
               'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
