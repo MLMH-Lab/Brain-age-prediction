@@ -4,6 +4,8 @@ and English index of multiple deprivation (IMD) variables"""
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
+import statsmodels.api as sm
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
@@ -34,6 +36,10 @@ def main():
     # Loading LSOA data merged with BIOBANK demographic data
     dataset = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'IMD_data.csv')
     col = list(dataset.columns[23:])
+
+    for var in col:
+        dataset_var = dataset.dropna(subset=[var])
+        ols_reg(dataset_var, 'Diff_age-m', var)
 
 
 if __name__ == "__main__":
