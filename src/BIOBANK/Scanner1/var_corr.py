@@ -34,8 +34,9 @@ from pathlib import Path
 
 import pandas as pd
 import numpy as np
-from scipy.stats import spearmanr, f_oneway
+from scipy.stats import spearmanr, f_oneway, ttest_ind
 from statsmodels.stats.multicomp import pairwise_tukeyhsd, MultiComparison
+from statsmodels.stats.multitest import multipletests
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
@@ -204,11 +205,41 @@ def main():
 
     # Holm-Bonferroni method for multiple comparisons
     dataset = dataset.dropna(subset=['Education_highest'])
-    # comp = MultiComp.allpairtest(mod.ttest_rel, method='Holm')
-
-    res2 = pairwise_tukeyhsd(dataset['AbsDiff_age-mean'], dataset['Education_highest'])
     mod = MultiComparison(dataset['AbsDiff_age-mean'], dataset['Education_highest'])
     print(mod.tukeyhsd())
+
+    # bonferroni-corrected alpha for multiple t-tests
+    alpha_bon = 0.05/6
+
+    for x in x_list:
+        plist = []
+        print('\n', x)
+        tstat, pval = ttest_ind(dataset_uni[x], dataset_prof_qual[x])
+        plist.append(pval)
+        if pval < alpha_bon:
+            print("uni vs prof_qual", pval)
+        tstat, pval = ttest_ind(dataset_uni[x], dataset_a_level[x])
+        plist.append(pval)
+        if pval < alpha_bon:
+            print("uni vs a_level", pval)
+        tstat, pval = ttest_ind(dataset_uni[x], dataset_gcse[x])
+        plist.append(pval)
+        if pval < alpha_bon:
+            print("uni vs gcse", pval)
+        tstat, pval = ttest_ind(dataset_prof_qual[x], dataset_a_level[x])
+        plist.append(pval)
+        if pval < alpha_bon:
+            print("prof_qual vs a_level", pval)
+        tstat, pval = ttest_ind(dataset_prof_qual[x], dataset_gcse[x])
+        plist.append(pval)
+        if pval < alpha_bon:
+            print("prof_qual vs gcse", pval)
+        tstat, pval = ttest_ind(dataset_a_level[x], dataset_gcse[x])
+        plist.append(pval)
+        if pval < alpha_bon:
+            print("a_level vs gcse", pval)
+        print(multipletests(plist, alpha=0.05, method='bonferroni'))
+
 
 if __name__ == "__main__":
     main()
