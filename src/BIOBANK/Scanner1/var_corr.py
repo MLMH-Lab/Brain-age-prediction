@@ -175,6 +175,15 @@ def main():
                             'Diff_age-mean', 'Diff_age-median'],
                    index=False)
 
+    # Scatterplots
+    air_pollution_plot = dataset.plot(x='Diff_age-mean', y='Air_pollution', kind='scatter')
+    traffic_intensity_plot = dataset.plot(x='Diff_age-mean', y='Traffic_intensity', kind='scatter')
+    inv_dist_plot = dataset.plot(x='Diff_age-mean', y='Inverse_dist_road', kind='scatter')
+    greenspace_plot = dataset.plot(x='Diff_age-mean', y='Greenspace_perc', kind='scatter')
+    garden_plot = dataset.plot(x='Diff_age-mean', y='Garden_perc', kind='scatter')
+    water_plot = dataset.plot(x='Diff_age-mean', y='Water_perc', kind='scatter')
+    nat_env_plot = dataset.plot(x='Diff_age-mean', y='Natural_env_perc', kind='scatter')
+
     # Exploratory analysis of education
     education_fre = pd.crosstab(index=dataset["Education_highest"], columns="count")
 
@@ -194,7 +203,7 @@ def main():
         f_stat, pvalue = f_oneway(dataset_uni[x], dataset_prof_qual[x], dataset_a_level[x], dataset_gcse[x])
         print(x, f_stat, pvalue)
 
-    # Boxplot
+    # Boxplot for education
     df_edu = pd.concat([dataset_uni['AbsDiff_age-mean'], dataset_prof_qual['AbsDiff_age-mean'],
                         dataset_a_level['AbsDiff_age-mean'], dataset_gcse['AbsDiff_age-mean']],
                         axis=1, keys=['Uni', 'Prof_qual', 'A_levels', 'GCSE'])
