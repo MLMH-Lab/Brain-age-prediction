@@ -38,8 +38,15 @@ def main():
     dataset = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'IMD_data.csv')
     dataset['AbsDiff_age-mean'] = abs(dataset['Diff_age-m'])
     dataset['AbsDiff_age-median'] = abs(dataset['Diff_age_1'])
+
+    # create list of IMD vars
     col = list(dataset.columns[23:])
 
+    # create list of IMD vars with scores only
+    col_score = []
+    for item in col:
+        if item.split('_')[-1] == 'score':
+            col_score.append(item)
 
     for var in col:
         dataset_var = dataset.dropna(subset=[var])
