@@ -74,10 +74,10 @@ def ols_reg(df, x, y):
     alpha = 0.05
     n = len(df)
     if OLS_p < alpha:
-        print('n=%s, %s and %s - reject H0: p = %.3f, rho = %.3f'
+        print('n=%s, %s and %s - reject H0: p = %.3f, coef = %.3f'
               % (n, x, y, OLS_p, OLS_coeff))
     # elif OLS_p >= alpha:
-    #     print('%s and %s - fail to reject H0: p = %.3f, rho = %.3f'
+    #     print('%s and %s - fail to reject H0: p = %.3f, coef = %.3f'
     #           % (x, y, OLS_p, OLS_coeff))
     # else:
     #     print('Error with %s and %s' % (x, y))

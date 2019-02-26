@@ -12,7 +12,8 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def ols_reg(df, x, y):
-    """Perform linear regression using ordinary least squares (OLS) method"""
+    """Perform linear regression using ordinary least squares (OLS) method
+    x= dependent var, y= independent var(s)"""
 
     endog = np.asarray(df[x], dtype=float)
     exog = np.asarray(sm.add_constant(df[y]), dtype=float)
@@ -24,10 +25,10 @@ def ols_reg(df, x, y):
     alpha = 0.05
     n = len(df)
     if OLS_p < alpha:
-        print('n=%s, %s and %s - reject H0: p = %.3f, rho = %.3f'
+        print('n=%s, %s and %s - reject H0: p = %.3f, coef = %.3f'
               % (n, x, y, OLS_p, OLS_coeff))
     # elif OLS_p >= alpha:
-    #     print('%s and %s - fail to reject H0: p = %.3f, rho = %.3f'
+    #     print('%s and %s - fail to reject H0: p = %.3f, coef = %.3f'
     #           % (x, y, OLS_p, OLS_coeff))
     # else:
     #     print('Error with %s and %s' % (x, y))
@@ -48,11 +49,17 @@ def main():
         if item.split('_')[-1] == 'score':
             col_score.append(item)
 
+    # scatter plot per IMD var
+    for var in col_score:
+        dataset.plot(x='AbsDiff_age-mean', y=var, kind='scatter')
+        plt.show()
+
+    # regression per IMD var
     for var in col:
         dataset_var = dataset.dropna(subset=[var])
         ols_reg(dataset_var, 'Diff_age-m', var)
-        # dataset.plot(x='Diff_age-m', y=var, kind='scatter')
-        # plt.show()
+
+    ols_reg(dataset_var, 'Diff_age-m', var)
 
 
 if __name__ == "__main__":
