@@ -1,6 +1,6 @@
 """
-Script to explore distribution of age and gender in UK BIOBANK dataset from scanner1
-Aim is to plot a line graph of age vs number of subjects for male/female
+Script to explore distribution of gender and education with regards to age in UK BIOBANK dataset from scanner1
+Aim is to plot a line graph of age vs number of subjects for male/female + age vs number of subjects for education level
 
 References
 [1] - Zhao, Lu, et al. "Age-Related Differences in Brain Morphology and the Modifiers in Middle-Aged and Older Adults."
@@ -23,7 +23,7 @@ def plot_save_histogram(male_ages, female_ages):
     plt.hist(male_ages, color='blue', histtype='step', lw=2, bins=range(45, 75, 1), label='male')
     plt.hist(female_ages, color='red', histtype='step', lw=2, bins=range(45, 75, 1), label='female')
 
-    plt.title("Age distribution in UK BIOBANK", fontsize=17)
+    plt.title("Age distribution in UK BIOBANK by gender", fontsize=17)
     plt.axis('tight')
     plt.xlabel("Age at MRI scan [years]", fontsize=15)
     plt.ylabel("Number of subjects", fontsize=15)
@@ -33,6 +33,30 @@ def plot_save_histogram(male_ages, female_ages):
     plt.tick_params(labelsize=13)
 
     output_img_path = PROJECT_ROOT / 'outputs' / 'gender_age_dist_BIOBANK.png'
+    plt.savefig(str(output_img_path))
+    plt.show()
+
+
+def plot_save_histogram_education(edu_level_1, edu_level_2, edu_level_3, edu_level_4):
+    """Create histogram of age distribution by education level and saves in output folder as png"""
+    plt.style.use('seaborn-whitegrid')
+    plt.figure(figsize=(10, 7))
+
+    plt.hist(edu_level_1, color='blue', histtype='step', lw=2, bins=range(45, 75, 1), label='GCSE')
+    plt.hist(edu_level_2, color='red', histtype='step', lw=2, bins=range(45, 75, 1), label='A levels')
+    plt.hist(edu_level_3, color='yellow', histtype='step', lw=2, bins=range(45, 75, 1), label='Professional qualification')
+    plt.hist(edu_level_4, color='green', histtype='step', lw=2, bins=range(45, 75, 1), label='University')
+
+    plt.title("Age distribution in UK BIOBANK by education level", fontsize=17)
+    plt.axis('tight')
+    plt.xlabel("Age at MRI scan [years]", fontsize=15)
+    plt.ylabel("Number of subjects", fontsize=15)
+    plt.xticks(range(45, 75, 5))
+    plt.yticks(range(0, 401, 50))
+    plt.legend(loc='upper right', fontsize=13)
+    plt.tick_params(labelsize=13)
+
+    output_img_path = PROJECT_ROOT / 'outputs' / 'education_age_dist_BIOBANK.png'
     plt.savefig(str(output_img_path))
     plt.show()
 
