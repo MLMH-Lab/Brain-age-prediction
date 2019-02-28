@@ -83,6 +83,20 @@ def ols_reg(df, x, y):
     #     print('Error with %s and %s' % (x, y))
 
 
+def cohend(d1, d2):
+    """Function to calculate Cohen's d for independent samples"""
+
+    # calculate the size of samples
+    n1, n2 = len(d1), len(d2)
+    # calculate the variance of the samples
+    s1, s2 = np.var(d1, ddof=1), np.var(d2, ddof=1)
+    # calculate the pooled standard deviation
+    s = np.sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
+    # calculate the means of the samples
+    u1, u2 = np.mean(d1), np.mean(d2)
+    # calculate the effect size
+    return (u1 - u2) / s
+
 
 def main():
     # Load SVR age predictions
@@ -248,6 +262,14 @@ def main():
         if pval < alpha_bon:
             print("a_level vs gcse", pval)
         print(multipletests(plist, alpha=0.05, method='bonferroni'))
+
+    # Cohen's d test for education levels
+    cohend(dataset_uni, dataset_prof_qual)
+    cohend(dataset_uni, dataset_a_level)
+    cohend(dataset_uni, dataset_gcse)
+    cohend(dataset_prof_qual, dataset_a_level)
+    cohend(dataset_prof_qual, dataset_gcse)
+    cohend(dataset_a_level, dataset_gcse)
 
 
 if __name__ == "__main__":
