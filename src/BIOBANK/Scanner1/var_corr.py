@@ -95,7 +95,8 @@ def cohend(d1, d2):
     # calculate the means of the samples
     u1, u2 = np.mean(d1), np.mean(d2)
     # calculate the effect size
-    return (u1 - u2) / s
+    effect_size = (u1 - u2) / s
+    print(effect_size)
 
 
 def main():
