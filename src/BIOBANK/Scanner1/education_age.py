@@ -1,11 +1,6 @@
 """
-Script to explore distribution of gender and education with regards to age in UK BIOBANK dataset from scanner1
-Aim is to plot a line graph of age vs number of subjects for male/female + age vs number of subjects for education level
-
-References
-[1] - Zhao, Lu, et al. "Age-Related Differences in Brain Morphology and the Modifiers in Middle-Aged and Older Adults."
-Cerebral Cortex (2018).
-
+Script to explore distribution of education with regards to age in UK BIOBANK dataset from scanner1
+Aim is to plot a histogram of age vs number of subjects for education level
 """
 
 from pathlib import Path
