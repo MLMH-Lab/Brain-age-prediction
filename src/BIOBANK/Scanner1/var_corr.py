@@ -264,7 +264,7 @@ def main():
             print("a_level vs gcse", pval)
         print(multipletests(plist, alpha=0.05, method='bonferroni'))
 
-    # Cohen's d test for education levels
+    # Cohen's d test for education levels # outputs for all vars
     cohend(dataset_uni, dataset_prof_qual)
     cohend(dataset_uni, dataset_a_level)
     cohend(dataset_uni, dataset_gcse)
