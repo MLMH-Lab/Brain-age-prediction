@@ -59,8 +59,6 @@ def main():
         dataset_var = dataset.dropna(subset=[var])
         ols_reg(dataset_var, 'Diff_age-m', var)
 
-    ols_reg(dataset_var, 'Diff_age-m', var)
-
 
 if __name__ == "__main__":
     main()

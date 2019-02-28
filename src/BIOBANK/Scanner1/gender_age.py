@@ -75,6 +75,19 @@ def main():
 
     plot_save_histogram(male_ages, female_ages)
 
+    # Histogram of age distribution by education level
+    gcse_code = 1
+    alevels_code = 2
+    prof_qual_code = 3
+    uni_code = 4
+
+    gcse_ages = dataset_excl_nan.groupby('Education_highest').get_group(gcse_code).Age
+    alevels_ages = dataset_excl_nan.groupby('Education_highest').get_group(alevels_code).Age
+    prof_qual_ages = dataset_excl_nan.groupby('Education_highest').get_group(prof_qual_code).Age
+    uni_ages = dataset_excl_nan.groupby('Education_highest').get_group(uni_code).Age
+
+    plot_save_histogram_education(gcse_ages, alevels_ages, prof_qual_ages, uni_ages)
+
     # Script to look at demographics info based on Zhao et al 2018
     # Required are: number of subjects, gender split, age range
     print('Whole dataset')
