@@ -41,32 +41,9 @@ def plot_save_histogram_education(edu_level_1, edu_level_2, edu_level_3, edu_lev
 
 
 def main():
-    # Loading data
-    dataset_demographic = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv', sep='\t')
-    dataset_excl_nan = dataset_demographic.dropna()
-
-    # Access education information
-    dataset_edu = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'ukb22321.csv'),
-                              usecols=['eid',
-                                       '6138-2.0', '6138-2.1', '6138-2.2', '6138-2.3', '6138-2.4'])
-    dataset_edu.columns = ['ID',
-                           'Education_1', 'Education_2', 'Education_3', 'Education_4', 'Education_5']
-
-    # Create new education cols to simulate ordinal scale
-    education_dict = {1: 4, 2: 2, 3: 1, 4: 1, 5: 3, 6: 3}
-    dataset_dem['Education_1'] = dataset_dem['Education_1'].map(education_dict)
-    dataset_dem['Education_2'] = dataset_dem['Education_2'].map(education_dict)
-    dataset_dem['Education_3'] = dataset_dem['Education_3'].map(education_dict)
-    dataset_dem['Education_4'] = dataset_dem['Education_4'].map(education_dict)
-    dataset_dem['Education_5'] = dataset_dem['Education_5'].map(education_dict)
-
-    # Create col for maximum of education level per respondent
-    dataset_dem['Education_highest'] = dataset_dem[['Education_1', 'Education_2', 'Education_3',
-                                                    'Education_4', 'Education_5']].apply(max, axis=1)
-
-    # Merge age_pred and dataset_dem datasets
-    dataset = pd.merge(age_pred, dataset_dem, on='ID')
-
+    # Loading dataset with age and highest education level
+    dataset = pd.read_csv(PROJECT_ROOT / 'outputs' / 'age_predictions_demographics.csv')
+    dataset = dataset.dropna(subset=['Education_highest'])
 
     # Histogram of age distribution by education level
     gcse_code = 1
@@ -74,9 +51,9 @@ def main():
     prof_qual_code = 3
     uni_code = 4
 
-    gcse_ages = dataset_excl_nan.groupby('Education_highest').get_group(gcse_code).Age
-    alevels_ages = dataset_excl_nan.groupby('Education_highest').get_group(alevels_code).Age
-    prof_qual_ages = dataset_excl_nan.groupby('Education_highest').get_group(prof_qual_code).Age
-    uni_ages = dataset_excl_nan.groupby('Education_highest').get_group(uni_code).Age
+    gcse_ages = dataset.groupby('Education_highest').get_group(gcse_code).Age
+    alevels_ages = dataset.groupby('Education_highest').get_group(alevels_code).Age
+    prof_qual_ages = dataset.groupby('Education_highest').get_group(prof_qual_code).Age
+    uni_ages = dataset.groupby('Education_highest').get_group(uni_code).Age
 
     plot_save_histogram_education(gcse_ages, alevels_ages, prof_qual_ages, uni_ages)
