@@ -42,6 +42,7 @@ def main():
 
     # txt file to write scores to
     text_file = str(PROJECT_ROOT / 'outputs' / 'permutations' / subjects / 'perm_scores.txt')
+    f = open(text_file, 'w')
 
     # Create dataframe to hold actual and predicted ages + df for loop to add predictions to
     age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
@@ -125,10 +126,10 @@ def main():
                       % (i_perm, i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
 
                 # save scores in txt file - NOT YET WORKING
-                f = open(text_file, 'w')
                 f.write('Permutation %02d, Repetition %02d, Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
                       % (i_perm, i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
-                f.close()
+
+    f.close()
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
