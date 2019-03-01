@@ -88,7 +88,7 @@ def main():
                 search_space = [{'C': c_range}]
                 nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
-                gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3, n_jobs=6)
+                gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3)
                 gridsearch.fit(x_train, y_train)
                 svm_train_best = gridsearch.best_estimator_
                 best_params = gridsearch.best_params_
@@ -124,6 +124,7 @@ def main():
                 print('Permutation %02d, Repetition %02d, Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
                       % (i_perm, i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
 
+                # save scores in txt file - NOT YET WORKING
                 f = open(text_file, 'w')
                 f.write('Permutation %02d, Repetition %02d, Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
                       % (i_perm, i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
