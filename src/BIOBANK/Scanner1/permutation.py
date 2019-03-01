@@ -129,13 +129,14 @@ def main():
                 f.write('Permutation %02d, Repetition %02d, Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
                       % (i_perm, i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
 
-    f.close()
-
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
     cv_mae_mean = np.mean(cv_mae)
     cv_rmse_mean = np.mean(cv_rmse)
     print('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
+
+    f.write('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
+    f.close()
 
 
 if __name__ == "__main__":
