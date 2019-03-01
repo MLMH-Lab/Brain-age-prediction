@@ -47,9 +47,9 @@ def main():
     age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
     age_predictions['Index'] = age_predictions.index
 
-    n_repetitions = 10
-    n_folds = 10
-    n_nested_folds = 5
+    n_repetitions = 3
+    n_folds = 3
+    n_nested_folds = 3
     n_perm = 3 # increase to 10000 once the script is done
 
     # Random permutation loop
