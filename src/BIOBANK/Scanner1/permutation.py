@@ -6,6 +6,7 @@ import random
 
 import pandas as pd
 import numpy as np
+import argparse
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVR
@@ -16,7 +17,7 @@ from sklearn.model_selection import GridSearchCV
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
-def main():
+def main(index_min, index_max):
     # Define what subjects dataset should contain: total, male or female
     subjects = 'total'
 
