@@ -54,6 +54,9 @@ def main():
 
     # Random permutation loop
     for i_perm in range(n_perm):
+
+        np.random.seed = i_perm
+        random.seed = i_perm
         perm = np.random.permutation(age.size)
         age_perm = age[perm]
 
