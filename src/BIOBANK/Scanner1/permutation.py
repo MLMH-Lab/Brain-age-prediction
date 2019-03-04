@@ -17,13 +17,16 @@ from sklearn.model_selection import GridSearchCV
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
-def main(index_min, index_max):
+def main(args):
+
+
     # Define what subjects dataset should contain: total, male or female
     subjects = 'total'
 
-    # Load hdf5 file
+    # Load hdf5 file, use rows specified in arguments only
     file_name = 'freesurferData_' + subjects + '.h5'
     dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1' / file_name, key='table')
+    dataset = dataset[args.index_min:args.index_max]
 
     # Initialise random seed
     np.random.seed = 42
@@ -35,19 +38,6 @@ def main(index_min, index_max):
     tiv = tiv.reshape(len(dataset), 1)
     regions_norm = np.true_divide(regions, tiv)  # Independent vars X
     age = dataset[dataset.columns[2]].values  # Dependent var Y
-
-    # Create variable to hold CV variables
-    cv_r2_scores = []
-    cv_mae = []
-    cv_rmse = []
-
-    # txt file to write scores to
-    text_file = str(PROJECT_ROOT / 'outputs' / 'permutations' / subjects / 'perm_scores.txt')
-    f = open(text_file, 'w')
-
-    # Create dataframe to hold actual and predicted ages + df for loop to add predictions to
-    age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
-    age_predictions['Index'] = age_predictions.index
 
     n_repetitions = 3
     n_folds = 3
@@ -62,11 +52,20 @@ def main(index_min, index_max):
         perm = np.random.permutation(age.size)
         age_perm = age[perm]
 
+        # intitialise np arrays for saving coefficients and scores (one row per i_perm)
+        array_coef = np.array([])
+        array_scores = np.array([])
+
+        # Create variable to hold best model coefficients per permutation
+        cv_coef = []
+
+        # Create variable to hold CV scores per permutation
+        cv_r2_scores = []
+        cv_mae = []
+        cv_rmse = []
+
         # Loop to repeat 10-fold CV 10 times
         for i_repetition in range(n_repetitions):
-
-            # Create new empty column in age_predictions df to save age predictions of this repetition
-            age_predictions['Prediction repetition %02d' % i_repetition] = np.nan
 
             # Create 10-fold cross-validator, stratified by age
             skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
@@ -93,7 +92,8 @@ def main(index_min, index_max):
                 gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3)
                 gridsearch.fit(x_train, y_train)
                 svm_train_best = gridsearch.best_estimator_
-                best_params = gridsearch.best_params_
+                coef = svm_train_best.coef_
+                cv_coef = cv_coef.append(coef)
 
                 predictions = gridsearch.predict(x_test)
                 absolute_error = mean_absolute_error(y_test, predictions)
@@ -103,42 +103,32 @@ def main(index_min, index_max):
                 cv_mae.append(absolute_error)
                 cv_rmse.append(root_squared_error)
 
-                # Save scaler, model and model parameters
-                scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
-                model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
-                params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
-                dump(scaling, str(PROJECT_ROOT / 'outputs' / 'permutations' / subjects / scaler_file_name))
-                dump(best_params, str(PROJECT_ROOT / 'outputs' / 'permutations' / subjects / params_file_name))
-                dump(svm_train_best, str(PROJECT_ROOT / 'outputs' / 'permutations' / subjects / model_file_name))
+        # Create np array with mean coefficients - one row per permutation, one col per FS region
+        cv_coef_mean = np.mean(cv_coef)
+        if array_coef.size == 0:
+            array_coef = cv_coef_mean
+        else:
+            np.vstack(array_coef, cv_coef_mean)
 
-                # Create new df to hold test_index and corresponding age prediction
-                new_df = pd.DataFrame()
-                new_df['index'] = test_index
-                new_df['predictions'] = predictions
-
-                # Add predictions per test_index to age_predictions
-                for index, row in new_df.iterrows():
-                    col_index = i_repetition + 3
-                    sub_index = int(row['index'])
-                    age_predictions.iloc[[sub_index], [col_index]] = row['predictions']
-
-                # Print results of the CV fold
-                print('Permutation %02d, Repetition %02d, Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
-                      % (i_perm, i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
-
-                # save scores in txt file - NOT YET WORKING
-                f.write('Permutation %02d, Repetition %02d, Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
-                      % (i_perm, i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
-
-    # Variables for CV means across all repetitions
-    cv_r2_mean = np.mean(cv_r2_scores)
-    cv_mae_mean = np.mean(cv_mae)
-    cv_rmse_mean = np.mean(cv_rmse)
-    print('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
-
-    f.write('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
-    f.close()
+        # Variables for CV means across all repetitions - save one mean per permutation
+        cv_r2_mean = np.mean(cv_r2_scores)
+        cv_mae_mean = np.mean(cv_mae)
+        cv_rmse_mean = np.mean(cv_rmse)
+        print('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
+        mean_scores = np.concatenate((cv_r2_mean, cv_mae_mean, cv_rmse_mean))
+        if array_scores.size == 0:
+            array_scores = mean_scores
+        else:
+            np.vstack(array_scores, mean_scores)
 
 
 if __name__ == "__main__":
-    main()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("index_min", help="index of first subject to run",
+                        type=int)
+    parser.add_argument("index_max", help="index of last subject to run",
+                        type=int)
+    args = parser.parse_args()
+
+    main(args)
