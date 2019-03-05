@@ -91,7 +91,7 @@ def main(args):
 
                 svm_train_best = gridsearch.best_estimator_
                 coef = svm_train_best.coef_
-                cv_coef = cv_coef.append(coef)
+                cv_coef = np.append(cv_coef, coef)
 
                 predictions = gridsearch.predict(x_test)
 
@@ -99,9 +99,9 @@ def main(args):
                 root_squared_error = sqrt(mean_squared_error(y_test, predictions))
                 r2_score = svm_train_best.score(x_test, y_test)
 
-                cv_r2_scores.append(r2_score)
-                cv_mae.append(absolute_error)
-                cv_rmse.append(root_squared_error)
+                cv_r2_scores = np.append(cv_r2_scores, r2_score)
+                cv_mae = np.append(cv_mae, absolute_error)
+                cv_rmse = np.append(cv_rmse, root_squared_error)
 
         # Create np array with mean coefficients - one row per permutation, one col per FS region
         cv_coef_mean = np.mean(np.abs(np.array(cv_coef)), axis=0)
