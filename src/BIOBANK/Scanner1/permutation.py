@@ -53,7 +53,7 @@ def main(args):
         array_scores = np.array([])
 
         # Create variable to hold best model coefficients per permutation
-        cv_coef = np.array([])
+        cv_coef = np.zeros([1,100])
 
         # Create variable to hold CV scores per permutation
         cv_r2_scores = np.array([])
@@ -91,7 +91,7 @@ def main(args):
 
                 svm_train_best = gridsearch.best_estimator_
                 coef = svm_train_best.coef_
-                cv_coef = np.append(cv_coef, coef)
+                cv_coef = np.concatenate((cv_coef, coef), axis=0)
 
                 predictions = gridsearch.predict(x_test)
 
@@ -104,6 +104,7 @@ def main(args):
                 cv_rmse = np.append(cv_rmse, root_squared_error)
 
         # Create np array with mean coefficients - one row per permutation, one col per FS region
+        cv_coef = np.delete(cv_coef, 0, 0)
         cv_coef_mean = np.mean(np.abs(np.array(cv_coef)), axis=0)
         cv_coef_mean = cv_coef_mean[np.newaxis, :]
         array_coef = np.concatenate((array_coef, cv_coef_mean))
