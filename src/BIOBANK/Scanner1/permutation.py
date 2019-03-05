@@ -23,7 +23,6 @@ def main(args):
     # Load hdf5 file, use rows specified in arguments only
     file_name = 'freesurferData_' + subjects + '.h5'
     dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1' / file_name, key='table')
-    dataset = dataset[args.index_min:args.index_max]
 
     # Initialise random seed
     np.random.seed = 42
@@ -39,10 +38,9 @@ def main(args):
     n_repetitions = 3
     n_folds = 3
     n_nested_folds = 3
-    n_perm = 3 # increase to 10000 once the script is done
 
     # Random permutation loop
-    for i_perm in range(n_perm):
+    for i_perm in range(args.index_min, args.index_max):
 
         np.random.seed(i_perm)
         random.seed(i_perm)
