@@ -49,8 +49,8 @@ def main(args):
         age_permuted = np.random.permutation(age)
 
         # intitialise np arrays for saving coefficients and scores (one row per i_perm)
-        array_coef = np.array([])
-        array_scores = np.array([])
+        array_coef = np.array([[]])
+        array_scores = np.array([[]])
 
         # Create variable to hold best model coefficients per permutation
         cv_coef = np.zeros([1,100])
@@ -108,7 +108,7 @@ def main(args):
         cv_coef_abs = np.abs(cv_coef)
         cv_coef_mean = np.mean(cv_coef_abs, axis=0)
         cv_coef_mean = cv_coef_mean[np.newaxis, :]
-        array_coef = np.concatenate((array_coef, cv_coef_mean))
+        array_coef = np.hstack((array_coef, cv_coef_mean))
 
         # Variables for CV means across all repetitions - save one mean per permutation
         cv_r2_mean = np.mean(cv_r2_scores)
