@@ -40,7 +40,9 @@ def main(args):
     n_nested_folds = 2
 
     # intitialise np arrays for saving coefficients and scores (one row per i_perm)
-    array_coef = np.array([[]])
+    array_coef = np.zeros([1,100])
+    # TODO: what is a better way to create an empty array with the right shape without havign to delete the first row?
+    array_coef = np.delete(array_coef, 0, 0)
     array_scores = np.array([[]])
 
     # Random permutation loop
@@ -54,6 +56,7 @@ def main(args):
 
         # Create variable to hold best model coefficients per permutation
         cv_coef = np.zeros([1,100])
+        cv_coef = np.delete(cv_coef, 0, 0)
 
         # Create variable to hold CV scores per permutation
         cv_r2_scores = np.array([[]])
@@ -104,7 +107,6 @@ def main(args):
                 cv_rmse = np.append(cv_rmse, root_squared_error)
 
         # Create np array with mean coefficients - one row per permutation, one col per FS region
-        cv_coef = np.delete(cv_coef, 0, 0) # TODO: there's probably a more elegant way of initialising the array in the first place
         cv_coef_abs = np.abs(cv_coef)
         cv_coef_mean = np.mean(cv_coef_abs, axis=0)
         cv_coef_mean = cv_coef_mean[np.newaxis, :]
@@ -118,6 +120,8 @@ def main(args):
         mean_scores = np.concatenate((cv_r2_mean, cv_mae_mean, cv_rmse_mean))
         mean_scores = mean_scores[np.newaxis, :]
         array_scores = np.concatenate((array_scores, mean_scores))
+
+    # TODO: save array_coef and array_scores as np files
 
 
 if __name__ == "__main__":
