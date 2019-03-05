@@ -11,15 +11,12 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def main(args):
-
-
     # Define what subjects dataset should contain: total, male or female
     subjects = 'total'
 
@@ -47,10 +44,10 @@ def main(args):
     # Random permutation loop
     for i_perm in range(n_perm):
 
-        np.random.seed = i_perm
-        random.seed = i_perm
-        perm = np.random.permutation(age.size)
-        age_perm = age[perm]
+        np.random.seed(i_perm)
+        random.seed(i_perm)
+
+        age_permuted = np.random.permutation(age)
 
         # intitialise np arrays for saving coefficients and scores (one row per i_perm)
         array_coef = np.array([])
@@ -74,7 +71,7 @@ def main(args):
                 print('Running repetition %02d, fold %02d' % (i_repetition, i_fold))
 
                 x_train, x_test = regions_norm[train_index], regions_norm[test_index]
-                y_train, y_test = age_perm[train_index], age_perm[test_index]
+                y_train, y_test = age_permuted[train_index], age_permuted[test_index]
 
                 # Scaling in range [-1, 1]
                 scaling = MinMaxScaler(feature_range=(-1, 1))
@@ -90,21 +87,26 @@ def main(args):
                 nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
                 gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3)
+
                 gridsearch.fit(x_train, y_train)
+
                 svm_train_best = gridsearch.best_estimator_
                 coef = svm_train_best.coef_
                 cv_coef = cv_coef.append(coef)
 
                 predictions = gridsearch.predict(x_test)
+
                 absolute_error = mean_absolute_error(y_test, predictions)
                 root_squared_error = sqrt(mean_squared_error(y_test, predictions))
                 r2_score = svm_train_best.score(x_test, y_test)
+
                 cv_r2_scores.append(r2_score)
                 cv_mae.append(absolute_error)
                 cv_rmse.append(root_squared_error)
 
         # Create np array with mean coefficients - one row per permutation, one col per FS region
-        cv_coef_mean = np.mean(cv_coef)
+        cv_coef_mean = np.mean(np.abs(np.arrray(cv_coef)), axis=0)
+
         if array_coef.size == 0:
             array_coef = cv_coef_mean
         else:
