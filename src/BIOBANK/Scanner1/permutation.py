@@ -105,7 +105,7 @@ def main(args):
                 cv_rmse.append(root_squared_error)
 
         # Create np array with mean coefficients - one row per permutation, one col per FS region
-        cv_coef_mean = np.mean(np.abs(np.arrray(cv_coef)), axis=0)
+        cv_coef_mean = np.mean(np.abs(np.array(cv_coef)), axis=0)
 
         if array_coef.size == 0:
             array_coef = cv_coef_mean
