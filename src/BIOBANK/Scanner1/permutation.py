@@ -52,12 +52,12 @@ def main(args):
         array_scores = np.array([])
 
         # Create variable to hold best model coefficients per permutation
-        cv_coef = []
+        cv_coef = np.array([])
 
         # Create variable to hold CV scores per permutation
-        cv_r2_scores = []
-        cv_mae = []
-        cv_rmse = []
+        cv_r2_scores = np.array([])
+        cv_mae = np.array([])
+        cv_rmse = np.array([])
 
         # Loop to repeat 10-fold CV 10 times
         for i_repetition in range(n_repetitions):
