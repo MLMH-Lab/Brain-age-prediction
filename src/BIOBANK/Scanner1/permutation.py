@@ -25,8 +25,8 @@ def main(args):
     dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1' / file_name, key='table')
 
     # Initialise random seed
-    np.random.seed = 42
-    random.seed = 42
+    np.random.seed(42)
+    random.seed(42)
 
     # Normalise regional volumes by total intracranial volume (tiv)
     regions = dataset[dataset.columns[5:-2]].values
