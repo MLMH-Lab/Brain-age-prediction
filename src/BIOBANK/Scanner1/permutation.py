@@ -39,6 +39,10 @@ def main(args):
     n_folds = 2
     n_nested_folds = 2
 
+    # intitialise np arrays for saving coefficients and scores (one row per i_perm)
+    array_coef = np.array([[]])
+    array_scores = np.array([[]])
+
     # Random permutation loop
     # for i_perm in range(args.index_min, args.index_max):
     for i_perm in range(2):
@@ -48,17 +52,13 @@ def main(args):
 
         age_permuted = np.random.permutation(age)
 
-        # intitialise np arrays for saving coefficients and scores (one row per i_perm)
-        array_coef = np.array([[]])
-        array_scores = np.array([[]])
-
         # Create variable to hold best model coefficients per permutation
         cv_coef = np.zeros([1,100])
 
         # Create variable to hold CV scores per permutation
-        cv_r2_scores = np.array([])
-        cv_mae = np.array([])
-        cv_rmse = np.array([])
+        cv_r2_scores = np.array([[]])
+        cv_mae = np.array([[]])
+        cv_rmse = np.array([[]])
 
         # Loop to repeat 10-fold CV 10 times
         for i_repetition in range(n_repetitions):
@@ -108,7 +108,7 @@ def main(args):
         cv_coef_abs = np.abs(cv_coef)
         cv_coef_mean = np.mean(cv_coef_abs, axis=0)
         cv_coef_mean = cv_coef_mean[np.newaxis, :]
-        array_coef = np.hstack((array_coef, cv_coef_mean))
+        array_coef = np.concatenate((array_coef, cv_coef_mean), axis=0)
 
         # Variables for CV means across all repetitions - save one mean per permutation
         cv_r2_mean = np.mean(cv_r2_scores)
