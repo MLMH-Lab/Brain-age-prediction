@@ -35,12 +35,13 @@ def main(args):
     regions_norm = np.true_divide(regions, tiv)  # Independent vars X
     age = dataset[dataset.columns[2]].values  # Dependent var Y
 
-    n_repetitions = 3
-    n_folds = 3
-    n_nested_folds = 3
+    n_repetitions = 2
+    n_folds = 2
+    n_nested_folds = 2
 
     # Random permutation loop
-    for i_perm in range(args.index_min, args.index_max):
+    # for i_perm in range(args.index_min, args.index_max):
+    for i_perm in range(2):
 
         np.random.seed(i_perm)
         random.seed(i_perm)
