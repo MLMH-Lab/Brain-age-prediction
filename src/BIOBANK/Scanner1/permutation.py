@@ -106,11 +106,8 @@ def main(args):
 
         # Create np array with mean coefficients - one row per permutation, one col per FS region
         cv_coef_mean = np.mean(np.abs(np.array(cv_coef)), axis=0)
-
-        if array_coef.size == 0:
-            array_coef = cv_coef_mean
-        else:
-            np.vstack(array_coef, cv_coef_mean)
+        cv_coef_mean = cv_coef_mean[np.newaxis, :]
+        array_coef = np.concatenate((array_coef, cv_coef_mean))
 
         # Variables for CV means across all repetitions - save one mean per permutation
         cv_r2_mean = np.mean(cv_r2_scores)
@@ -118,10 +115,8 @@ def main(args):
         cv_rmse_mean = np.mean(cv_rmse)
         print('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
         mean_scores = np.concatenate((cv_r2_mean, cv_mae_mean, cv_rmse_mean))
-        if array_scores.size == 0:
-            array_scores = mean_scores
-        else:
-            np.vstack(array_scores, mean_scores)
+        mean_scores = mean_scores[np.newaxis, :]
+        array_scores = np.concatenate((array_scores, mean_scores))
 
 
 if __name__ == "__main__":
