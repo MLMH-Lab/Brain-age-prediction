@@ -39,7 +39,7 @@ def main(args):
     n_folds = 2
     n_nested_folds = 2
 
-    # intitialise np arrays for saving coefficients and scores (one row per i_perm)
+    # initialise np arrays for saving coefficients and scores (one row per i_perm)
     array_coef = np.zeros([1,100])
     # TODO: what is a better way to create an empty array with the right shape without havign to delete the first row?
     array_coef = np.delete(array_coef, 0, 0)
@@ -113,16 +113,21 @@ def main(args):
         array_coef = np.concatenate((array_coef, cv_coef_mean), axis=0)
 
         # Variables for CV means across all repetitions - save one mean per permutation
+        # should the below use absolute values?
         cv_r2_mean = np.mean(cv_r2_scores)
         cv_mae_mean = np.mean(cv_mae)
         cv_rmse_mean = np.mean(cv_rmse)
         print('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
-        mean_scores = np.concatenate((cv_r2_mean, cv_mae_mean, cv_rmse_mean))
+        # the 3 lines below are not working right
+        mean_scores = np.array([cv_r2_mean, cv_mae_mean, cv_rmse_mean])
         mean_scores = mean_scores[np.newaxis, :]
-        array_scores = np.concatenate((array_scores, mean_scores))
+        array_scores = np.concatenate((array_scores, mean_scores), axis=1)
 
-    # TODO: save array_coef and array_scores as np files
-
+    # Save arrays with permutation coefs and scores as np files - NOT CHECKED YET
+    filepath_coef = '/home/lea/PycharmProjects/predicted_brain_age/outputs/permutations/total/perm_coef.npy'
+    filepath_scores = '/home/lea/PycharmProjects/predicted_brain_age/outputs/permutations/total/perm_scores.npy'
+    np.save(filepath_coef, array_coef)
+    np.save(filepath_scores, array_scores)
 
 if __name__ == "__main__":
 
