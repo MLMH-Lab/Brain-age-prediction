@@ -35,9 +35,9 @@ def main(args):
     regions_norm = np.true_divide(regions, tiv)  # Independent vars X
     age = dataset[dataset.columns[2]].values  # Dependent var Y
 
-    n_repetitions = 10
-    n_folds = 10
-    n_nested_folds = 5
+    n_repetitions = 2
+    n_folds = 2
+    n_nested_folds = 2
 
     # initialise np arrays for saving coefficients and scores (one row per i_perm)
     n_perm = args.index_max - args.index_min
@@ -124,10 +124,10 @@ def main(args):
         array_scores[i_perm] = mean_scores
 
     # Save arrays with permutation coefs and scores as np files
-    filepath_coef = '/home/lea/PycharmProjects/predicted_brain_age/outputs/permutations/total/perm_coef.npy'
-    filepath_scores = '/home/lea/PycharmProjects/predicted_brain_age/outputs/permutations/total/perm_scores.npy'
-    np.save(filepath_coef, array_coef)
-    np.save(filepath_scores, array_scores)
+    filepath_coef = PROJECT_ROOT / 'outputs' / 'permutations' / subjects / 'perm_coef.npy'
+    filepath_scores = PROJECT_ROOT / 'outputs' / 'permutations' / subjects / 'perm_scores.npy'
+    np.save(str(filepath_coef), array_coef)
+    np.save(str(filepath_scores), array_scores)
 
 
 if __name__ == "__main__":
