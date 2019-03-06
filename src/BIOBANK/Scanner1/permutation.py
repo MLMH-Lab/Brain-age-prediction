@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import argparse
 from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import RobustScaler
 from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import GridSearchCV
@@ -76,8 +76,8 @@ def main(args):
                 x_train, x_test = regions_norm[train_index], regions_norm[test_index]
                 y_train, y_test = age_permuted[train_index], age_permuted[test_index]
 
-                # Scaling in range [-1, 1]
-                scaling = MinMaxScaler(feature_range=(-1, 1))
+                # Scaling using interquartile
+                scaling = RobustScaler()
                 x_train = scaling.fit_transform(x_train)
                 x_test = scaling.transform(x_test)
 
