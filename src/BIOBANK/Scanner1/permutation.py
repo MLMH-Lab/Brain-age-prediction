@@ -40,7 +40,7 @@ def main(args):
     n_nested_folds = 2
 
     # initialise np arrays for saving coefficients and scores (one row per i_perm)
-    n_perm = args.index_max - args.index_min
+    n_perm = args.index_max - args.index_min + 1
     array_coef = np.zeros([n_perm, 100])
     array_scores = np.zeros([n_perm, 3])
 
@@ -94,7 +94,6 @@ def main(args):
 
                 svm_train_best = gridsearch.best_estimator_
                 coef = svm_train_best.coef_
-                print(index)
                 cv_coef[index] = coef
 
                 predictions = gridsearch.predict(x_test)
