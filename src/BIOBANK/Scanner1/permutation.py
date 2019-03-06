@@ -120,7 +120,7 @@ def main(args):
         cv_rmse_mean = np.mean(cv_rmse)
         print('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
         mean_scores = np.array([cv_r2_mean, cv_mae_mean, cv_rmse_mean])
-        array_scores[i_perm] = mean_scores
+        array_scores[i_perm - 1] = mean_scores
 
     # Save arrays with permutation coefs and scores as np files
     filepath_coef = PROJECT_ROOT / 'outputs' / 'permutations' / subjects / 'perm_coef.npy'
