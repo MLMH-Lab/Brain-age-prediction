@@ -12,13 +12,15 @@ import pandas as pd
 import numpy as np
 import scipy.stats as stats
 
+PROJECT_ROOT = '/home/lea/PycharmProjects/predicted_brain_age'
+
 
 def save_fre_table(input_df, col_name):
     """Export frequency table of column as csv"""
 
     fre_table = input_df[col_name].value_counts()
     file_name = col_name + '_fre_table.csv'
-    fre_table.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/' + file_name)
+    fre_table.to_csv(PROJECT_ROOT + '/outputs/' + file_name)
 
 
 def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
@@ -79,6 +81,7 @@ def get_ids_to_drop(input_df, age, gender, n_to_drop):
 
     return id_list
 
+
 def balancing_sample(demographics_data_df, dict_sig, gender_observed):
     """Fix gender balance."""
 
@@ -110,8 +113,7 @@ def main():
     np.random.seed = 123
 
     # Load freesurfer data
-    dataset_fs = pd.read_csv(
-        '/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/freesurferData.csv')
+    dataset_fs = pd.read_csv(PROJECT_ROOT + '/data/BIOBANK/Scanner1/freesurferData.csv')
 
     # Create a new 'eid' col in FS dataset to match supplementary demographic data
     dataset_fs['Participant_ID'] = dataset_fs['Image_ID']. \
@@ -121,9 +123,8 @@ def main():
     dataset_fs['ID'] = pd.to_numeric(dataset_fs['ID'])
 
     # Loading supplementary demographic data
-    dataset_dem = pd.read_csv(
-        '/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/ukb22321.csv',
-        usecols=['eid', '31-0.0', '21003-2.0', '21000-0.0'])
+    dataset_dem = pd.read_csv(PROJECT_ROOT + '/data/BIOBANK/Scanner1/ukb22321.csv',
+                              usecols=['eid', '31-0.0', '21003-2.0', '21000-0.0'])
     dataset_dem.columns = ['ID', 'Gender', 'Ethnicity', 'Age']
     dataset_dem_excl_nan = dataset_dem.dropna()
 
@@ -170,7 +171,7 @@ def main():
     homogeneous_ids = pd.DataFrame(reduced_dataset['Image_ID'])
 
     # Output final dataset
-    homogeneous_ids.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/homogeneous_dataset.csv', index=False)
+    homogeneous_ids.to_csv(PROJECT_ROOT + '/outputs/homogeneous_dataset.csv', index=False)
 
 
 if __name__ == "__main__":

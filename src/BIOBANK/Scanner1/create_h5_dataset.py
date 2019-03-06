@@ -8,17 +8,17 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 def main():
     # Load freesurfer data as csv
-    dataset_freesurfer = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
+    dataset_freesurfer = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
 
     # Load IDs for subjects from balanced dataset
-    ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'outputs/homogeneous_dataset.csv')
+    ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'outputs' / 'homogeneous_dataset.csv')
 
     # Make freesurfer dataset homogeneous
     dataset_balanced = pd.merge(dataset_freesurfer, ids_homogeneous, on='Image_ID')
 
     # Loading demographic data to access age per participant
-    dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'ukb22321.csv'),
-        usecols=['eid', '31-0.0', '21003-2.0'])
+    dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'ukb22321.csv'),
+                              usecols=['eid', '31-0.0', '21003-2.0'])
     dataset_dem.columns = ['ID', 'Gender', 'Age']
     dataset_dem = dataset_dem.dropna()
 
@@ -40,9 +40,12 @@ def main():
     dataset_female_csv = dataset_csv.groupby('Gender').get_group(female_code)
 
     # Create datasets as hdf5
-    dataset_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData_total.h5', key='table', mode='w')
-    dataset_male_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData_male.h5', key='table', mode='w')
-    dataset_female_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData_female.h5', key='table', mode='w')
+    dataset_csv.to_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData_total.h5', key='table',
+                       mode='w')
+    dataset_male_csv.to_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData_male.h5', key='table',
+                            mode='w')
+    dataset_female_csv.to_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData_female.h5', key='table',
+                              mode='w')
 
 
 if __name__ == "__main__":

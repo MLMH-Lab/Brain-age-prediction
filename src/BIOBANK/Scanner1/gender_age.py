@@ -12,7 +12,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
-PROJECT_ROOT = Path('../../../') # Todo: Improve before publish code
+PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def plot_save_histogram(male_ages, female_ages):

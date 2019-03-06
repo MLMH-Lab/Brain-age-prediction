@@ -34,9 +34,13 @@ def main():
     # Define what subjects dataset should contain: total, male or female
     subjects = 'male'
 
+    # Create output subdirectory if it does not exist.
+    output_dir = PROJECT_ROOT / 'outputs' / subjects
+    output_dir.mkdir(exist_ok=True)
+
     # Load hdf5 file
     file_name = 'freesurferData_' + subjects + '.h5'
-    dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1' / file_name, key='table')
+    dataset = pd.read_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name, key='table')
 
     # Initialise random seed
     np.random.seed = 42
@@ -59,8 +63,8 @@ def main():
     age_predictions['Index'] = age_predictions.index
 
     n_repetitions = 10
-    n_folds = 10
-    n_nested_folds = 5
+    n_folds = 2
+    n_nested_folds = 2
 
     # Loop to repeat 10-fold CV 10 times
     for i_repetition in range(n_repetitions):
@@ -90,13 +94,18 @@ def main():
             nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
             gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3, n_jobs=6)
-            svm_train_best = gridsearch.fit(x_train, y_train)
+
+            gridsearch.fit(x_train, y_train)
+
+            best_svm = gridsearch.best_estimator_
             best_params = gridsearch.best_params_
 
-            predictions = gridsearch.predict(x_test)
+            predictions = best_svm.predict(x_test)
+
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = svm_train_best.score(x_test, y_test)
+            r2_score = best_svm.score(x_test, y_test)
+
             cv_r2_scores.append(r2_score)
             cv_mae.append(absolute_error)
             cv_rmse.append(root_squared_error)
@@ -105,9 +114,9 @@ def main():
             scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
             model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
             params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
-            dump(scaling, str(PROJECT_ROOT / 'outputs' / subjects / scaler_file_name))
-            dump(best_params, str(PROJECT_ROOT / 'outputs' / subjects / params_file_name))
-            dump(svm_train_best, str(PROJECT_ROOT / 'outputs' /  subjects / model_file_name))
+            dump(scaling, str(output_dir / scaler_file_name))
+            dump(best_params, str(output_dir / params_file_name))
+            dump(best_svm, str(output_dir / model_file_name))
 
             # Create new df to hold test_index and corresponding age prediction
             new_df = pd.DataFrame()
@@ -126,7 +135,7 @@ def main():
 
     # Save predictions
     age_predictions = age_predictions.drop('Index', axis=1)
-    age_predictions.to_csv(str(PROJECT_ROOT / 'outputs' / subjects / 'age_predictions.csv'), index=False)
+    age_predictions.to_csv(str(output_dir / 'age_predictions.csv'), index=False)
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
