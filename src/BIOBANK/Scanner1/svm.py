@@ -34,6 +34,10 @@ def main():
     # Define what subjects dataset should contain: total, male or female
     subjects = 'male'
 
+    # Create output subdirectory if it does not exist.
+    output_dir = PROJECT_ROOT / 'outputs' / subjects
+    output_dir.mkdir(exist_ok=True)
+
     # Load hdf5 file
     file_name = 'freesurferData_' + subjects + '.h5'
     dataset = pd.read_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name, key='table')
@@ -96,7 +100,7 @@ def main():
             best_svm = gridsearch.best_estimator_
             best_params = gridsearch.best_params_
 
-            predictions = best_params.predict(x_test)
+            predictions = best_svm.predict(x_test)
 
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
@@ -110,9 +114,9 @@ def main():
             scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
             model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
             params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
-            dump(scaling, str(PROJECT_ROOT / 'outputs' / subjects / scaler_file_name))
-            dump(best_params, str(PROJECT_ROOT / 'outputs' / subjects / params_file_name))
-            dump(best_svm, str(PROJECT_ROOT / 'outputs' / subjects / model_file_name))
+            dump(scaling, str(output_dir / scaler_file_name))
+            dump(best_params, str(output_dir / params_file_name))
+            dump(best_svm, str(output_dir / model_file_name))
 
             # Create new df to hold test_index and corresponding age prediction
             new_df = pd.DataFrame()
@@ -131,7 +135,7 @@ def main():
 
     # Save predictions
     age_predictions = age_predictions.drop('Index', axis=1)
-    age_predictions.to_csv(str(PROJECT_ROOT / 'outputs' / subjects / 'age_predictions.csv'), index=False)
+    age_predictions.to_csv(str(output_dir / 'age_predictions.csv'), index=False)
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
