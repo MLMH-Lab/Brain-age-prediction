@@ -71,7 +71,7 @@ def main(args):
             skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
 
             for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
-                print('Running repetition %02d, fold %02d' % (i_repetition, i_fold))
+                print('Running permutation %02d, repetition %02d, fold %02d' % (i_perm, i_repetition, i_fold))
 
                 x_train, x_test = regions_norm[train_index], regions_norm[test_index]
                 y_train, y_test = age_permuted[train_index], age_permuted[test_index]
