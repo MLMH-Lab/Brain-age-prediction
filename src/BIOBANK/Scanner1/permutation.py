@@ -35,9 +35,9 @@ def main(args):
     regions_norm = np.true_divide(regions, tiv)  # Independent vars X
     age = dataset[dataset.columns[2]].values  # Dependent var Y
 
-    n_repetitions = 2
-    n_folds = 2
-    n_nested_folds = 2
+    n_repetitions = 10
+    n_folds = 10
+    n_nested_folds = 5
 
     # initialise np arrays for saving coefficients and scores (one row per i_perm)
     n_perm = args.index_max - args.index_min + 1
