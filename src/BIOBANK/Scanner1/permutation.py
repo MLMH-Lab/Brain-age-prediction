@@ -20,7 +20,7 @@ def main(args):
     # Define what subjects dataset should contain: total, male or female
     subjects = 'total'
 
-    # Load hdf5 file, use rows specified in arguments only
+    # Load hdf5 file
     file_name = 'freesurferData_' + subjects + '.h5'
     dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1' / file_name, key='table')
 
@@ -35,9 +35,9 @@ def main(args):
     regions_norm = np.true_divide(regions, tiv)  # Independent vars X
     age = dataset[dataset.columns[2]].values  # Dependent var Y
 
-    n_repetitions = 2
-    n_folds = 2
-    n_nested_folds = 2
+    n_repetitions = 10
+    n_folds = 10
+    n_nested_folds = 5
 
     # initialise np arrays for saving coefficients and scores (one row per i_perm)
     n_perm = args.index_max - args.index_min
@@ -64,7 +64,7 @@ def main(args):
         cv_mae = np.array([[]])
         cv_rmse = np.array([[]])
 
-        # Loop to repeat 10-fold CV 10 times
+        # Loop to repeat n_folds-fold CV n_repetitions times
         for i_repetition in range(n_repetitions):
 
             # Create 10-fold cross-validator, stratified by age
@@ -114,7 +114,7 @@ def main(args):
         # cv_coef_mean = cv_coef_mean[np.newaxis, :]
         array_coef[i_perm - 1] = cv_coef_mean
 
-        # Variables for CV means across all repetitions - save one mean per permutation
+        # Variables for CV means across all repetitions - one row per permutation
         cv_r2_mean = np.mean(cv_r2_scores)
         cv_mae_mean = np.mean(cv_mae)
         cv_rmse_mean = np.mean(cv_rmse)
