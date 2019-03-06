@@ -38,6 +38,25 @@ def main():
     model_array_coef_abs = np.abs(model_array_coef)
     model_coef_mean = np.mean(model_array_coef_abs, axis=0)
 
+    # Get proportion of permuted coefficients higher than actual coefficients
+
+    # Create array of permuted coef subtracted by actual coef
+    diff_array = np.zeros([n_models, 100])
+
+    ind = 0
+    for row in model_array_coef:
+        new_row = row - model_coef_mean
+        diff_array[ind] = new_row
+        ind += 1
+
+    # # per feature, count how often negative + divide by number of permutations
+    # n_perm = len(perm_coef)
+    #
+    # ind2 = 0
+    # for f in diff_array:
+    #     if diff_array[ind2] < 0:
+    #         count ...
+
 
 
 if __name__ == "__main__":
