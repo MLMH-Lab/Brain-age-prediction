@@ -35,19 +35,17 @@ def main(args):
     regions_norm = np.true_divide(regions, tiv)  # Independent vars X
     age = dataset[dataset.columns[2]].values  # Dependent var Y
 
-    n_repetitions = 2
-    n_folds = 2
-    n_nested_folds = 2
+    n_repetitions = 10
+    n_folds = 10
+    n_nested_folds = 5
 
     # initialise np arrays for saving coefficients and scores (one row per i_perm)
-    # n_perm = args.index_max - args.index_min
-    n_perm = 2 # for testing
+    n_perm = args.index_max - args.index_min
     array_coef = np.zeros([n_perm, 100])
     array_scores = np.zeros([n_perm, 3])
 
     # Random permutation loop
-    # for i_perm in range(args.index_min, args.index_max):
-    for i_perm in range(2):
+    for i_perm in range(args.index_min, args.index_max):
 
         np.random.seed(i_perm)
         random.seed(i_perm)
@@ -86,8 +84,7 @@ def main(args):
                 # Systematic search for best hyperparameters
                 svm = SVR(kernel='linear')
 
-                c_range = [0.001, 0.01, 0.1] # shortened for testing
-                # c_range = [0.001, 0.01, 0.1, 1, 10, 100]
+                c_range = [0.001, 0.01, 0.1, 1, 10, 100]
                 search_space = [{'C': c_range}]
                 nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
