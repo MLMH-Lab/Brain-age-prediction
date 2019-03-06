@@ -40,7 +40,7 @@ def main(args):
     n_nested_folds = 5
 
     # initialise np arrays for saving coefficients and scores (one row per i_perm)
-    n_perm = args.index_max - args.index_min + 1
+    n_perm = args.index_max - args.index_min
     array_coef = np.zeros([n_perm, 100])
     array_scores = np.zeros([n_perm, 3])
 
@@ -111,7 +111,7 @@ def main(args):
         # Create np array with mean coefficients - one row per permutation, one col per feature
         cv_coef_abs = np.abs(cv_coef)
         cv_coef_mean = np.mean(cv_coef_abs, axis=0)
-        cv_coef_mean = cv_coef_mean[np.newaxis, :]
+        # cv_coef_mean = cv_coef_mean[np.newaxis, :]
         array_coef[i_perm] = cv_coef_mean
 
         # Variables for CV means across all repetitions - save one mean per permutation
