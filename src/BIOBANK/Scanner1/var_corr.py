@@ -100,8 +100,14 @@ def cohend(d1, d2):
 
 
 def main():
+    # Define what subjects dataset should contain: total, male or female
+    subjects = 'male'
+
+    # Create output subdirectory if it does not exist.
+    output_dir = PROJECT_ROOT / 'outputs' / subjects
+
     # Load SVR age predictions
-    age_pred = pd.read_csv(PROJECT_ROOT / 'outputs/age_predictions.csv')
+    age_pred = pd.read_csv(output_dir / 'age_predictions.csv')
 
     # Add new columns as mean, median, std of age predictions + difference between actual age and mean, median
     pred_repetition = 10
@@ -170,7 +176,7 @@ def main():
             ols_reg(dataset_y, x, y)
 
     # output csv for polr in R
-    dataset.to_csv(str(PROJECT_ROOT / 'outputs/age_predictions_demographics.csv'),
+    dataset.to_csv(str(PROJECT_ROOT / 'outputs'/'age_predictions_demographics.csv'),
                    columns=['Participant_ID', 'Age', 'East_coordinate', 'North_coordinate',
                             'Mean_predicted_age', 'Median_predicted_age',
                             'Std_predicted_age',
@@ -183,7 +189,7 @@ def main():
                    index=False)
 
     # output csv with actual age, mean predicted age, median, std
-    dataset.to_csv(str(PROJECT_ROOT / 'outputs/age_predictions_stats.csv'),
+    dataset.to_csv(str(PROJECT_ROOT / 'outputs'/'age_predictions_stats.csv'),
                    columns=['Participant_ID', 'Age',
                             'AbsDiff_age-mean', 'AbsDiff_age-median',
                             'Mean_predicted_age', 'Median_predicted_age', 'Std_predicted_age',
@@ -222,9 +228,10 @@ def main():
     df_edu = pd.concat([dataset_uni['AbsDiff_age-mean'], dataset_prof_qual['AbsDiff_age-mean'],
                         dataset_a_level['AbsDiff_age-mean'], dataset_gcse['AbsDiff_age-mean']],
                         axis=1, keys=['Uni', 'Prof_qual', 'A_levels', 'GCSE'])
+
     plot = pd.DataFrame.boxplot(df_edu)
 
-    output_img_path = '/home/lea/PycharmProjects/predicted_brain_age/outputs/edu_abs_agemean_BIOBANK.png'
+    output_img_path = PROJECT_ROOT/'outputs'/'edu_abs_agemean_BIOBANK.png'
     plt.savefig(str(output_img_path))
 
     # Holm-Bonferroni method for multiple comparisons
