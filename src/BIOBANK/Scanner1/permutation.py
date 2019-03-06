@@ -41,7 +41,6 @@ def main(args):
 
     # initialise np arrays for saving coefficients and scores (one row per i_perm)
     array_coef = np.zeros([1,100])
-    # TODO: what is a better way to create an empty array with the right shape without havign to delete the first row?
     array_coef = np.delete(array_coef, 0, 0)
     array_scores = np.array([[]])
 
@@ -54,9 +53,12 @@ def main(args):
 
         age_permuted = np.random.permutation(age)
 
-        # Create variable to hold best model coefficients per permutation
-        cv_coef = np.zeros([1,100])
-        cv_coef = np.delete(cv_coef, 0, 0)
+        # Create variables to hold best model coefficients and scores per permutation
+        cv_row = n_repetitions * n_folds
+        cv_coef = np.zeros([cv_row, 100])
+
+        # Set index for adding coef arrays per repetition per fold to cv_coef
+        index = 0
 
         # Create variable to hold CV scores per permutation
         cv_r2_scores = np.array([[]])
@@ -94,7 +96,8 @@ def main(args):
 
                 svm_train_best = gridsearch.best_estimator_
                 coef = svm_train_best.coef_
-                cv_coef = np.concatenate((cv_coef, coef), axis=0)
+                print(index)
+                cv_coef[index] = coef
 
                 predictions = gridsearch.predict(x_test)
 
@@ -105,6 +108,8 @@ def main(args):
                 cv_r2_scores = np.append(cv_r2_scores, r2_score)
                 cv_mae = np.append(cv_mae, absolute_error)
                 cv_rmse = np.append(cv_rmse, root_squared_error)
+
+                index += 1
 
         # Create np array with mean coefficients - one row per permutation, one col per FS region
         cv_coef_abs = np.abs(cv_coef)
