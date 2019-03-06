@@ -40,9 +40,10 @@ def main(args):
     n_nested_folds = 2
 
     # initialise np arrays for saving coefficients and scores (one row per i_perm)
-    array_coef = np.zeros([1,100])
-    array_coef = np.delete(array_coef, 0, 0)
-    array_scores = np.array([[]])
+    # n_perm = args.index_max - args.index_min
+    n_perm = 2 # for testing
+    array_coef = np.zeros([n_perm, 100])
+    array_scores = np.zeros([n_perm, 3])
 
     # Random permutation loop
     # for i_perm in range(args.index_min, args.index_max):
@@ -111,28 +112,26 @@ def main(args):
 
                 index += 1
 
-        # Create np array with mean coefficients - one row per permutation, one col per FS region
+        # Create np array with mean coefficients - one row per permutation, one col per feature
         cv_coef_abs = np.abs(cv_coef)
         cv_coef_mean = np.mean(cv_coef_abs, axis=0)
         cv_coef_mean = cv_coef_mean[np.newaxis, :]
-        array_coef = np.concatenate((array_coef, cv_coef_mean), axis=0)
+        array_coef[i_perm] = cv_coef_mean
 
         # Variables for CV means across all repetitions - save one mean per permutation
-        # should the below use absolute values?
         cv_r2_mean = np.mean(cv_r2_scores)
         cv_mae_mean = np.mean(cv_mae)
         cv_rmse_mean = np.mean(cv_rmse)
         print('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
-        # the 3 lines below are not working right
         mean_scores = np.array([cv_r2_mean, cv_mae_mean, cv_rmse_mean])
-        mean_scores = mean_scores[np.newaxis, :]
-        array_scores = np.concatenate((array_scores, mean_scores), axis=1)
+        array_scores[i_perm] = mean_scores
 
-    # Save arrays with permutation coefs and scores as np files - NOT CHECKED YET
+    # Save arrays with permutation coefs and scores as np files
     filepath_coef = '/home/lea/PycharmProjects/predicted_brain_age/outputs/permutations/total/perm_coef.npy'
     filepath_scores = '/home/lea/PycharmProjects/predicted_brain_age/outputs/permutations/total/perm_scores.npy'
     np.save(filepath_coef, array_coef)
     np.save(filepath_scores, array_scores)
+
 
 if __name__ == "__main__":
 
