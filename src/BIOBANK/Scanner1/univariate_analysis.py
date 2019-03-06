@@ -4,17 +4,17 @@ Step 1: normalise each brain region
 Step 2: create df with normalised brain region (dep var) and age of participant (indep var) (+ quadratic and cubic age)
 Step 3: output coefficient per subject
 
-TODO: Refactor code removing global variables
-
 References
 [1] - Zhao, Lu, et al. "Age-Related Differences in Brain Morphology and the Modifiers in Middle-Aged and Older Adults."
 Cerebral Cortex (2018).
 """
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
 import statsmodels.api as sm
+
+PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def normalise_region_df(normalised_df, df, region_name):
@@ -45,12 +45,10 @@ def ols_reg(df, region_name, reg_output):
 def main():
 
     # Loading Freesurfer data
-    dataset_fs_all_regions = pd.read_csv('/home/lea/PycharmProjects/'
-                                         'predicted_brain_age/data/BIOBANK/Scanner1/freesurferData.csv')
+    dataset_fs_all_regions = pd.read_csv(str(PROJECT_ROOT / 'data'/ 'BIOBANK'/'Scanner1'/'freesurferData.csv'))
 
     # Loading demographic data
-    dataset_demographic = pd.read_csv('/home/lea/PycharmProjects/'
-                                      'predicted_brain_age/data/BIOBANK/Scanner1/participants.tsv', sep='\t')
+    dataset_demographic = pd.read_csv(str(PROJECT_ROOT / 'data'/ 'BIOBANK'/'Scanner1'/'participants.tsv'), sep='\t')
     dataset_demographic_excl_nan = dataset_demographic.dropna()
 
     # Create a new col in FS dataset to contain Participant_ID
@@ -90,7 +88,7 @@ def main():
         ols_reg(normalised_df, region, reg_output)
 
     # Output to csv
-    reg_output.to_csv('/home/lea/PycharmProjects/predicted_brain_age/outputs/OLS_result.csv', index=False)
+    reg_output.to_csv(str(PROJECT_ROOT / 'outputs'/ 'OLS_result.csv'), index=False)
 
 
 if __name__ == "__main__":
