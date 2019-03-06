@@ -21,7 +21,7 @@ import random
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import RobustScaler
 from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
@@ -47,7 +47,7 @@ def main():
     random.seed = 42
 
     # Normalise regional volumes by total intracranial volume (tiv)
-    regions = dataset[dataset.columns[5:-2]].values
+    regions = dataset[dataset.columns[5:-1]].values
     tiv = dataset.EstimatedTotalIntraCranialVol.values
     tiv = tiv.reshape(len(dataset), 1)
     regions_norm = np.true_divide(regions, tiv)  # Independent vars X
@@ -81,8 +81,8 @@ def main():
             x_train, x_test = regions_norm[train_index], regions_norm[test_index]
             y_train, y_test = age[train_index], age[test_index]
 
-            # Scaling in range [-1, 1]
-            scaling = MinMaxScaler(feature_range=(-1, 1))
+            # Scaling using interquartile
+            scaling = RobustScaler()
             x_train = scaling.fit_transform(x_train)
             x_test = scaling.transform(x_test)
 
