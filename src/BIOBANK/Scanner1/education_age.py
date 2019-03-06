@@ -18,7 +18,8 @@ def plot_save_histogram_education(edu_level_1, edu_level_2, edu_level_3, edu_lev
 
     plt.hist(edu_level_1, color='blue', histtype='step', lw=2, bins=range(45, 75, 1), label='GCSE')
     plt.hist(edu_level_2, color='red', histtype='step', lw=2, bins=range(45, 75, 1), label='A levels')
-    plt.hist(edu_level_3, color='yellow', histtype='step', lw=2, bins=range(45, 75, 1), label='Professional qualification')
+    plt.hist(edu_level_3, color='yellow', histtype='step', lw=2, bins=range(45, 75, 1),
+             label='Professional qualification')
     plt.hist(edu_level_4, color='green', histtype='step', lw=2, bins=range(45, 75, 1), label='University')
 
     plt.title("Age distribution in UK BIOBANK by education level", fontsize=17)
@@ -52,3 +53,7 @@ def main():
     uni_ages = dataset.groupby('Education_highest').get_group(uni_code).Age
 
     plot_save_histogram_education(gcse_ages, alevels_ages, prof_qual_ages, uni_ages)
+
+
+if __name__ == "__main__":
+    main()
