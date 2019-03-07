@@ -3,6 +3,7 @@ from math import sqrt
 from pathlib import Path
 import random
 import time
+import warnings
 
 import pandas as pd
 import numpy as np
@@ -12,11 +13,15 @@ from sklearn.preprocessing import RobustScaler
 from sklearn.svm import LinearSVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import GridSearchCV
+from sklearn.exceptions import ConvergenceWarning
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def main(args):
+    # Ignore warnings
+    warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
+
     # Define what subjects dataset should contain: total, male or female
     subjects = 'total'
 
