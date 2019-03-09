@@ -20,8 +20,7 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 def main(args):
     # Ignore warnings
-    warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
-
+    warnings.filterwarnings('ignore')
     # Define what subjects dataset should contain: total, male or female
     subjects = 'total'
 
