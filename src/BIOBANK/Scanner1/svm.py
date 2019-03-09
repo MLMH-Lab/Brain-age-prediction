@@ -28,7 +28,7 @@ from sklearn.metrics import make_scorer, mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
 
-PROJECT_ROOT = Path('/media/kcl_1/HDD/PycharmProjects/predicted_brain_age')
+PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def main():
