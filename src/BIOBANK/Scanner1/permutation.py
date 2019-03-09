@@ -91,7 +91,7 @@ def main(args):
                 nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
                 gridsearch = GridSearchCV(svm, param_grid=search_space, scoring=make_scorer(mean_absolute_error),
-                                          refit=True, cv=nested_skf, verbose=3, n_jobs=1)
+                                          refit=True, cv=nested_skf, verbose=1, n_jobs=1)
 
                 gridsearch.fit(x_train, y_train)
 
