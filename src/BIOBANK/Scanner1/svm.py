@@ -24,10 +24,9 @@ import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
 from sklearn.svm import LinearSVR
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import make_scorer, mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import make_scorer
 
 PROJECT_ROOT = Path('/media/kcl_1/HDD/PycharmProjects/predicted_brain_age')
 

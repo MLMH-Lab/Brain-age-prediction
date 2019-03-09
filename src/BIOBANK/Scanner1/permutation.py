@@ -11,9 +11,8 @@ import argparse
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
 from sklearn.svm import LinearSVR
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import make_scorer, mean_absolute_error, mean_squared_error
 from sklearn.model_selection import GridSearchCV
-from sklearn.exceptions import ConvergenceWarning
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
@@ -85,26 +84,26 @@ def main(args):
                 x_test = scaling.transform(x_test)
 
                 # Systematic search for best hyperparameters
-                svm = LinearSVR()
+                svm = LinearSVR(loss='epsilon_insensitive')
 
-                c_range = [2 ** -7, 2 ** -6, 2 ** -5, 2 ** -4, 2 ** -3, 2 ** -2, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 2,
-                           2 ** 3, 2 ** 4, 2 ** 5, 2 ** 7]
+                c_range = [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]
                 search_space = [{'C': c_range}]
                 nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
-                gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=0)
+                gridsearch = GridSearchCV(svm, param_grid=search_space, scoring=make_scorer(mean_absolute_error),
+                                          refit=True, cv=nested_skf, verbose=3, n_jobs=1)
 
                 gridsearch.fit(x_train, y_train)
 
-                svm_train_best = gridsearch.best_estimator_
+                best_svm = gridsearch.best_estimator_
 
-                cv_coef[i_iteration] = svm_train_best.coef_
+                cv_coef[i_iteration] = best_svm.coef_
 
-                predictions = svm_train_best.predict(x_test)
+                predictions = best_svm.predict(x_test)
 
                 absolute_error = mean_absolute_error(y_test, predictions)
                 root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-                r2_score = svm_train_best.score(x_test, y_test)
+                r2_score = best_svm.score(x_test, y_test)
 
                 cv_r2_scores = np.append(cv_r2_scores, r2_score)
                 cv_mae = np.append(cv_mae, absolute_error)
@@ -114,7 +113,7 @@ def main(args):
 
                 fold_time = time.time() - start
                 print('Finished permutation %02d, repetition %02d, fold %02d, ETA %f' % (
-                i_perm, i_repetition, i_fold, fold_time * (n_repetitions * n_folds - i_iteration)))
+                    i_perm, i_repetition, i_fold, fold_time * (n_repetitions * n_folds - i_iteration)))
 
         # Create np array with mean coefficients - one row per permutation, one col per feature
         cv_coef_abs = np.abs(cv_coef)
