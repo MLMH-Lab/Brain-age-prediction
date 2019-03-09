@@ -11,7 +11,7 @@ import argparse
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
 from sklearn.svm import LinearSVR
-from sklearn.metrics import make_scorer, mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import GridSearchCV
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
@@ -90,7 +90,7 @@ def main(args):
                 search_space = [{'C': c_range}]
                 nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
-                gridsearch = GridSearchCV(svm, param_grid=search_space, scoring=make_scorer(mean_absolute_error),
+                gridsearch = GridSearchCV(svm, param_grid=search_space, scoring='neg_mean_absolute_error',
                                           refit=True, cv=nested_skf, verbose=1, n_jobs=1)
 
                 gridsearch.fit(x_train, y_train)
