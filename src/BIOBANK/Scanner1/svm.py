@@ -17,12 +17,14 @@ Step 13: Print CV results"""
 from math import sqrt
 from pathlib import Path
 import random
+import warnings
+
 
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
-from sklearn.svm import SVR
+from sklearn.svm import LinearSVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
@@ -31,8 +33,9 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def main():
+    warnings.filterwarnings('ignore')
     # Define what subjects dataset should contain: total, male or female
-    subjects = 'male'
+    subjects = 'total'
 
     # Create output subdirectory if it does not exist.
     output_dir = PROJECT_ROOT / 'outputs' / subjects
@@ -63,8 +66,8 @@ def main():
     age_predictions['Index'] = age_predictions.index
 
     n_repetitions = 10
-    n_folds = 2
-    n_nested_folds = 2
+    n_folds = 10
+    n_nested_folds = 5
 
     # Loop to repeat 10-fold CV 10 times
     for i_repetition in range(n_repetitions):
@@ -87,18 +90,20 @@ def main():
             x_test = scaling.transform(x_test)
 
             # Systematic search for best hyperparameters
-            svm = SVR(kernel='linear')
+            svm = LinearSVR()
 
-            c_range = [0.001, 0.01, 0.1, 1, 10, 100]
+            c_range = [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]
             search_space = [{'C': c_range}]
             nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
-            gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3, n_jobs=6)
+            gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3)
 
             gridsearch.fit(x_train, y_train)
 
             best_svm = gridsearch.best_estimator_
-            best_params = gridsearch.best_params_
+
+            params_results = {'means':gridsearch.cv_results_['mean_test_score'],
+                              'params': gridsearch.cv_results_['params']}
 
             predictions = best_svm.predict(x_test)
 
@@ -115,7 +120,7 @@ def main():
             model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
             params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
             dump(scaling, str(output_dir / scaler_file_name))
-            dump(best_params, str(output_dir / params_file_name))
+            dump(params_results, str(output_dir / params_file_name))
             dump(best_svm, str(output_dir / model_file_name))
 
             # Create new df to hold test_index and corresponding age prediction
