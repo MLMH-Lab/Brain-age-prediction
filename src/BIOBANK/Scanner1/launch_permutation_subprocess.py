@@ -18,7 +18,7 @@ processes = []
 for slices_i in slices_indexes:
     command = str(venv_python) + ' ' + str(code_perm) + ' %d %d'%(slices_i[0], slices_i[1])
     print(command)
-    p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    p = subprocess.Popen(command, shell=True, stdout=subprocess.DEVNULL)
     processes.append(p)
 
 for p in processes:
