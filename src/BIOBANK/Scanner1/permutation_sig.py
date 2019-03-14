@@ -3,9 +3,7 @@
 from pathlib import Path
 import numpy as np
 import pandas as pd
-
 import os
-import glob
 
 from sklearn.externals import joblib
 
@@ -22,8 +20,8 @@ def main():
 
     # Define number of subjects, number of permutations run, number of features, number of output scores
     n_subjects = 12190
-    n_perm = 1000 # for testing, should be n_subjects
-    n_features = 101
+    n_perm = n_subjects
+    n_features = 101 # freesurfer regions
     n_scores = 3 # r2, MAE, RMSE
 
     # Directory where SVM models are saved
