@@ -15,17 +15,49 @@ def main():
     # Define what subjects were modeled: total, male or female
     subjects = 'test'
 
+    # Define number of repetitions and folds used in SVM models
+    n_repetitions = 10
+    n_folds = 10
+    n_models = n_repetitions * n_folds
+
     # Define number of subjects, number of permutations run, number of features, number of output scores
     n_subjects = 12190
-    n_perm = 1000 # for testing
+    n_perm = 1000 # for testing, should be n_subjects
     n_features = 101
     n_scores = 3 # r2, MAE, RMSE
+
+    # Directory where SVM models are saved
+    model_output_dir = Path(str(PROJECT_ROOT / 'outputs' / subjects))
 
     # Directory where permutation scores and coefficients are saved (2 files per permutation)
     perm_output_dir = Path(str(PROJECT_ROOT / 'outputs' / 'permutations' / subjects))
 
     # Significance level alpha with Bonferroni correction
     bonferroni_alpha = 0.05 / n_perm
+
+
+    # ASSESSING SIGNIFICANCE OF MODEL SCORES (R2, MAE, RMSE)
+
+    # Create a list of all model score files
+    list_model_score_files = []
+    for rep in range(n_repetitions):
+        for fold in range(n_folds):
+            list_model_score_files.append(str(rep) + '_' + str(fold) + '_svm_scores.npy')
+
+    # Load SVM model scores into array model_scores
+    model_scores = np.zeros([n_models, n_scores])
+
+    index = 0
+    for score_file in list_model_score_files:
+        if os.path.isfile(str(model_output_dir / score_file)):
+            model_score = np.load(model_output_dir / score_file)
+            model_scores[index] = model_score
+        else:
+            print("File not found: %s" % score_file)
+        index += 1
+
+    model_scores_abs = np.abs(model_scores)
+    model_scores_mean = np.mean(model_scores_abs, axis=0)
 
     # Load permutation scores into array perm_scores
     perm_scores = np.zeros([n_perm, n_scores])
@@ -37,41 +69,25 @@ def main():
         else:
             print('File not found: perm_scores_%04d.npy' % i)
 
-    # Load permutation coefficients into array perm_coef
-    perm_coef = np.zeros([n_perm, n_features]) # why does it have to be +1?
+    # Calculate proportion of permutation scores higher than model scores out of all permutations (p value)
+    scores_pval = []
+    for i_score in perm_scores:
+        pval = (np.sum(perm_scores[:, i_score] >= model_scores_mean[i_score]) + 1.0) / (n_perm + 1)
+        scores_pval.append(pval)
 
-    for i in range(n_perm):
-        coef_file_name = 'perm_coef_%04d.npy' % i
-        if os.path.isfile(str(perm_output_dir / coef_file_name)):
-            perm_coef[i] = np.load(perm_output_dir / coef_file_name)
-        else:
-            print('File not found: perm_coef_%04d.npy' % i)
+    scores_pval = (np.sum(perm_scores >= model_scores_mean) + 1.0) / (n_perm + 1)
 
-    # Define number of repetitions and folds used in SVM models
-    n_repetitions = 10
-    n_folds = 10
-    n_models = n_repetitions * n_folds
+    # Assess significance with Bonferroni correction
+    scores_sig = scores_pval < bonferroni_alpha
 
-    # Directory where models are saved
-    model_output_dir = Path(str(PROJECT_ROOT / 'outputs' / subjects))
 
-    # Create a list of all SVM models that were run
+    # ASSESSING SIGNIFICANCE OF FEATURE COEFFICIENTS
+
+    # Create a list of all SVM models that were run to be able to access coefficients
     list_model_files = []
     for rep in range(n_repetitions):
         for fold in range(n_folds):
             list_model_files.append(str(rep) + '_' + str(fold) + '_svm.joblib')
-
-    # Load SVM model scores into array model_scores
-    model_scores = np.zeros([n_models, n_scores])
-
-    # TODO: svm files don't contain score output, so below not yet working
-
-    model_scores_abs = np.abs(model_scores)
-    model_scores_mean = np.mean(model_scores_abs, axis=0)
-    scores_pval = (np.sum(perm_scores >= model_scores_mean) + 1.0) / (n_perm + 1)
-
-    # Assess significance with Bonferroni correction
-    scores_sig_array = scores_pval < bonferroni_alpha
 
     # Load SVM model coef into array model_coef
     model_coef = np.zeros([n_models, n_features])
@@ -89,13 +105,24 @@ def main():
     model_coef_abs = np.abs(model_coef)
     model_coef_mean = np.mean(model_coef_abs, axis=0)
 
-    # Calculate p-value per feature #TODO: is not calculating pvalue per feature but per permutation
+    # Load permutation coefficients into array perm_coef
+    perm_coef = np.zeros([n_perm, n_features])
+
+    for i in range(n_perm):
+        coef_file_name = 'perm_coef_%04d.npy' % i
+        if os.path.isfile(str(perm_output_dir / coef_file_name)):
+            perm_coef[i] = np.load(perm_output_dir / coef_file_name)
+        else:
+            print('File not found: perm_coef_%04d.npy' % i)
+
+    # Calculate p-value per feature and store in coef_p_list
     coef_p_list = []
 
-    for p in perm_coef: # should be referring to sth else
-        print(p >= model_coef_mean)
-        pval = (np.sum(p >= model_coef_mean) + 1.0) / (n_perm + 1)
+    ind = 0
+    for i_feat in perm_coef.T:
+        pval = (np.sum(i_feat >= model_coef_mean[ind]) + 1.0) / (n_perm + 1)
         coef_p_list.append(pval)
+        ind += 1
 
     # Assess significance with Bonferroni correction
     coef_p_array = np.array(coef_p_list)
@@ -109,12 +136,10 @@ def main():
     feature_names = np.array(dataset.columns[5:-1])
 
     coef_csv = pd.DataFrame([model_coef_mean, coef_p_array, coef_sig_array], columns=feature_names)
+    # coef_csv = coef_csv.sort_values(by=['pval']) #df would have to be transposed
     coef_csv.to_csv(model_output_dir + 'coef_sig.csv')
 
     # p_list_df = pd.DataFrame(p_list, columns=['Feature', 'N_permcoef_higher', 'p_val'])
-
-    # TODO: save as two separate csv files, include the feature names, model coef, sig level (bonferroni correction), sort by pval
-
 
 
 if __name__ == "__main__":
