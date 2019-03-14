@@ -21,7 +21,7 @@ def main(args):
     # Ignore warnings
     warnings.filterwarnings('ignore')
     # Define what subjects dataset should contain: total, male or female
-    subjects = 'total'
+    subjects = 'test'
 
     # Create output subdirectory if it does not exist.
     perm_dir = PROJECT_ROOT / 'outputs' / 'permutations'
@@ -30,6 +30,7 @@ def main(args):
     perm_subject_dir.mkdir(exist_ok=True)
 
     # Load hdf5 file
+    subjects = 'total'
     file_name = 'freesurferData_' + subjects + '.h5'
     dataset = pd.read_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name, key='table')
 
@@ -40,11 +41,14 @@ def main(args):
     regions_norm = np.true_divide(regions, tiv)  # Independent vars X
     age = dataset[dataset.columns[2]].values  # Dependent var Y
 
+    regions_norm = regions_norm[:60,:]
+    age = age[:60]
+
     n_features = regions.shape[1]
 
-    n_repetitions = 10
-    n_folds = 10
-    n_nested_folds = 5
+    n_repetitions = 1
+    n_folds = 3
+    n_nested_folds = 3
 
     # Random permutation loop
     for i_perm in range(args.index_min, args.index_max):
@@ -86,7 +90,7 @@ def main(args):
                 # Systematic search for best hyperparameters
                 svm = LinearSVR(loss='epsilon_insensitive')
 
-                c_range = [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]
+                c_range = [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1]
                 search_space = [{'C': c_range}]
                 nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 

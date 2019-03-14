@@ -197,9 +197,11 @@ def main():
     dataset.to_csv(str(PROJECT_ROOT / 'outputs'/'age_predictions_demographics.csv'),
                    columns=['Participant_ID', 'Age', 'East_coordinate', 'North_coordinate',
                             'Mean_predicted_age', 'Median_predicted_age',
+                            'Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
+                            'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
+                            'BrainAGE_predmean', 'BrainAGE_predmean',
+                            'BrainAGER_predmean', 'BrainAGER_predmedian',
                             'Std_predicted_age',
-                            'AbsDiff_age-mean', 'AbsDiff_age-median',
-                            'Diff_age-mean', 'Diff_age-median',
                             'Education_highest',
                             'Air_pollution',
                             'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
@@ -209,9 +211,12 @@ def main():
     # output csv with actual age, mean predicted age, median, std
     dataset.to_csv(str(PROJECT_ROOT / 'outputs'/'age_predictions_stats.csv'),
                    columns=['Participant_ID', 'Age',
-                            'AbsDiff_age-mean', 'AbsDiff_age-median',
-                            'Mean_predicted_age', 'Median_predicted_age', 'Std_predicted_age',
-                            'Diff_age-mean', 'Diff_age-median'],
+                            'Mean_predicted_age', 'Median_predicted_age',
+                            'Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
+                            'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
+                            'BrainAGE_predmean', 'BrainAGE_predmean',
+                            'BrainAGER_predmean', 'BrainAGER_predmedian',
+                            'Std_predicted_age'],
                    index=False)
 
     # Scatterplots
