@@ -117,8 +117,8 @@ def main():
     age_pred['Std_predicted_age'] = age_pred.iloc[:, 2:last_col].std(axis=1)
     age_pred['BrainAGE_predmean'] = age_pred['Mean_predicted_age'] - age_pred['Age']
     age_pred['BrainAGE_predmedian'] = age_pred['Median_predicted_age'] - age_pred['Age']
-    age_pred['AbsDiff_BrainAGE_predmean'] = abs(age_pred['BrainAGE_predmean'])
-    age_pred['AbsDiff_BrainAGE_predmedian'] = abs(age_pred['BrainAGE_predmedian'])
+    age_pred['Abs_BrainAGE_predmean'] = abs(age_pred['BrainAGE_predmean'])
+    age_pred['Abs_BrainAGE_predmedian'] = abs(age_pred['BrainAGE_predmedian'])
 
     # Add new columns for BrainAGER (Brain Age Gap Estimate Residualized)
     brainager_model_predmean = sm.OLS(age_pred['Age'], age_pred['Mean_predicted_age'])
@@ -131,8 +131,8 @@ def main():
     brainager_residuals_predmedian = brainager_results_predmedian.resid
     age_pred['BrainAGER_predmedian'] = brainager_residuals_predmedian
 
-    age_pred['AbsDiff_BrainAGER_predmean'] = abs(age_pred['BrainAGER_predmean'])
-    age_pred['AbsDiff_BrainAGER_predmedian'] = abs(age_pred['BrainAGER_predmedian'])
+    age_pred['Abs_BrainAGER_predmean'] = abs(age_pred['BrainAGER_predmean'])
+    age_pred['Abs_BrainAGER_predmedian'] = abs(age_pred['BrainAGER_predmedian'])
 
     # Extract participant ID
     age_pred['ID'] = age_pred['Participant_ID'].str.split('-', expand=True)[1]
@@ -169,9 +169,11 @@ def main():
     dataset = pd.merge(age_pred, dataset_dem, on='ID')
 
     # Correlation variables
-    x_list = ['AbsDiff_BrainAGE_predmean', 'AbsDiff_BrainAGE_predmedian',
+    x_list = ['Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
+              'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
               'BrainAGE_predmean', 'BrainAGE_predmean',
-              'BrainAGER_predmean', 'BrainAGER_predmedian', 'Std_predicted_age']
+              'BrainAGER_predmean', 'BrainAGER_predmedian',
+              'Std_predicted_age']
     y_list = ['Education_highest',
               'Air_pollution',
               'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
