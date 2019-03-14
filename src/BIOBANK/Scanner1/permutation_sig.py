@@ -79,10 +79,13 @@ def main():
         ind += 1
 
     # Assess significance with Bonferroni correction
-    scores_sig = scores_pval < bonferroni_alpha
+    scores_pval_array = np.array(scores_pval)
+    scores_sig = scores_pval_array < bonferroni_alpha
 
     # Save as csv
-    scores_csv = pd.DataFrame([model_scores_mean, scores_pval, scores_sig])
+    scores_csv = pd.DataFrame([model_scores_mean, scores_pval, scores_sig], columns=['R2', 'MAE', 'RMSE'],
+                              index=['score', 'p', 'significance'])
+    scores_csv.to_csv(str(model_output_dir / 'scores_sig.csv'))
 
 
     # ASSESSING SIGNIFICANCE OF FEATURE COEFFICIENTS
@@ -132,19 +135,17 @@ def main():
     coef_p_array = np.array(coef_p_list)
     coef_sig_array = coef_p_array < bonferroni_alpha
 
-
-    # EXPORT SIGNIFICANCE RESULTS
-
     # Load FS data to access feature names
     fs_file_name = 'freesurferData_' + subjects + '.h5'
     dataset = pd.read_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / fs_file_name, key='table')
     feature_names = np.array(dataset.columns[5:-1])
 
-    coef_csv = pd.DataFrame([model_coef_mean, coef_p_array, coef_sig_array], columns=feature_names)
-    # coef_csv = coef_csv.sort_values(by=['pval']) #df would have to be transposed
-    coef_csv.to_csv(model_output_dir + 'coef_sig.csv')
-
-    # p_list_df = pd.DataFrame(p_list, columns=['Feature', 'N_permcoef_higher', 'p_val'])
+    # Save as csv
+    coef_csv = pd.DataFrame([model_coef_mean, coef_p_array, coef_sig_array], columns=feature_names,
+                            index=['coefficient', 'pval', 'significance'])
+    coef_csv = coef_csv.transpose()
+    coef_csv = coef_csv.sort_values(by=['pval'])
+    coef_csv.to_csv(model_output_dir / 'coef_sig.csv')
 
 
 if __name__ == "__main__":
