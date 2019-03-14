@@ -71,14 +71,18 @@ def main():
 
     # Calculate proportion of permutation scores higher than model scores out of all permutations (p value)
     scores_pval = []
-    for i_score in perm_scores:
-        pval = (np.sum(perm_scores[:, i_score] >= model_scores_mean[i_score]) + 1.0) / (n_perm + 1)
-        scores_pval.append(pval)
 
-    scores_pval = (np.sum(perm_scores >= model_scores_mean) + 1.0) / (n_perm + 1)
+    ind = 0
+    for i_score in perm_scores.T:
+        pval = (np.sum(i_score >= model_scores_mean[ind]) + 1.0) / (n_perm + 1)
+        scores_pval.append(pval)
+        ind += 1
 
     # Assess significance with Bonferroni correction
     scores_sig = scores_pval < bonferroni_alpha
+
+    # Save as csv
+    scores_csv = pd.DataFrame([model_scores_mean, scores_pval, scores_sig])
 
 
     # ASSESSING SIGNIFICANCE OF FEATURE COEFFICIENTS
@@ -128,7 +132,8 @@ def main():
     coef_p_array = np.array(coef_p_list)
     coef_sig_array = coef_p_array < bonferroni_alpha
 
-    # TODO: save scores and their pval as csv file
+
+    # EXPORT SIGNIFICANCE RESULTS
 
     # Load FS data to access feature names
     fs_file_name = 'freesurferData_' + subjects + '.h5'
