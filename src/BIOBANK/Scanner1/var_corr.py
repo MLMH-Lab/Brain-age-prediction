@@ -131,6 +131,9 @@ def main():
     brainager_residuals_predmedian = brainager_results_predmedian.resid
     age_pred['BrainAGER_predmedian'] = brainager_residuals_predmedian
 
+    age_pred['AbsDiff_BrainAGER_predmean'] = abs(age_pred['BrainAGER_predmean'])
+    age_pred['AbsDiff_BrainAGER_predmedian'] = abs(age_pred['BrainAGER_predmedian'])
+
     # Extract participant ID
     age_pred['ID'] = age_pred['Participant_ID'].str.split('-', expand=True)[1]
     age_pred['ID'] = pd.to_numeric(age_pred['ID'])
@@ -166,7 +169,9 @@ def main():
     dataset = pd.merge(age_pred, dataset_dem, on='ID')
 
     # Correlation variables
-    x_list = ['AbsDiff_age-mean', 'AbsDiff_age-median', 'Diff_age-mean', 'Diff_age-median', 'Std_predicted_age']
+    x_list = ['AbsDiff_BrainAGE_predmean', 'AbsDiff_BrainAGE_predmedian',
+              'BrainAGE_predmean', 'BrainAGE_predmean',
+              'BrainAGER_predmean', 'BrainAGER_predmedian', 'Std_predicted_age']
     y_list = ['Education_highest',
               'Air_pollution',
               'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
