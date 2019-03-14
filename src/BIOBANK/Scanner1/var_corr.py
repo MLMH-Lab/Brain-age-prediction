@@ -220,13 +220,13 @@ def main():
                    index=False)
 
     # Scatterplots
-    air_pollution_plot = dataset.plot(x='Diff_age-mean', y='Air_pollution', kind='scatter')
-    traffic_intensity_plot = dataset.plot(x='Diff_age-mean', y='Traffic_intensity', kind='scatter')
-    inv_dist_plot = dataset.plot(x='Diff_age-mean', y='Inverse_dist_road', kind='scatter')
-    greenspace_plot = dataset.plot(x='Diff_age-mean', y='Greenspace_perc', kind='scatter')
-    garden_plot = dataset.plot(x='Diff_age-mean', y='Garden_perc', kind='scatter')
-    water_plot = dataset.plot(x='Diff_age-mean', y='Water_perc', kind='scatter')
-    nat_env_plot = dataset.plot(x='Diff_age-mean', y='Natural_env_perc', kind='scatter')
+    air_pollution_plot = dataset.plot(x='BrainAGER_predmean', y='Air_pollution', kind='scatter')
+    traffic_intensity_plot = dataset.plot(x='BrainAGER_predmean', y='Traffic_intensity', kind='scatter')
+    inv_dist_plot = dataset.plot(x='BrainAGER_predmean', y='Inverse_dist_road', kind='scatter')
+    greenspace_plot = dataset.plot(x='BrainAGER_predmean', y='Greenspace_perc', kind='scatter')
+    garden_plot = dataset.plot(x='BrainAGER_predmean', y='Garden_perc', kind='scatter')
+    water_plot = dataset.plot(x='BrainAGER_predmean', y='Water_perc', kind='scatter')
+    nat_env_plot = dataset.plot(x='BrainAGER_predmean', y='Natural_env_perc', kind='scatter')
 
     # Exploratory analysis of education
     education_fre = pd.crosstab(index=dataset["Education_highest"], columns="count")
@@ -248,8 +248,8 @@ def main():
         print(x, f_stat, pvalue)
 
     # Boxplot for education
-    df_edu = pd.concat([dataset_uni['AbsDiff_age-mean'], dataset_prof_qual['AbsDiff_age-mean'],
-                        dataset_a_level['AbsDiff_age-mean'], dataset_gcse['AbsDiff_age-mean']],
+    df_edu = pd.concat([dataset_uni['Abs_BrainAGER_predmean'], dataset_prof_qual['Abs_BrainAGER_predmean'],
+                        dataset_a_level['Abs_BrainAGER_predmean'], dataset_gcse['Abs_BrainAGER_predmean']],
                         axis=1, keys=['Uni', 'Prof_qual', 'A_levels', 'GCSE'])
 
     plot = pd.DataFrame.boxplot(df_edu)
@@ -259,7 +259,7 @@ def main():
 
     # Holm-Bonferroni method for multiple comparisons
     dataset = dataset.dropna(subset=['Education_highest'])
-    mod = MultiComparison(dataset['AbsDiff_age-mean'], dataset['Education_highest'])
+    mod = MultiComparison(dataset['Abs_BrainAGER_predmean'], dataset['Education_highest'])
     print(mod.tukeyhsd())
 
     # bonferroni-corrected alpha for multiple t-tests
