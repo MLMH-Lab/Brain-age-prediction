@@ -35,7 +35,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from scipy.stats import spearmanr, f_oneway, ttest_ind
-from statsmodels.stats.multicomp import pairwise_tukeyhsd, MultiComparison
+from statsmodels.stats.multicomp import MultiComparison
 from statsmodels.stats.multitest import multipletests
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
@@ -61,11 +61,11 @@ def spearman(df, x, y):
     #     print('Error with %s and %s' % (x, y))
 
 
-def ols_reg(df, x, y):
+def ols_reg(df, indep, dep):
     """Perform linear regression using ordinary least squares (OLS) method"""
 
-    endog = np.asarray(df[x], dtype=float)
-    exog = np.asarray(sm.add_constant(df[y]), dtype=float)
+    endog = np.asarray(df[indep], dtype=float)
+    exog = np.asarray(sm.add_constant(df[dep]), dtype=float)
     OLS_model = sm.OLS(endog, exog)
     OLS_results = OLS_model.fit()
     OLS_p = OLS_results.pvalues[1]
@@ -75,7 +75,7 @@ def ols_reg(df, x, y):
     n = len(df)
     if OLS_p < alpha:
         print('n=%s, %s and %s - reject H0: p = %.3f, coef = %.3f'
-              % (n, x, y, OLS_p, OLS_coeff))
+              % (n, indep, dep, OLS_p, OLS_coeff))
     # elif OLS_p >= alpha:
     #     print('%s and %s - fail to reject H0: p = %.3f, coef = %.3f'
     #           % (x, y, OLS_p, OLS_coeff))
@@ -101,7 +101,7 @@ def cohend(d1, d2):
 
 def main():
     # Define what subjects dataset should contain: total, male or female
-    subjects = 'male'
+    subjects = 'test'
 
     # Create output subdirectory if it does not exist.
     output_dir = PROJECT_ROOT / 'outputs' / subjects
@@ -120,7 +120,16 @@ def main():
     age_pred['AbsDiff_BrainAGE_predmean'] = abs(age_pred['BrainAGE_predmean'])
     age_pred['AbsDiff_BrainAGE_predmedian'] = abs(age_pred['BrainAGE_predmedian'])
 
-    # TODO: linreg for age and predicted age to get brainAGER
+    # Add new columns for BrainAGER (Brain Age Gap Estimate Residualized)
+    brainager_model_predmean = sm.OLS(age_pred['Age'], age_pred['BrainAGE_predmean'])
+    brainager_results_predmean = brainager_model_predmean.fit()
+    brainager_residuals_predmean = brainager_results_predmean.resid
+    age_pred['BrainAGER_predmean'] = brainager_residuals_predmean
+
+    brainager_model_predmedian = sm.OLS(age_pred['Age'], age_pred['BrainAGE_predmedian'])
+    brainager_results_predmedian = brainager_model_predmedian.fit()
+    brainager_residuals_predmedian = brainager_results_predmedian.resid
+    age_pred['BrainAGER_predmedian'] = brainager_residuals_predmedian
 
     # Extract participant ID
     age_pred['ID'] = age_pred['Participant_ID'].str.split('-', expand=True)[1]
