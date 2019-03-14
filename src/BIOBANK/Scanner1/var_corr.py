@@ -115,10 +115,12 @@ def main():
     age_pred['Mean_predicted_age'] = age_pred.iloc[:, 2:last_col].mean(axis=1)
     age_pred['Median_predicted_age'] = age_pred.iloc[:, 2:last_col].median(axis=1)
     age_pred['Std_predicted_age'] = age_pred.iloc[:, 2:last_col].std(axis=1)
-    age_pred['Diff_age-mean'] = age_pred['Age'] - age_pred['Mean_predicted_age']
-    age_pred['Diff_age-median'] = age_pred['Age'] - age_pred['Median_predicted_age']
-    age_pred['AbsDiff_age-mean'] = abs(age_pred['Diff_age-mean'])
-    age_pred['AbsDiff_age-median'] = abs(age_pred['Diff_age-median'])
+    age_pred['BrainAGE_predmean'] = age_pred['Mean_predicted_age'] - age_pred['Age']
+    age_pred['BrainAGE_predmedian'] = age_pred['Median_predicted_age'] - age_pred['Age']
+    age_pred['AbsDiff_BrainAGE_predmean'] = abs(age_pred['BrainAGE_predmean'])
+    age_pred['AbsDiff_BrainAGE_predmedian'] = abs(age_pred['BrainAGE_predmedian'])
+
+    # TODO: linreg for age and predicted age to get brainAGER
 
     # Extract participant ID
     age_pred['ID'] = age_pred['Participant_ID'].str.split('-', expand=True)[1]
