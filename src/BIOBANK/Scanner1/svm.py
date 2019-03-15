@@ -34,7 +34,7 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 def main():
     warnings.filterwarnings('ignore')
     # Define what subjects dataset should contain: total, male or female
-    subjects = 'test'
+    subjects = 'total'
 
     # Create output subdirectory if it does not exist.
     output_dir = PROJECT_ROOT / 'outputs' / subjects
@@ -64,9 +64,9 @@ def main():
     age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
     age_predictions['Index'] = age_predictions.index
 
-    n_repetitions = 2
-    n_folds = 2
-    n_nested_folds = 2
+    n_repetitions = 10
+    n_folds = 10
+    n_nested_folds = 5
 
     # Loop to repeat 10-fold CV 10 times
     for i_repetition in range(n_repetitions):
@@ -91,7 +91,7 @@ def main():
             # Systematic search for best hyperparameters
             svm = LinearSVR(loss='epsilon_insensitive')
 
-            c_range = [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1]
+            c_range = [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]
             search_space = [{'C': c_range}]
             nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
