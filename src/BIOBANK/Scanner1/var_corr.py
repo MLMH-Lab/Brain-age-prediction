@@ -100,6 +100,8 @@ def cohend(d1, d2):
 
 
 def main():
+    # Load dataset
+    dataset = pd.read_csv(str(PROJECT_ROOT / 'outputs'/'age_predictions_demographics.csv'))
 
     # Correlation variables
     x_list = ['Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
