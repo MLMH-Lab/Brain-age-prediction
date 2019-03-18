@@ -1,5 +1,13 @@
 """Script to create dataset for var_corr and lsoa_corr"""
 
+from pathlib import Path
+
+import pandas as pd
+import statsmodels.api as sm
+
+
+PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
+
 
 def main():
     # Define what subjects dataset should contain: total, male or female
