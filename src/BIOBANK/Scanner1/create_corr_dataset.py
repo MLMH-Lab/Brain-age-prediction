@@ -152,7 +152,7 @@ def main():
     dataset = pd.merge(dataset, dataset_imd, on='Participant_ID')
 
     # output csv with age variables and demographic variables
-    dataset.to_csv(str(PROJECT_ROOT / 'outputs' / 'age_predictions_demographics.csv'))
+    dataset.to_csv(str(output_dir / 'age_predictions_demographics.csv'))
 
 
 if __name__ == "__main__":
