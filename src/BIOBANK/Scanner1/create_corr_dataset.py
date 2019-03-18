@@ -66,7 +66,7 @@ def main():
     age_pred['ID'] = age_pred['Participant_ID'].str.split('-', expand=True)[1]
     age_pred['ID'] = pd.to_numeric(age_pred['ID'])
 
-    # Loading demographic data to access variables
+    # Loading demographic data in UK Biobank to access variables
     dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'ukb22321.csv'),
                               usecols=['eid',
                                        '6138-2.0', '6138-2.1', '6138-2.2', '6138-2.3', '6138-2.4',
@@ -82,6 +82,10 @@ def main():
                            'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
 
     # Create new education cols to simulate ordinal scale
+    # The original 6-point education scale was reduced to a 4-point scale using the following assumptions:
+    # Codes 3 "O levels / GCSEs or equivalent" and 4 "CSEs or equivalent" are equivalent
+    # Codes 5 "NVQ or HND or HNC or equivalent" and 6 "Other professional qualifications" are equivalent
+    # Codes -7	"None of the above" and -3	"Prefer not to answer" are treated as missing data
     education_dict = {1: 4, 2: 2, 3: 1, 4: 1, 5: 3, 6: 3}
     dataset_dem['Education_1'] = dataset_dem['Education_1'].map(education_dict)
     dataset_dem['Education_2'] = dataset_dem['Education_2'].map(education_dict)
