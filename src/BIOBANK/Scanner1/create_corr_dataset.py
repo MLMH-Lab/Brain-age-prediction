@@ -140,7 +140,7 @@ def main():
                            'Education_deprivation_decile', 'Education_deprivation_rank', 'Education_deprivation_score',
                            'Health_deprivation_decile', 'Health_deprivation_rank', 'Health_deprivation_score',
                            'Crime_decile', 'Crime_rank', 'Crime_score',
-                           'Barries_housing_decile', 'Barries_housing_rank', 'Barries_housing_score',
+                           'Barrier_housing_decile', 'Barrier_housing_rank', 'Barrier_housing_score',
                            'Environment_deprivation_decile', 'Environment_deprivation_rank',
                            'Environment_deprivation_score',
                            'Income_deprivation_aff_children_decile', 'Income_deprivation_aff_children_rank',

@@ -109,7 +109,7 @@ def main():
     # Correlation variables
     x_list = ['Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
               'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
-              'BrainAGE_predmean', 'BrainAGE_predmean',
+              'BrainAGE_predmean', 'BrainAGE_predmedian',
               'BrainAGER_predmean', 'BrainAGER_predmedian',
               'Std_predicted_age']
     y_list = ['Education_highest',

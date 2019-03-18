@@ -47,18 +47,18 @@ def main():
            'Education_deprivation_decile', 'Education_deprivation_rank', 'Education_deprivation_score',
            'Health_deprivation_decile', 'Health_deprivation_rank', 'Health_deprivation_score',
            'Crime_decile', 'Crime_rank', 'Crime_score',
-           'Barries_housing_decile', 'Barries_housing_rank', 'Barries_housing_score',
+           'Barrier_housing_decile', 'Barrier_housing_rank', 'Barrier_housing_score',
            'Environment_deprivation_decile', 'Environment_deprivation_rank', 'Environment_deprivation_score']
 
     # Correlation variables
-    x_list = ['Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
-              'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
-              'BrainAGE_predmean', 'BrainAGE_predmean',
-              'BrainAGER_predmean', 'BrainAGER_predmedian',
-              'Std_predicted_age']
+    # x_list = ['Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
+    #           'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
+    #           'BrainAGE_predmean', 'BrainAGE_predmean',
+    #           'BrainAGER_predmean', 'BrainAGER_predmedian',
+    #           'Std_predicted_age']
 
     # # Shortened x_list
-    # x_list = ['Abs_BrainAGER_predmean', 'BrainAGER_predmean']
+    x_list = ['Abs_BrainAGER_predmean', 'BrainAGER_predmean']
 
     # create list of deprivation vars with scores only
     col_score = []
@@ -71,6 +71,8 @@ def main():
         for x in x_list:
             dataset_var = dataset.dropna(subset=[var])
             ols_reg(dataset_var, x, var)
+
+    # TODO: bonferroni correction?
 
 
 if __name__ == "__main__":
