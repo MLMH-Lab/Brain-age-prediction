@@ -78,9 +78,9 @@ def ols_reg(df, indep, dep):
               % (n, indep, dep, OLS_p, OLS_coeff))
     # elif OLS_p >= alpha:
     #     print('%s and %s - fail to reject H0: p = %.3f, coef = %.3f'
-    #           % (x, y, OLS_p, OLS_coeff))
+    #           % (indep, dep, OLS_p, OLS_coeff))
     # else:
-    #     print('Error with %s and %s' % (x, y))
+    #     print('Error with %s and %s' % (indep, dep))
 
 
 def cohend(d1, d2):

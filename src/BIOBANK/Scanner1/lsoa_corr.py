@@ -11,12 +11,11 @@ import matplotlib.pyplot as plt
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
-def ols_reg(df, x, y):
-    """Perform linear regression using ordinary least squares (OLS) method
-    x= dependent var, y= independent var(s)"""
+def ols_reg(df, indep, dep):
+    """Perform linear regression using ordinary least squares (OLS) method"""
 
-    endog = np.asarray(df[x], dtype=float)
-    exog = np.asarray(sm.add_constant(df[y]), dtype=float)
+    endog = np.asarray(df[indep], dtype=float)
+    exog = np.asarray(sm.add_constant(df[dep]), dtype=float)
     OLS_model = sm.OLS(endog, exog)
     OLS_results = OLS_model.fit()
     OLS_p = OLS_results.pvalues[1]
@@ -26,12 +25,12 @@ def ols_reg(df, x, y):
     n = len(df)
     if OLS_p < alpha:
         print('n=%s, %s and %s - reject H0: p = %.3f, coef = %.3f'
-              % (n, x, y, OLS_p, OLS_coeff))
+              % (n, indep, dep, OLS_p, OLS_coeff))
     # elif OLS_p >= alpha:
     #     print('%s and %s - fail to reject H0: p = %.3f, coef = %.3f'
-    #           % (x, y, OLS_p, OLS_coeff))
+    #           % (indep, dep, OLS_p, OLS_coeff))
     # else:
-    #     print('Error with %s and %s' % (x, y))
+    #     print('Error with %s and %s' % (indep, dep))
 
 
 def main():
