@@ -52,19 +52,14 @@ def main():
            'Income_deprivation_aff_children_decile', 'Income_deprivation_aff_children_rank', 'Income_deprivation_aff_children_score',
            'Income_deprivation_aff_elder_decile', 'Income_deprivation_aff_elder_rank', 'Income_deprivation_aff_elder_score']
 
-    # create list of IMD vars with scores only
+    # create list of deprivation vars with scores only
     col_score = []
     for item in col:
         if item.split('_')[-1] == 'score':
             col_score.append(item)
 
-    # scatter plot per IMD var
-    for var in col_score:
-        dataset.plot(x='AbsDiff_age-mean', y=var, kind='scatter')
-        plt.show()
-
     # regression per IMD var
-    for var in col:
+    for var in col_score:
         dataset_var = dataset.dropna(subset=[var])
         ols_reg(dataset_var, 'Diff_age-m', var)
 
