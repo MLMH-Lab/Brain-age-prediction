@@ -16,7 +16,6 @@ from pathlib import Path
 import pandas as pd
 import statsmodels.api as sm
 
-
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
@@ -100,9 +99,53 @@ def main():
     # Merge age_pred and dataset_dem datasets
     dataset = pd.merge(age_pred, dataset_dem, on='ID')
 
+    # Loading data from English Indices of Deprivation 2015
+    dataset_imd = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'IMD_data.csv',
+                              columns=['Participan', 'code', 'name', 'label',
+                                       'wide index of multiple deprivation LSOA_IMD_decile',
+                                       'wide index of multiple deprivation LSOA_IMD_rank',
+                                       'wide index of multiple deprivation LSOA_IMD_score',
+                                       'wide index of multiple deprivation LSOA_income_dep_domain_decile',
+                                       'wide index of multiple deprivation LSOA_income_dep_domain_rank',
+                                       'wide index of multiple deprivation LSOA_income_dep_domain_score',
+                                       'wide index of multiple deprivation LSOA_employ_dep_decile',
+                                       'wide index of multiple deprivation LSOA_employ_dep_rank',
+                                       'wide index of multiple deprivation LSOA_employ_dep_score',
+                                       'wide index of multiple deprivation LSOA_EST_decile',
+                                       'wide index of multiple deprivation LSOA_EST_rank',
+                                       'wide index of multiple deprivation LSOA_EST_score',
+                                       'wide index of multiple deprivation LSOA_HDD_decile',
+                                       'wide index of multiple deprivation LSOA_HDD_rank',
+                                       'wide index of multiple deprivation LSOA_HDD_score',
+                                       'wide index of multiple deprivation LSOA_crime_decile',
+                                       'wide index of multiple deprivation LSOA_crime_rank',
+                                       'wide index of multiple deprivation LSOA_crime_score',
+                                       'wide index of multiple deprivation LSOA_BHS_decile',
+                                       'wide index of multiple deprivation LSOA_BHS_rank',
+                                       'wide index of multiple deprivation LSOA_BHS_score',
+                                       'wide index of multiple deprivation LSOA_LED_decile',
+                                       'wide index of multiple deprivation LSOA_LED_rank',
+                                       'wide index of multiple deprivation LSOA_LED_score',
+                                       'wide index of multiple deprivation LSOA_IDchild_decile',
+                                       'wide index of multiple deprivation LSOA_IDchild_rank',
+                                       'wide index of multiple deprivation LSOA_IDchild_score',
+                                       'wide index of multiple deprivation LSOA_IDelder_decile',
+                                       'wide index of multiple deprivation LSOA_IDelder_rank',
+                                       'wide index of multiple deprivation LSOA_IDelder_score'
+                                       ])
 
-    # output csv for polr in R
-    dataset.to_csv(str(PROJECT_ROOT / 'outputs'/'age_predictions_demographics.csv'),
+    # output csv with chronological age, mean predicted age, median, std, age prediction errors
+    dataset.to_csv(str(PROJECT_ROOT / 'outputs' / 'age_predictions_stats.csv'),
+                   columns=['Participant_ID', 'Age',
+                            'Mean_predicted_age', 'Median_predicted_age', 'Std_predicted_age',
+                            'Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
+                            'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
+                            'BrainAGE_predmean', 'BrainAGE_predmean',
+                            'BrainAGER_predmean', 'BrainAGER_predmedian'],
+                   index=False)
+
+    # output csv with age variables and demographic variables
+    dataset.to_csv(str(PROJECT_ROOT / 'outputs' / 'age_predictions_demographics.csv'),
                    columns=['Participant_ID', 'Age', 'East_coordinate', 'North_coordinate',
                             'Mean_predicted_age', 'Median_predicted_age',
                             'Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
@@ -116,16 +159,6 @@ def main():
                             'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc'],
                    index=False)
 
-    # output csv with actual age, mean predicted age, median, std
-    dataset.to_csv(str(PROJECT_ROOT / 'outputs'/'age_predictions_stats.csv'),
-                   columns=['Participant_ID', 'Age',
-                            'Mean_predicted_age', 'Median_predicted_age',
-                            'Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
-                            'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
-                            'BrainAGE_predmean', 'BrainAGE_predmean',
-                            'BrainAGER_predmean', 'BrainAGER_predmedian',
-                            'Std_predicted_age'],
-                   index=False)
 
 if __name__ == "__main__":
     main()
