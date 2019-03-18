@@ -40,7 +40,7 @@ def main():
     # Load dataset with age vars, demographic data from Biobank, demographic data from IMD
     dataset = pd.read_csv(str(PROJECT_ROOT / 'outputs' / subjects / 'age_predictions_demographics.csv'))
 
-    # create list of IMD vars
+    # create list of IMD vars, excluding supplementary children and elderly measures
     col = ['IMD_decile', 'IMD_rank', 'IMD_score',
            'Income_deprivation_decile', 'Income_deprivation_rank', 'Income_deprivation_score',
            'Employment_deprivation_decile', 'Employment_deprivation_rank', 'Employment_deprivation_score',
@@ -48,9 +48,7 @@ def main():
            'Health_deprivation_decile', 'Health_deprivation_rank', 'Health_deprivation_score',
            'Crime_decile', 'Crime_rank', 'Crime_score',
            'Barries_housing_decile', 'Barries_housing_rank', 'Barries_housing_score',
-           'Environment_deprivation_decile', 'Environment_deprivation_rank', 'Environment_deprivation_score',
-           'Income_deprivation_aff_children_decile', 'Income_deprivation_aff_children_rank', 'Income_deprivation_aff_children_score',
-           'Income_deprivation_aff_elder_decile', 'Income_deprivation_aff_elder_rank', 'Income_deprivation_aff_elder_score']
+           'Environment_deprivation_decile', 'Environment_deprivation_rank', 'Environment_deprivation_score']
 
     # Correlation variables
     x_list = ['Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
