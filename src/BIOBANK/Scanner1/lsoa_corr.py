@@ -52,16 +52,27 @@ def main():
            'Income_deprivation_aff_children_decile', 'Income_deprivation_aff_children_rank', 'Income_deprivation_aff_children_score',
            'Income_deprivation_aff_elder_decile', 'Income_deprivation_aff_elder_rank', 'Income_deprivation_aff_elder_score']
 
+    # Correlation variables
+    x_list = ['Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
+              'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
+              'BrainAGE_predmean', 'BrainAGE_predmean',
+              'BrainAGER_predmean', 'BrainAGER_predmedian',
+              'Std_predicted_age']
+
+    # # Shortened x_list
+    # x_list = ['Abs_BrainAGER_predmean', 'BrainAGER_predmean']
+
     # create list of deprivation vars with scores only
     col_score = []
     for item in col:
         if item.split('_')[-1] == 'score':
             col_score.append(item)
 
-    # regression per IMD var
+    # Linear regression per IMD var
     for var in col_score:
-        dataset_var = dataset.dropna(subset=[var])
-        ols_reg(dataset_var, 'Diff_age-m', var)
+        for x in x_list:
+            dataset_var = dataset.dropna(subset=[var])
+            ols_reg(dataset_var, x, var)
 
 
 if __name__ == "__main__":
