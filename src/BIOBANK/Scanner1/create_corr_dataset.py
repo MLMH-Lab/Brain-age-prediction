@@ -19,18 +19,24 @@ def main():
     # Load SVR age predictions
     age_pred = pd.read_csv(output_dir / 'age_predictions.csv')
 
-    # Add new columns as mean, median, std of age predictions + difference between actual age and mean, median
+    # Add new columns as mean, median, std of age predictions
     pred_repetition = 10
     last_col = pred_repetition + 2
     age_pred['Mean_predicted_age'] = age_pred.iloc[:, 2:last_col].mean(axis=1)
     age_pred['Median_predicted_age'] = age_pred.iloc[:, 2:last_col].median(axis=1)
     age_pred['Std_predicted_age'] = age_pred.iloc[:, 2:last_col].std(axis=1)
+
+    # Add new columns for age prediction error BrainAGE (Brain Age Gap Estimate)
+    # BrainAGE is the difference between mean/median predicted and chronological age
     age_pred['BrainAGE_predmean'] = age_pred['Mean_predicted_age'] - age_pred['Age']
     age_pred['BrainAGE_predmedian'] = age_pred['Median_predicted_age'] - age_pred['Age']
+
+    # Add new columns for absolute BrainAGE
     age_pred['Abs_BrainAGE_predmean'] = abs(age_pred['BrainAGE_predmean'])
     age_pred['Abs_BrainAGE_predmedian'] = abs(age_pred['BrainAGE_predmedian'])
 
     # Add new columns for BrainAGER (Brain Age Gap Estimate Residualized)
+    # BrainAGER is a more robust measure of age prediction error
     brainager_model_predmean = sm.OLS(age_pred['Age'], age_pred['Mean_predicted_age'])
     brainager_results_predmean = brainager_model_predmean.fit()
     brainager_residuals_predmean = brainager_results_predmean.resid
@@ -41,6 +47,7 @@ def main():
     brainager_residuals_predmedian = brainager_results_predmedian.resid
     age_pred['BrainAGER_predmedian'] = brainager_residuals_predmedian
 
+    # Add new columsn for absolute BrainAGER
     age_pred['Abs_BrainAGER_predmean'] = abs(age_pred['BrainAGER_predmean'])
     age_pred['Abs_BrainAGER_predmedian'] = abs(age_pred['BrainAGER_predmedian'])
 
