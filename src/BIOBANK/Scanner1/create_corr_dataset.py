@@ -101,7 +101,7 @@ def main():
 
     # Loading data from English Indices of Deprivation 2015
     dataset_imd = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'IMD_data.csv',
-                              columns=['Participan', 'code', 'name', 'label',
+                              usecols=['Participan', 'code', 'name', 'label',
                                        'wide index of multiple deprivation LSOA_IMD_decile',
                                        'wide index of multiple deprivation LSOA_IMD_rank',
                                        'wide index of multiple deprivation LSOA_IMD_score',
@@ -131,8 +131,22 @@ def main():
                                        'wide index of multiple deprivation LSOA_IDchild_score',
                                        'wide index of multiple deprivation LSOA_IDelder_decile',
                                        'wide index of multiple deprivation LSOA_IDelder_rank',
-                                       'wide index of multiple deprivation LSOA_IDelder_score'
-                                       ])
+                                       'wide index of multiple deprivation LSOA_IDelder_score'])
+    dataset_imd.columns = ['Participant_ID', 'LSOA_code', 'LSOA_name', 'LSOA_label',
+                           'IMD_decile', 'IMD_rank', 'IMD_score',
+                           'Income_deprivation_decile', 'Income_deprivation_rank', 'Income_deprivation_score',
+                           'Employment_deprivation_decile', 'Employment_deprivation_rank',
+                           'Employment_deprivation_score',
+                           'Education_deprivation_decile', 'Education_deprivation_rank', 'Education_deprivation_score',
+                           'Health_deprivation_decile', 'Health_deprivation_rank', 'Health_deprivation_score',
+                           'Crime_decile', 'Crime_rank', 'Crime_score',
+                           'Barries_housing_decile', 'Barries_housing_rank', 'Barries_housing_score',
+                           'Environment_deprivation_decile', 'Environment_deprivation_rank',
+                           'Environment_deprivation_score',
+                           'Income_deprivation_aff_children_decile', 'Income_deprivation_aff_children_rank',
+                           'Income_deprivation_aff_children_score',
+                           'Income_deprivation_aff_elder_decile', 'Income_deprivation_aff_elder_rank',
+                           'Income_deprivation_aff_elder_score']
 
     # output csv with chronological age, mean predicted age, median, std, age prediction errors
     dataset.to_csv(str(PROJECT_ROOT / 'outputs' / 'age_predictions_stats.csv'),
