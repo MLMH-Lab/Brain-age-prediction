@@ -13,9 +13,8 @@ def main():
     # Define what subjects dataset should contain: total, male or female
     subjects = 'total'
 
-    # Create output subdirectory if it does not exist
+    # Define output subdirectory
     output_dir = PROJECT_ROOT / 'outputs' / subjects
-    output_dir.mkdir(exist_ok=True)
 
     # Load SVR age predictions
     age_pred = pd.read_csv(output_dir / 'age_predictions.csv')
