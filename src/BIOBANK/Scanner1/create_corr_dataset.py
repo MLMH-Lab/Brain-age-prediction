@@ -148,30 +148,11 @@ def main():
                            'Income_deprivation_aff_elder_decile', 'Income_deprivation_aff_elder_rank',
                            'Income_deprivation_aff_elder_score']
 
-    # output csv with chronological age, mean predicted age, median, std, age prediction errors
-    dataset.to_csv(str(PROJECT_ROOT / 'outputs' / 'age_predictions_stats.csv'),
-                   columns=['Participant_ID', 'Age',
-                            'Mean_predicted_age', 'Median_predicted_age', 'Std_predicted_age',
-                            'Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
-                            'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
-                            'BrainAGE_predmean', 'BrainAGE_predmean',
-                            'BrainAGER_predmean', 'BrainAGER_predmedian'],
-                   index=False)
+    # Merge dataset with dataset_imd
+    dataset = pd.merge(dataset, dataset_imd, on='Participant_ID')
 
     # output csv with age variables and demographic variables
-    dataset.to_csv(str(PROJECT_ROOT / 'outputs' / 'age_predictions_demographics.csv'),
-                   columns=['Participant_ID', 'Age', 'East_coordinate', 'North_coordinate',
-                            'Mean_predicted_age', 'Median_predicted_age',
-                            'Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
-                            'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
-                            'BrainAGE_predmean', 'BrainAGE_predmean',
-                            'BrainAGER_predmean', 'BrainAGER_predmedian',
-                            'Std_predicted_age',
-                            'Education_highest',
-                            'Air_pollution',
-                            'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
-                            'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc'],
-                   index=False)
+    dataset.to_csv(str(PROJECT_ROOT / 'outputs' / 'age_predictions_demographics.csv'))
 
 
 if __name__ == "__main__":
