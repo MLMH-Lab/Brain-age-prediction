@@ -7,8 +7,8 @@ References:
 [1] Le TT, Kuplicki RT, McKinney BA, Yeh H-W, Thompson WK, Paulus MP and Tulsa 1000 Investigators (2018)
 A Nonlinear Simulation Framework Supports Adjusting for Age When Analyzing BrainAGE.
 Front. Aging Neurosci. 10:317. doi: 10.3389/fnagi.2018.00317
-[2] English Indices of Deprivation 2015 from the Ministry of Housing, Communities & Local Government,
-available online at https://www.gov.uk/government/collections/english-indices-of-deprivation
+[2] Eepartment for Communities and Local Government. English indicesof deprivation 2015. 2015.
+https://www.gov.uk/government/statistics/english-indices-of-deprivation-2015
 """
 
 from pathlib import Path
