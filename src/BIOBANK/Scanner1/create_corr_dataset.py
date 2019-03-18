@@ -1,4 +1,15 @@
-"""Script to create dataset for var_corr and lsoa_corr"""
+"""Script to create dataset for var_corr and lsoa_corr
+Step 1: Create variables for average age predictions and prediction errors, incl. BrainAGE, BrainAGER [1]
+Step 2: Add demographic variables from UK Biobank
+Step 3: Add demographic variables from English Indices of Deprivation [2]
+
+References:
+[1] Le TT, Kuplicki RT, McKinney BA, Yeh H-W, Thompson WK, Paulus MP and Tulsa 1000 Investigators (2018)
+A Nonlinear Simulation Framework Supports Adjusting for Age When Analyzing BrainAGE.
+Front. Aging Neurosci. 10:317. doi: 10.3389/fnagi.2018.00317
+[2] English Indices of Deprivation 2015 from the Ministry of Housing, Communities & Local Government,
+available online at https://www.gov.uk/government/collections/english-indices-of-deprivation
+"""
 
 from pathlib import Path
 
@@ -36,7 +47,7 @@ def main():
     age_pred['Abs_BrainAGE_predmedian'] = abs(age_pred['BrainAGE_predmedian'])
 
     # Add new columns for BrainAGER (Brain Age Gap Estimate Residualized)
-    # BrainAGER is a more robust measure of age prediction error
+    # BrainAGER is a more robust measure of age prediction error (see Lee et al. 2018)
     brainager_model_predmean = sm.OLS(age_pred['Age'], age_pred['Mean_predicted_age'])
     brainager_results_predmean = brainager_model_predmean.fit()
     brainager_residuals_predmean = brainager_results_predmean.resid
