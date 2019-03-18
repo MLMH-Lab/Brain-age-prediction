@@ -34,10 +34,11 @@ def ols_reg(df, indep, dep):
 
 
 def main():
-    # Loading LSOA data merged with BIOBANK demographic data
-    dataset = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'IMD_data.csv')
-    dataset['AbsDiff_age-mean'] = abs(dataset['Diff_age-m'])
-    dataset['AbsDiff_age-median'] = abs(dataset['Diff_age_1'])
+    # Define what subjects dataset should contain: total, male or female
+    subjects = 'total'
+
+    # Load dataset with age vars, demographic data from Biobank, demographic data from IMD
+    dataset = pd.read_csv(str(PROJECT_ROOT / 'outputs' / subjects / 'age_predictions_demographics.csv'))
 
     # create list of IMD vars
     col = list(dataset.columns[23:])
