@@ -37,8 +37,11 @@ def plot_save_histogram_education(edu_level_1, edu_level_2, edu_level_3, edu_lev
 
 
 def main():
+    # Define what subjects were modeled: total, male or female
+    subjects = 'total'
+
     # Loading dataset with age and highest education level
-    dataset = pd.read_csv(PROJECT_ROOT / 'outputs' / 'age_predictions_demographics.csv')
+    dataset = pd.read_csv(PROJECT_ROOT / 'outputs' / subjects / 'age_predictions_demographics.csv')
     dataset = dataset.dropna(subset=['Education_highest'])
 
     # Histogram of age distribution by education level
