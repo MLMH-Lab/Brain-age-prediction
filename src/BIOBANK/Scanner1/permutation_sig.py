@@ -11,7 +11,7 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 def main():
     # Define what subjects were modeled: total, male or female
-    subjects = 'test'
+    subjects = 'total'
 
     # Define number of repetitions and folds used in SVM models
     n_repetitions = 10
@@ -20,7 +20,7 @@ def main():
 
     # Define number of subjects, number of permutations run, number of features, number of output scores
     n_subjects = 12190
-    n_perm = n_subjects
+    n_perm = 1000
     n_features = 101 # freesurfer regions
     n_scores = 3 # r2, MAE, RMSE
 
