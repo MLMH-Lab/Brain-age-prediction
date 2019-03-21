@@ -20,7 +20,7 @@ def main():
 
     # Define number of subjects, number of permutations run, number of features, number of output scores
     n_subjects = 12190
-    n_perm = 1000
+    n_perm = 882 # 118 of the 1000 planned failed
     n_features = 101 # freesurfer regions
     n_scores = 3 # r2, MAE, RMSE
 
@@ -58,23 +58,30 @@ def main():
     model_scores_mean = np.mean(model_scores_abs, axis=0)
 
     # Load permutation scores into array perm_scores
-    perm_scores = np.zeros([n_perm, n_scores])
-
+    perm_scores = []
+    counter = 0
     for i in range(n_perm):
         score_file_name = 'perm_scores_%04d.npy' % i
         if os.path.isfile(str(perm_output_dir / score_file_name)):
-            perm_scores[i] = np.load(perm_output_dir / score_file_name)
+            perm_scores.append(np.load(perm_output_dir / score_file_name))
         else:
+            counter = counter +1
             print('File not found: perm_scores_%04d.npy' % i)
+
+    perm_scores = np.asarray(perm_scores, dtype='float32')
 
     # Calculate proportion of permutation scores higher than model scores out of all permutations (p value)
     scores_pval = []
+    print('R_square')
+    pval = (np.sum(model_scores_mean[0] <= perm_scores[0,i]) + 1.0) / (perm_scores.shape[0] + 1)
+    scores_pval.append(pval)
+    print(pval)
 
-    ind = 0
-    for i_score in perm_scores.T:
-        pval = (np.sum(i_score >= model_scores_mean[ind]) + 1.0) / (n_perm + 1)
+    for i in range(1, model_scores_mean.shape[0]):
+        print(i)
+        pval = (np.sum(model_scores_mean[i] >= perm_scores[:,i]) + 1.0) / (perm_scores.shape[0] + 1)
         scores_pval.append(pval)
-        ind += 1
+        print(pval)
 
     # Assess significance with Bonferroni correction
     scores_pval_array = np.array(scores_pval)
@@ -111,26 +118,24 @@ def main():
     model_coef_mean = np.mean(model_coef_abs, axis=0)
 
     # Load permutation coefficients into array perm_coef
-    perm_coef = np.zeros([n_perm, n_features])
-
+    perm_coef = []
     for i in range(n_perm):
         coef_file_name = 'perm_coef_%04d.npy' % i
         if os.path.isfile(str(perm_output_dir / coef_file_name)):
-            perm_coef[i] = np.load(perm_output_dir / coef_file_name)
+            perm_coef.append(np.load(perm_output_dir / coef_file_name))
         else:
             print('File not found: perm_coef_%04d.npy' % i)
 
-    # Calculate p-value per feature and store in coef_p_list
-    coef_p_list = []
+    perm_coef = np.asarray(perm_coef, dtype='float32')
 
-    ind = 0
-    for i_feat in perm_coef.T:
-        pval = (np.sum(i_feat >= model_coef_mean[ind]) + 1.0) / (n_perm + 1)
-        coef_p_list.append(pval)
-        ind += 1
+    # Calculate p-value per feature and store in coef_pval
+    coef_pval = []
+    for i in range(model_coef_mean.shape[0]):
+        pval = (np.sum(perm_coef[:, i] >= model_coef_mean[i]) + 1.0) / (882 + 1)
+        coef_pval.append(pval)
 
     # Assess significance with Bonferroni correction
-    coef_p_array = np.array(coef_p_list)
+    coef_p_array = np.array(coef_pval)
     coef_sig_array = coef_p_array < bonferroni_alpha
 
     # Load FS data to access feature names
