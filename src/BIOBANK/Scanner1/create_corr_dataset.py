@@ -46,13 +46,19 @@ def main():
     age_pred['Abs_BrainAGE_predmedian'] = abs(age_pred['BrainAGE_predmedian'])
 
     # Add new columns to age_pred for BrainAGER (Brain Age Gap Estimate Residualized)
-    # BrainAGER is a more robust measure of age prediction error (see Lee et al. 2018)
-    brainager_model_predmean = sm.OLS(age_pred['Age'], age_pred['Mean_predicted_age'])
+    # BrainAGER is a more robust measure of age prediction error (see Le et al. 2018)
+    x = age_pred['Age']
+    y = age_pred['Mean_predicted_age']
+    x = sm.add_constant(x)
+    brainager_model_predmean = sm.OLS(y, x)
     brainager_results_predmean = brainager_model_predmean.fit()
     brainager_residuals_predmean = brainager_results_predmean.resid
     age_pred['BrainAGER_predmean'] = brainager_residuals_predmean
 
-    brainager_model_predmedian = sm.OLS(age_pred['Age'], age_pred['Median_predicted_age'])
+    x = age_pred['Age']
+    y = age_pred['Median_predicted_age']
+    x = sm.add_constant(x)
+    brainager_model_predmedian = sm.OLS(y, x)
     brainager_results_predmedian = brainager_model_predmedian.fit()
     brainager_residuals_predmedian = brainager_results_predmedian.resid
     age_pred['BrainAGER_predmedian'] = brainager_residuals_predmedian

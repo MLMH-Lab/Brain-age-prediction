@@ -68,6 +68,7 @@ def ols_reg(df, indep, dep):
     exog = np.asarray(sm.add_constant(df[dep]), dtype=float)
     OLS_model = sm.OLS(endog, exog)
     OLS_results = OLS_model.fit()
+    print(OLS_results.summary())
     OLS_p = OLS_results.pvalues[1]
     OLS_coeff = OLS_results.params[1]
 
@@ -107,20 +108,20 @@ def main():
     dataset = pd.read_csv(str(PROJECT_ROOT / 'outputs' / subjects / 'age_predictions_demographics.csv'))
 
     # Correlation variables
-    x_list = ['Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
+    y_list = ['Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
               'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
               'BrainAGE_predmean', 'BrainAGE_predmedian',
               'BrainAGER_predmean', 'BrainAGER_predmedian',
               'Std_predicted_age']
-    y_list = ['Education_highest',
+    x_list = ['Education_highest',
               'Air_pollution',
               'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
               'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
 
     # Spearman correlation per variable
     print("Spearman correlation")
-    for x in x_list:
-        for y in y_list:
+    for y in y_list:
+        for x in y_list:
             dataset_y = dataset.dropna(subset=[y])
             spearman(dataset_y, x, y)
 
@@ -131,17 +132,39 @@ def main():
             dataset_y = dataset.dropna(subset=[y])
             ols_reg(dataset_y, x, y)
 
-    # Scatterplots
-    air_pollution_plot = dataset.plot(x='BrainAGER_predmean', y='Air_pollution', kind='scatter')
-    traffic_intensity_plot = dataset.plot(x='BrainAGER_predmean', y='Traffic_intensity', kind='scatter')
-    inv_dist_plot = dataset.plot(x='BrainAGER_predmean', y='Inverse_dist_road', kind='scatter')
-    greenspace_plot = dataset.plot(x='BrainAGER_predmean', y='Greenspace_perc', kind='scatter')
-    garden_plot = dataset.plot(x='BrainAGER_predmean', y='Garden_perc', kind='scatter')
-    water_plot = dataset.plot(x='BrainAGER_predmean', y='Water_perc', kind='scatter')
-    nat_env_plot = dataset.plot(x='BrainAGER_predmean', y='Natural_env_perc', kind='scatter')
+    bonferroni_alpha = 0.05 / 25
+    bon2 = 0.001 / 17
 
-    # Exploratory analysis of education
-    education_fre = pd.crosstab(index=dataset["Education_highest"], columns="count")
+    # TODO: fix loop below
+    print("\n OLS regression adjusted for chron. age")
+    for indepvar in y_list:
+        dataset_reduced = dataset.dropna(subset=[indepvar])
+        # depvar = dataset_reduced['Mean_predicted_age']
+        # # indep = dataset_reduced[['Age', y]]
+        # # print(indep)
+        model = sm.OLS(dataset_reduced['Mean_predicted_age'], dataset_reduced[['Age', indepvar]]).fit()
+        print(model.pvalues[1], model.pvalues[1]<bonferroni_alpha, model.pvalues[1]<bon2)
+        print(model.params[1])
+        print(model.summary())
+
+    # TODO: clean up the below script - which analyses do we actually need to keep?
+
+    # Scatterplots
+    age_predmean_plot = dataset.plot(x='Age', y='Mean_predicted_age', kind='scatter')
+    age_brainage_plot = dataset.plot(x='Age', y='BrainAGE_predmean', kind='scatter')
+    age_brainager_plot = dataset.plot(x='Age', y='BrainAGER_predmean', kind='scatter')
+    brainage_brainager_plot = dataset.plot(x='BrainAGER_predmean', y='BrainAGE_predmean', kind='scatter')
+    education_plot = dataset.plot(x='education_highest', y='BrainAGE_predmean', kind='scatter')
+    air_pollution_plot = dataset.plot(x='Air_pollution', y='BrainAGER_predmean', kind='scatter')
+    traffic_intensity_plot = dataset.plot(x='Traffic_intensity', y='BrainAGER_predmean', kind='scatter')
+    inv_dist_plot = dataset.plot(x='Inverse_dist_road', y='BrainAGER_predmean', kind='scatter')
+    greenspace_plot = dataset.plot(x='Greenspace_perc', y='BrainAGER_predmean', kind='scatter')
+    garden_plot = dataset.plot(x='Garden_perc', y='BrainAGER_predmean', kind='scatter')
+    water_plot = dataset.plot(x='Water_perc', y='BrainAGER_predmean', kind='scatter')
+    nat_env_plot = dataset.plot(x='Natural_env_perc', y='BrainAGER_predmean', kind='scatter')
+
+
+    # EXPLORATORY ANALYSIS OF EDUCATION
 
     # Perform one-way ANOVA for education groups
     # Alternative to: ols_reg(dataset_y, 'Diff age-mean', 'Education_highest') ?
@@ -160,18 +183,20 @@ def main():
         print(x, f_stat, pvalue)
 
     # Boxplot for education
-    df_edu = pd.concat([dataset_uni['Abs_BrainAGER_predmean'], dataset_prof_qual['Abs_BrainAGER_predmean'],
-                        dataset_a_level['Abs_BrainAGER_predmean'], dataset_gcse['Abs_BrainAGER_predmean']],
+    df_edu = pd.concat([dataset_gcse['BrainAGER_predmean'], dataset_a_level['BrainAGER_predmean'],
+                        dataset_prof_qual['BrainAGER_predmean'], dataset_uni['BrainAGER_predmean']],
                         axis=1, keys=['Uni', 'Prof_qual', 'A_levels', 'GCSE'])
 
-    plot = pd.DataFrame.boxplot(df_edu)
+    edu_plot = pd.DataFrame.boxplot(df_edu)
+    plt.xlabel('Highest level of education obtained')
+    plt.ylabel('BrainAGER')
 
-    output_img_path = PROJECT_ROOT/'outputs'/'edu_abs_agemean_BIOBANK.png'
+    output_img_path = PROJECT_ROOT/'outputs'/'edu_brainager_BIOBANK.png'
     plt.savefig(str(output_img_path))
 
     # Holm-Bonferroni method for multiple comparisons
-    dataset = dataset.dropna(subset=['Education_highest'])
-    mod = MultiComparison(dataset['Abs_BrainAGER_predmean'], dataset['Education_highest'])
+    dataset_edu = dataset.dropna(subset=['Education_highest'])
+    mod = MultiComparison(dataset_edu['Abs_BrainAGER_predmean'], dataset_edu['Education_highest'])
     print(mod.tukeyhsd())
 
     # bonferroni-corrected alpha for multiple t-tests
@@ -204,7 +229,7 @@ def main():
         plist.append(pval)
         if pval < alpha_bon:
             print("a_level vs gcse", pval)
-        print(multipletests(plist, alpha=0.05, method='bonferroni'))
+        # print(multipletests(plist, alpha=0.05, method='bonferroni'))
 
     # Cohen's d test for education levels # outputs for all vars
     cohend(dataset_uni, dataset_prof_qual)
