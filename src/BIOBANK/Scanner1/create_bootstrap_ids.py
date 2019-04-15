@@ -1,8 +1,11 @@
-"""Script to create gender-homogeneous lists of Image IDs to feed into create_h5_dataset script"""
+"""Script to create gender-homogeneous bootstrap datasets to feed into create_h5_bootstrap script;
+Creates 50 bootstrap samples with increasing size"""
 
 
 from pathlib import Path
 import pandas as pd
+import numpy as np
+import os
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
@@ -11,31 +14,46 @@ def main():
     # Load final homogeneous dataset with Image IDs, age and gender variables
     dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData_total.h5', key='table')
 
+    # Set random seed for random sampling of subjects
+    np.random.seed(42)
+
     # Find range of ages in homogeneous dataset
     age_min = int(dataset['Age'].min()) # 47
     age_max = int(dataset['Age'].max()) # 73
 
-    # Loop over ages
-    for age in range(age_min, (age_max + 1)):
+    # Define or create directory to save bootstrap datasets
+    bootstrap_dir = Path(str(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'bootstrap'))
+    if not os.path.exists(str(bootstrap_dir)):
+        os.makedirs(str(bootstrap_dir))
 
-        # Empty list to append Image IDs to
-        list_ids = []
+    # Bootstrap index
+    n_bootstrap = 0
 
-        # Get dataset for specific age only
-        age_group = dataset.groupby('Age').get_group(age)
+    # Loop to create 50 bootstrap samples that each contain 1 male, 1 female per age group/year
+    for i in range(50):
 
-        # Loop over genders (0: female, 1:male)
-        for gender in range(2):
-            gender_group = age_group.groupby('Gender').get_group(gender)
-            random_id = gender_group['Image_ID'].sample(n=1, replace=True, random_state=age)
-            # random_row = gender_group.sample(n=1, replace=True, random_state=47)
-            # random_id = gender_group.iloc[random_row.index, 3]
-            list_ids.append(random_id)
+        # Create empty df to add bootstrap subjects to
+        dataset_bootstrap = pd.DataFrame(columns=dataset.columns)
 
-    # Save list_ids as csv
-    df_ids = pd.DataFrame(list_ids).transpose()
-    file_name = 'homogeneous_ids_age_' + str(age) + '.csv'
-    df_ids.to_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name), index=False)
+        # Loop over ages
+        for age in range(age_min, (age_max + 1)):
+
+            # Get dataset for specific age only
+            age_group = dataset.groupby('Age').get_group(age)
+
+            # Loop over genders (0: female, 1:male)
+            for gender in range(2):
+                gender_group = age_group.groupby('Gender').get_group(gender)
+
+                # Extract random subject of that gender and add to dataset_bootstrap
+                random_row = gender_group.sample(n=i, replace=True)
+                dataset_bootstrap = pd.concat([dataset_bootstrap, random_row])
+
+        # Export dataset_bootstrap as csv
+        file_name = 'homogeneous_ids_age_' + str(n_bootstrap) + '.csv'
+        dataset_bootstrap.to_csv(str(bootstrap_dir / file_name), index=False)
+
+        n_bootstrap += 1
 
 
 if __name__ == "__main__":
