@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
+BOOTSTRAP_DIR = Path(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'bootstrap')
 
 
 def create_dataset(dataset_homogeneous='homogeneous_dataset.csv'):
@@ -11,7 +12,7 @@ def create_dataset(dataset_homogeneous='homogeneous_dataset.csv'):
     dataset_freesurfer = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
 
     # Load IDs for subjects from balanced dataset
-    ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'outputs' / dataset_homogeneous)
+    ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / dataset_homogeneous)
 
     # Make freesurfer dataset homogeneous
     dataset_balanced = pd.merge(dataset_freesurfer, ids_homogeneous, on='Image_ID')
@@ -33,7 +34,14 @@ def create_dataset(dataset_homogeneous='homogeneous_dataset.csv'):
     dataset_csv = pd.merge(dataset_dem, dataset_balanced, on='ID')
 
     # Create dataset as hdf5
-    dataset_csv.to_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table', mode='w')
+    if dataset_homogeneous != 'homogeneous_dataset.csv':
+        file_name = dataset_homogeneous + 'freesurferData.h5'
+        dataset_csv.to_hdf(BOOTSTRAP_DIR / file_name,
+                           key='table', mode='w')
+    else:
+        file_name = 'freesurferData.h5'
+        dataset_csv.to_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name,
+                           key='table', mode='w')
 
 
 if __name__ == "__main__":
