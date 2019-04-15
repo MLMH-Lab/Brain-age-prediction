@@ -50,7 +50,7 @@ def main():
                 dataset_bootstrap = pd.concat([dataset_bootstrap, random_row])
 
         # Export dataset_bootstrap as csv
-        file_name = 'homogeneous_ids_age_' + str(n_bootstrap) + '.csv'
+        file_name = 'homogeneous_bootstrap_' + str(n_bootstrap) + '.csv'
         dataset_bootstrap.to_csv(str(bootstrap_dir / file_name), index=False)
 
         n_bootstrap += 1
