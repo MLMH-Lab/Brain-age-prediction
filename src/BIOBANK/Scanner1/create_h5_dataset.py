@@ -12,7 +12,10 @@ def create_dataset(dataset_homogeneous='homogeneous_dataset.csv'):
     dataset_freesurfer = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
 
     # Load IDs for subjects from balanced dataset
-    ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / dataset_homogeneous)
+    if dataset_homogeneous != 'homogeneous_dataset.csv':
+        ids_homogeneous = pd.read_csv(BOOTSTRAP_DIR / dataset_homogeneous)
+    else:
+        ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / dataset_homogeneous)
 
     # Make freesurfer dataset homogeneous
     dataset_balanced = pd.merge(dataset_freesurfer, ids_homogeneous, on='Image_ID')
