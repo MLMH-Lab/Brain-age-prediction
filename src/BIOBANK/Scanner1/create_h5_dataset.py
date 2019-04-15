@@ -6,12 +6,12 @@ import pandas as pd
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
-def main():
+def create_dataset(dataset_homogeneous='homogeneous_dataset.csv'):
     # Load freesurfer data as csv
     dataset_freesurfer = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
 
     # Load IDs for subjects from balanced dataset
-    ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'outputs/homogeneous_dataset.csv')
+    ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'outputs' / dataset_homogeneous)
 
     # Make freesurfer dataset homogeneous
     dataset_balanced = pd.merge(dataset_freesurfer, ids_homogeneous, on='Image_ID')
@@ -37,4 +37,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    create_dataset()
