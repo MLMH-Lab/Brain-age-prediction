@@ -17,6 +17,7 @@ Step 13: Print CV results"""
 from math import sqrt
 from pathlib import Path
 import random
+import os
 
 import pandas as pd
 import numpy as np
@@ -30,9 +31,16 @@ from sklearn.model_selection import GridSearchCV
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
-def main():
-    # Load hdf5 file
-    dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table')
+def run_svm(input_dataset='/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/homogeneous_dataset_freesurferData.h5',
+         output_dir='/home/lea/PycharmProjects/predicted_brain_age/outputs/total'):
+
+    # Load hdf5 dataset
+    dataset = pd.read_hdf(input_dataset, key='table')
+    dataset = dataset[1:50] # remove after testing
+
+    # Create output_dir if necessary
+    if not os.path.exists(str(output_dir)):
+        os.makedirs(str(output_dir))
 
     # Initialise random seed
     np.random.seed = 42
@@ -101,9 +109,9 @@ def main():
             scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
             model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
             params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
-            dump(scaling, str(PROJECT_ROOT / 'outputs' / scaler_file_name))
-            dump(best_params, str(PROJECT_ROOT / 'outputs' / params_file_name))
-            dump(svm_train_best, str(PROJECT_ROOT / 'outputs' /  model_file_name))
+            dump(scaling, str(output_dir + '/' + scaler_file_name))
+            dump(best_params, str(output_dir + '/' + params_file_name))
+            dump(svm_train_best, str(output_dir + '/' +  model_file_name))
 
             # Create new df to hold test_index and corresponding age prediction
             new_df = pd.DataFrame()
@@ -122,7 +130,7 @@ def main():
 
     # Save predictions
     age_predictions = age_predictions.drop('Index', axis=1)
-    age_predictions.to_csv(str(PROJECT_ROOT / 'outputs/age_predictions.csv'), index=False)
+    age_predictions.to_csv(str(output_dir + '/age_predictions.csv'), index=False)
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
@@ -132,4 +140,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    run_svm()
