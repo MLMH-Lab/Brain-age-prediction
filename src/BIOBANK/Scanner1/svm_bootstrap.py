@@ -1,6 +1,5 @@
 """Script to run SVM on bootstrap datasets of UK BIOBANK Scanner1 using svm script"""
 
-from pathlib import Path
 import os
 import glob
 
@@ -11,9 +10,7 @@ def main():
     for file_path in glob.iglob(
             '/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/bootstrap/h5_datasets/homogeneous_bootstrap_*.h5',
             recursive=True):
-        print(file_path)
         file_name = os.path.basename(file_path)
-        print(file_name)
         run_svm(input_dataset=file_path,
                 output_dir=str('/home/lea/PycharmProjects/predicted_brain_age/outputs/bootstrap/svm/' + file_name))
 
