@@ -2,31 +2,31 @@
 
 from pathlib import Path
 import pandas as pd
+import os
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 BOOTSTRAP_DIR = Path(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'bootstrap')
 
 
-def create_dataset(dataset_homogeneous='homogeneous_dataset.csv'):
-    # Load freesurfer data as csv
+def create_dataset(dataset_homogeneous='homogeneous_dataset.csv',
+                   input_dir='/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/',
+                   output_dir='/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/'):
+
+    # Load Freesurfer data as csv
     dataset_freesurfer = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
 
     # Load IDs for subjects from balanced dataset
-    if dataset_homogeneous != 'homogeneous_dataset.csv':
-        ids_homogeneous = pd.read_csv(BOOTSTRAP_DIR / dataset_homogeneous)
-    else:
-        ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / dataset_homogeneous)
+    ids_homogeneous = pd.read_csv(input_dir + dataset_homogeneous)
 
-    # Make freesurfer dataset homogeneous
+    # Reduce Freesurfer dataset to include only subjects from ids_homogeneous
     dataset_balanced = pd.merge(dataset_freesurfer, ids_homogeneous, on='Image_ID')
 
     # Loading demographic data to access age per participant
     dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'ukb22321.csv'),
         usecols=['eid', '21003-2.0'])
     dataset_dem.columns = ['ID', 'Age']
-    dataset_dem = dataset_dem.dropna()
 
-    # Create a new col in FS dataset to contain participant ID
+    # Create a new col in Freesurfer dataset to contain participant ID
     dataset_balanced['Participant_ID'] = dataset_balanced['Image_ID']. \
         str.split('_', expand=True)[0]
     dataset_balanced['ID'] = dataset_balanced['Participant_ID']. \
@@ -37,14 +37,11 @@ def create_dataset(dataset_homogeneous='homogeneous_dataset.csv'):
     dataset_csv = pd.merge(dataset_dem, dataset_balanced, on='ID')
 
     # Create dataset as hdf5
-    if dataset_homogeneous != 'homogeneous_dataset.csv':
-        file_name = dataset_homogeneous + 'freesurferData.h5'
-        dataset_csv.to_hdf(BOOTSTRAP_DIR / file_name,
-                           key='table', mode='w')
-    else:
-        file_name = 'freesurferData.h5'
-        dataset_csv.to_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name,
-                           key='table', mode='w')
+    dataset_name = dataset_homogeneous.split('.')[0]
+    file_name = dataset_name + '_freesurferData.h5' # make sure this changed name is reflected in other scripts
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    dataset_csv.to_hdf((output_dir + file_name), key='table', mode='w')
 
 
 if __name__ == "__main__":
