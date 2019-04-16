@@ -5,18 +5,17 @@ import pandas as pd
 import os
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
-# BOOTSTRAP_DIR = Path(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'bootstrap')
 
 
 def create_dataset(dataset_homogeneous='homogeneous_dataset.csv',
-                   input_dir='/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/',
-                   output_dir='/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/'):
+                   input_dir='/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1',
+                   output_dir='/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1'):
 
     # Load Freesurfer data as csv
     dataset_freesurfer = pd.read_csv(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.csv')
 
     # Load IDs for subjects from balanced dataset
-    ids_homogeneous = pd.read_csv(input_dir + dataset_homogeneous)
+    ids_homogeneous = pd.read_csv(input_dir + '/' + dataset_homogeneous)
 
     # Reduce Freesurfer dataset to include only subjects from ids_homogeneous
     dataset_balanced = pd.merge(dataset_freesurfer, ids_homogeneous, on='Image_ID')
@@ -41,7 +40,7 @@ def create_dataset(dataset_homogeneous='homogeneous_dataset.csv',
     file_name = dataset_name + '_freesurferData.h5' # make sure this changed name is reflected in other scripts
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    dataset_csv.to_hdf((output_dir + file_name), key='table', mode='w')
+    dataset_csv.to_hdf((output_dir + '/' + file_name), key='table', mode='w')
 
 
 if __name__ == "__main__":
