@@ -5,7 +5,7 @@ import pandas as pd
 import os
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
-BOOTSTRAP_DIR = Path(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'bootstrap')
+# BOOTSTRAP_DIR = Path(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'bootstrap')
 
 
 def create_dataset(dataset_homogeneous='homogeneous_dataset.csv',
@@ -21,10 +21,10 @@ def create_dataset(dataset_homogeneous='homogeneous_dataset.csv',
     # Reduce Freesurfer dataset to include only subjects from ids_homogeneous
     dataset_balanced = pd.merge(dataset_freesurfer, ids_homogeneous, on='Image_ID')
 
-    # Loading demographic data to access age per participant
+    # Loading demographic data to access age and gender per participant
     dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'ukb22321.csv'),
-        usecols=['eid', '21003-2.0'])
-    dataset_dem.columns = ['ID', 'Age']
+        usecols=['eid', '31-0.0', '21003-2.0'])
+    dataset_dem.columns = ['ID', 'Gender', 'Age']
 
     # Create a new col in Freesurfer dataset to contain participant ID
     dataset_balanced['Participant_ID'] = dataset_balanced['Image_ID']. \
