@@ -22,8 +22,8 @@ def create_dataset(dataset_homogeneous='homogeneous_dataset.csv',
 
     # Loading demographic data to access age and gender per participant
     dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK'/ 'Scanner1' / 'ukb22321.csv'),
-        usecols=['eid', '31-0.0', '21003-2.0'])
-    dataset_dem.columns = ['ID', 'Gender', 'Age']
+        usecols=['eid', '21003-2.0', '31-0.0'])
+    dataset_dem.columns = ['ID', 'Age', 'Gender']
 
     # Create a new col in Freesurfer dataset to contain participant ID
     dataset_balanced['Participant_ID'] = dataset_balanced['Image_ID']. \
