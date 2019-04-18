@@ -18,7 +18,6 @@ from math import sqrt
 from pathlib import Path
 import random
 import warnings
-import os
 
 import pandas as pd
 import numpy as np
@@ -32,28 +31,29 @@ from sklearn.model_selection import GridSearchCV
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
-def run_svm(input_dataset='/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/homogeneous_dataset_freesurferData.h5',
-         output_dir='/home/lea/PycharmProjects/predicted_brain_age/outputs/total'):
+def main():
     warnings.filterwarnings('ignore')
+    # Define what subjects dataset should contain: total, male or female
+    subjects = 'total'
 
-    # Load hdf5 dataset
-    dataset = pd.read_hdf(input_dataset, key='table')
-    dataset = dataset[1:50] # remove after testing
+    # Create output subdirectory if it does not exist.
+    output_dir = PROJECT_ROOT / 'outputs' / subjects
+    output_dir.mkdir(exist_ok=True)
 
-    # Create output_dir if necessary
-    if not os.path.exists(str(output_dir)):
-        os.makedirs(str(output_dir))
+    # Load hdf5 file
+    file_name = 'freesurferData_' + subjects + '.h5'
+    dataset = pd.read_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name, key='table')
 
     # Initialise random seed
     np.random.seed = 42
     random.seed = 42
 
     # Normalise regional volumes by total intracranial volume (tiv)
-    regions = dataset[dataset.columns[4:-2]].values
+    regions = dataset[dataset.columns[5:-1]].values
     tiv = dataset.EstimatedTotalIntraCranialVol.values
     tiv = tiv.reshape(len(dataset), 1)
     regions_norm = np.true_divide(regions, tiv)  # Independent vars X
-    age = dataset[dataset.columns[1]].values  # Dependent var Y
+    age = dataset[dataset.columns[2]].values  # Dependent var Y
 
     # Create variable to hold CV variables
     cv_r2_scores = []
@@ -83,7 +83,7 @@ def run_svm(input_dataset='/home/lea/PycharmProjects/predicted_brain_age/data/BI
             x_train, x_test = regions_norm[train_index], regions_norm[test_index]
             y_train, y_test = age[train_index], age[test_index]
 
-            # Scaling in range [-1, 1]
+            # Scaling using interquartile
             scaling = RobustScaler()
             x_train = scaling.fit_transform(x_train)
             x_test = scaling.transform(x_test)
@@ -119,14 +119,14 @@ def run_svm(input_dataset='/home/lea/PycharmProjects/predicted_brain_age/data/BI
             scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
             model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
             params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
-            dump(scaling, str(output_dir + '/' + scaler_file_name))
-            dump(params_results, str(output_dir + '/' + params_file_name))
-            dump(best_svm, str(output_dir + '/' +  model_file_name))
+            dump(scaling, str(output_dir / scaler_file_name))
+            dump(params_results, str(output_dir / params_file_name))
+            dump(best_svm, str(output_dir / model_file_name))
 
             # Save model scores r2, MAE, RMSE
             scores_array = np.array([r2_score, absolute_error, root_squared_error])
             scores_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_scores.npy'
-            filepath_scores = str(output_dir + '/' + scores_file_name)
+            filepath_scores = str(output_dir / scores_file_name)
             np.save(filepath_scores, scores_array)
 
             # Create new df to hold test_index and corresponding age prediction
@@ -146,7 +146,7 @@ def run_svm(input_dataset='/home/lea/PycharmProjects/predicted_brain_age/data/BI
 
     # Save predictions
     age_predictions = age_predictions.drop('Index', axis=1)
-    age_predictions.to_csv(str(output_dir + '/age_predictions.csv'), index=False)
+    age_predictions.to_csv(str(output_dir / 'age_predictions.csv'), index=False)
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
@@ -156,4 +156,4 @@ def run_svm(input_dataset='/home/lea/PycharmProjects/predicted_brain_age/data/BI
 
 
 if __name__ == "__main__":
-    run_svm()
+    main()
