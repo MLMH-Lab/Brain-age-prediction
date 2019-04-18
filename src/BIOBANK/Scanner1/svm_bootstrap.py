@@ -25,10 +25,16 @@ def main():
     # Disable warnings
     warnings.filterwarnings('ignore') # there's a deprecation warning for model_selection iid
 
+    # index to keep track of bootstrap running
+    run = 0
+
     # Loop over bootstrap samples
     for file_path in glob.iglob(
             '/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/bootstrap/h5_datasets/homogeneous_bootstrap_*.h5',
             recursive=True):
+
+        print(run)
+        run += 1
 
         # Load hdf5 dataset for that bootstrap sample
         input_dataset = file_path
