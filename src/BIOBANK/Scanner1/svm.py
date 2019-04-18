@@ -17,13 +17,14 @@ Step 13: Print CV results"""
 from math import sqrt
 from pathlib import Path
 import random
+import warnings
 import os
 
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.svm import SVR
+from sklearn.preprocessing import RobustScaler
+from sklearn.svm import LinearSVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
@@ -33,6 +34,7 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 def run_svm(input_dataset='/home/lea/PycharmProjects/predicted_brain_age/data/BIOBANK/Scanner1/homogeneous_dataset_freesurferData.h5',
          output_dir='/home/lea/PycharmProjects/predicted_brain_age/outputs/total'):
+    warnings.filterwarnings('ignore')
 
     # Load hdf5 dataset
     dataset = pd.read_hdf(input_dataset, key='table')
@@ -82,25 +84,33 @@ def run_svm(input_dataset='/home/lea/PycharmProjects/predicted_brain_age/data/BI
             y_train, y_test = age[train_index], age[test_index]
 
             # Scaling in range [-1, 1]
-            scaling = MinMaxScaler(feature_range=(-1, 1))
+            scaling = RobustScaler()
             x_train = scaling.fit_transform(x_train)
             x_test = scaling.transform(x_test)
 
             # Systematic search for best hyperparameters
-            svm = SVR(kernel='linear')
+            svm = LinearSVR(loss='epsilon_insensitive')
 
-            c_range = [0.001, 0.01, 0.1, 1, 10, 100]
+            c_range = [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]
             search_space = [{'C': c_range}]
             nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
-            gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3)
-            svm_train_best = gridsearch.fit(x_train, y_train)
-            best_params = gridsearch.best_params_
+            gridsearch = GridSearchCV(svm, param_grid=search_space, scoring='neg_mean_absolute_error',
+                                      refit=True, cv=nested_skf, verbose=3, n_jobs=1)
 
-            predictions = gridsearch.predict(x_test)
+            gridsearch.fit(x_train, y_train)
+
+            best_svm = gridsearch.best_estimator_
+
+            params_results = {'means': gridsearch.cv_results_['mean_test_score'],
+                              'params': gridsearch.cv_results_['params']}
+
+            predictions = best_svm.predict(x_test)
+
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = svm_train_best.score(x_test, y_test)
+            r2_score = best_svm.score(x_test, y_test)
+
             cv_r2_scores.append(r2_score)
             cv_mae.append(absolute_error)
             cv_rmse.append(root_squared_error)
@@ -110,8 +120,14 @@ def run_svm(input_dataset='/home/lea/PycharmProjects/predicted_brain_age/data/BI
             model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
             params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
             dump(scaling, str(output_dir + '/' + scaler_file_name))
-            dump(best_params, str(output_dir + '/' + params_file_name))
-            dump(svm_train_best, str(output_dir + '/' +  model_file_name))
+            dump(params_results, str(output_dir + '/' + params_file_name))
+            dump(best_svm, str(output_dir + '/' +  model_file_name))
+
+            # Save model scores r2, MAE, RMSE
+            scores_array = np.array([r2_score, absolute_error, root_squared_error])
+            scores_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_scores.npy'
+            filepath_scores = str(output_dir + '/' + scores_file_name)
+            np.save(filepath_scores, scores_array)
 
             # Create new df to hold test_index and corresponding age prediction
             new_df = pd.DataFrame()
