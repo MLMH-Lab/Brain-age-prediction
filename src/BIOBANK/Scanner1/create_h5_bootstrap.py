@@ -6,8 +6,8 @@ from pathlib import Path
 import os
 import glob
 
-from src.BIOBANK.Scanner1.create_h5_dataset import create_dataset
-
+# from src.BIOBANK.Scanner1.create_h5_dataset import create_dataset
+from create_h5_dataset import create_dataset # to run it from terminal
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
