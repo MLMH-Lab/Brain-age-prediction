@@ -1,11 +1,14 @@
-"""Script to assess sample homogeneity in UK BIOBANK Scanner1: gender vs age, ethnicity vs age;
-Supplementary data and labels acquired from https://biobank.ctsu.ox.ac.uk/crystal/search.cgi
+"""Script to assess sample homogeneity in UK BIOBANK Scanner1: gender and ethnicity
+
+Due to the limited number of non-white ethnicity we decided to exclude them from further analysis.
 
 Step 1: Organising dataset
 Step 2: Visualisation of distribution
 Step 3: Chi-square contingency analysis
-Step 4: Remove subjects based on chi-square results to achieve homogeneous sample in terms of gender and ethnicity"""
+Step 4: Remove subjects based on chi-square results to achieve homogeneous sample in terms of gender and ethnicity
 
+Supplementary data and labels acquired from https://biobank.ctsu.ox.ac.uk/crystal/search.cgi
+"""
 import itertools
 from pathlib import Path
 
@@ -16,12 +19,12 @@ import scipy.stats as stats
 PROJECT_ROOT = Path.cwd()
 
 
-def save_fre_table(input_df, col_name):
+def save_frequency_table(input_df, col_name):
     """Export frequency table of column as csv"""
 
-    fre_table = input_df[col_name].value_counts()
-    file_name = col_name + '_fre_table.csv'
-    fre_table.to_csv(PROJECT_ROOT / 'outputs' / file_name)
+    freq_table = input_df[col_name].value_counts()
+    file_name = col_name + '_freq_table.csv'
+    freq_table.to_csv(PROJECT_ROOT / 'outputs' / file_name)
 
 
 def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
@@ -32,7 +35,7 @@ def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
 
     # Bonferroni correction for multiple comparisons; use sig_list to check which ages are most different
     sig_level = 0.05 / len(age_combinations)
-    msg = "Chi-square test for ages {} vs {} is significant:\nTest Statistic: {}\np-value: {}\n"
+    msg = 'Chi-square test for ages {} vs {} is significant:\nTest Statistic: {}\np-value: {}\n'
     if p_value < sig_level:
         sig_list.append(age1)
         sig_list.append(age2)
@@ -82,7 +85,7 @@ def get_ids_to_drop(input_df, age, gender, n_to_drop):
 
     return id_list
 
-
+# TODO: make generic  function
 def balancing_sample(demographics_data_df, dict_sig, gender_observed):
     """Fix gender balance."""
 
@@ -122,11 +125,16 @@ def main():
     dataset_dem.columns = ['ID', 'Gender', 'Ethnicity', 'Age']
     dataset_dem_excl_nan = dataset_dem.dropna()
 
+    # Create a new 'ID' column in FS dataset to match supplementary demographic data
+    dataset_fs['ID'] = dataset_fs['Image_ID'].str.split('_', expand=True)[0]
+    dataset_fs['ID'] = dataset_fs['ID'].str.split('-', expand=True)[1]
+    dataset_fs['ID'] = pd.to_numeric(dataset_fs['ID'])
+
     # Merge supplementary demographic data with freesurfer data
     dataset = pd.merge(dataset_fs, dataset_dem_excl_nan, on='ID')
 
     # Labeling data
-    grouped_ethnicity_dict = {
+    ethnicity_dict = {
         1: 'White', 1001: 'White', 1002: 'White', 1003: 'White',
         2: 'Mixed', 2001: 'Mixed', 2002: 'Mixed', 2003: 'Mixed', 2004: 'Mixed',
         3: 'Asian', 3001: 'Asian', 3002: 'Asian', 3003: 'Asian', 3004: 'Asian',
@@ -137,34 +145,38 @@ def main():
     }
 
     gender_dict = {
-        0: 'Female', 1: 'Male'
+        0: 'Female',
+        1: 'Male'
     }
 
     dataset = dataset.replace({'Gender': gender_dict})
-    dataset_grouped = dataset.replace({'Ethnicity': grouped_ethnicity_dict})
+    dataset = dataset.replace({'Ethnicity': ethnicity_dict})
 
     # Export ethnicity and age distribution for future reference
-    save_fre_table(dataset_grouped, 'Ethnicity')
-    save_fre_table(dataset_grouped, 'Age')
+    save_frequency_table(dataset, 'Ethnicity')
+    save_frequency_table(dataset, 'Age')
+    # TODO: Use figures instead to be related to the next command
 
-    # Exclude ages with <100 participants, exclude non-white ethnicities due to small subgroups
-    dataset_dem_ab46 = dataset_grouped[dataset_grouped['Age'] > 46]
-    dataset_dem_ab46_ethn = dataset_dem_ab46[dataset_dem_ab46['Ethnicity'] == 'White']
+    # Exclude ages with <100 participants,
+    dataset = dataset[dataset['Age'] > 46]
 
-    dict_sig, gender_observed = chi2_contingency_analysis(dataset_dem_ab46_ethn)
+    # Exclude non-white ethnicities due to small subgroups
+    dataset = dataset[dataset['Ethnicity'] == 'White']
+
+    # -------------------------------------------------------------
+    # TODO: make it DRY
+    dict_sig, gender_observed = chi2_contingency_analysis(dataset)
     print('Unbalanced groups')
     print(dict_sig)
 
-    # Create new balanced dataset
-    reduced_dataset = balancing_sample(dataset_dem_ab46_ethn, dict_sig, gender_observed)
+    dataset = balancing_sample(dataset, dict_sig, gender_observed)
 
-    dict_sig, gender_observed = chi2_contingency_analysis(reduced_dataset)
+    dict_sig, gender_observed = chi2_contingency_analysis(dataset)
     print('Unbalanced groups')
     print(dict_sig)
+    # -------------------------------------------------------------
 
-    homogeneous_ids = pd.DataFrame(reduced_dataset['Image_ID'])
-
-    # Output final dataset
+    homogeneous_ids = pd.DataFrame(dataset['Image_ID'])
     homogeneous_ids.to_csv(PROJECT_ROOT / 'outputs' / 'homogeneous_dataset.csv', index=False)
 
 
