@@ -1,4 +1,9 @@
-.idea/
+# Environments
 venv/
+
+# Pycharm
+.idea/
+
+# Project's dataset
 data/
 !data/README.md
