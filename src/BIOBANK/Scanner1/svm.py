@@ -17,12 +17,13 @@ Step 13: Print CV results"""
 from math import sqrt
 from pathlib import Path
 import random
+import warnings
 
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.svm import SVR
+from sklearn.preprocessing import RobustScaler
+from sklearn.svm import LinearSVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
@@ -31,19 +32,28 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def main():
+    warnings.filterwarnings('ignore')
+    # Define what subjects dataset should contain: total, male or female
+    subjects = 'total'
+
+    # Create output subdirectory if it does not exist.
+    output_dir = PROJECT_ROOT / 'outputs' / subjects
+    output_dir.mkdir(exist_ok=True)
+
     # Load hdf5 file
-    dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/freesurferData.h5', key='table')
+    file_name = 'freesurferData_' + subjects + '.h5'
+    dataset = pd.read_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name, key='table')
 
     # Initialise random seed
     np.random.seed = 42
     random.seed = 42
 
     # Normalise regional volumes by total intracranial volume (tiv)
-    regions = dataset[dataset.columns[4:-2]].values
+    regions = dataset[dataset.columns[5:-1]].values
     tiv = dataset.EstimatedTotalIntraCranialVol.values
     tiv = tiv.reshape(len(dataset), 1)
     regions_norm = np.true_divide(regions, tiv)  # Independent vars X
-    age = dataset[dataset.columns[1]].values  # Dependent var Y
+    age = dataset[dataset.columns[2]].values  # Dependent var Y
 
     # Create variable to hold CV variables
     cv_r2_scores = []
@@ -73,26 +83,34 @@ def main():
             x_train, x_test = regions_norm[train_index], regions_norm[test_index]
             y_train, y_test = age[train_index], age[test_index]
 
-            # Scaling in range [-1, 1]
-            scaling = MinMaxScaler(feature_range=(-1, 1))
+            # Scaling using interquartile
+            scaling = RobustScaler()
             x_train = scaling.fit_transform(x_train)
             x_test = scaling.transform(x_test)
 
             # Systematic search for best hyperparameters
-            svm = SVR(kernel='linear')
+            svm = LinearSVR(loss='epsilon_insensitive')
 
-            c_range = [0.001, 0.01, 0.1, 1, 10, 100]
+            c_range = [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]
             search_space = [{'C': c_range}]
             nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
-            gridsearch = GridSearchCV(svm, param_grid=search_space, refit=True, cv=nested_skf, verbose=3)
-            svm_train_best = gridsearch.fit(x_train, y_train)
-            best_params = gridsearch.best_params_
+            gridsearch = GridSearchCV(svm, param_grid=search_space, scoring='neg_mean_absolute_error',
+                                      refit=True, cv=nested_skf, verbose=3, n_jobs=1)
 
-            predictions = gridsearch.predict(x_test)
+            gridsearch.fit(x_train, y_train)
+
+            best_svm = gridsearch.best_estimator_
+
+            params_results = {'means': gridsearch.cv_results_['mean_test_score'],
+                              'params': gridsearch.cv_results_['params']}
+
+            predictions = best_svm.predict(x_test)
+
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = svm_train_best.score(x_test, y_test)
+            r2_score = best_svm.score(x_test, y_test)
+
             cv_r2_scores.append(r2_score)
             cv_mae.append(absolute_error)
             cv_rmse.append(root_squared_error)
@@ -101,9 +119,15 @@ def main():
             scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
             model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
             params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
-            dump(scaling, str(PROJECT_ROOT / 'outputs' / scaler_file_name))
-            dump(best_params, str(PROJECT_ROOT / 'outputs' / params_file_name))
-            dump(svm_train_best, str(PROJECT_ROOT / 'outputs' /  model_file_name))
+            dump(scaling, str(output_dir / scaler_file_name))
+            dump(params_results, str(output_dir / params_file_name))
+            dump(best_svm, str(output_dir / model_file_name))
+
+            # Save model scores r2, MAE, RMSE
+            scores_array = np.array([r2_score, absolute_error, root_squared_error])
+            scores_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_scores.npy'
+            filepath_scores = str(output_dir / scores_file_name)
+            np.save(filepath_scores, scores_array)
 
             # Create new df to hold test_index and corresponding age prediction
             new_df = pd.DataFrame()
@@ -122,7 +146,7 @@ def main():
 
     # Save predictions
     age_predictions = age_predictions.drop('Index', axis=1)
-    age_predictions.to_csv(str(PROJECT_ROOT / 'outputs/age_predictions.csv'), index=False)
+    age_predictions.to_csv(str(output_dir / 'age_predictions.csv'), index=False)
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)

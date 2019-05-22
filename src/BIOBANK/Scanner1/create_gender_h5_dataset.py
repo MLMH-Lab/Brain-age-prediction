@@ -1,12 +1,13 @@
-"""Script to create dataset of UK BIOBANK Scanner1 in hdf5 format"""
+"""Script to create dataset of UK BIOBANK Scanner1 in hdf5 format - split by gender"""
 
 from pathlib import Path
 import pandas as pd
+import argparse
 
 PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
-def main():
+def main(args):
     # Load freesurfer data as csv
     dataset_freesurfer = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
 
@@ -32,10 +33,23 @@ def main():
     # Merge FS dataset and demographic dataset to access age
     dataset_csv = pd.merge(dataset_dem, dataset_balanced, on='ID')
 
-    # Create datasets as hdf5
-    dataset_csv.to_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData_total.h5', key='table',
-                       mode='w')
+    # Create dataset based on gender args
+    if args.gender == 'male':
+        dataset_male_csv = dataset_csv.groupby('Gender').get_group(1)
+        dataset_male_csv.to_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData_male.h5', key='table',
+                                mode='w')
+    elif args.gender == 'female':
+        dataset_female_csv = dataset_csv.groupby('Gender').get_group(0)
+        dataset_female_csv.to_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData_female.h5',
+                                  key='table',
+                                  mode='w')
+    else:
+        print("Error with args")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("gender", help="gender to analyse: male, female", type=str)
+    args = parser.parse_args()
+
+    main(args)

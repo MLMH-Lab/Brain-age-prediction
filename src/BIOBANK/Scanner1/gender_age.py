@@ -1,5 +1,5 @@
 """
-Script to explore distribution of age and gender in UK BIOBANK dataset from scanner1
+Script to explore distribution of gender with regards to age in UK BIOBANK dataset from scanner1
 Aim is to plot a line graph of age vs number of subjects for male/female
 
 References
@@ -12,7 +12,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
-PROJECT_ROOT = Path('../../../') # Todo: Improve before publish code
+PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def plot_save_histogram(male_ages, female_ages):
@@ -23,7 +23,7 @@ def plot_save_histogram(male_ages, female_ages):
     plt.hist(male_ages, color='blue', histtype='step', lw=2, bins=range(45, 75, 1), label='male')
     plt.hist(female_ages, color='red', histtype='step', lw=2, bins=range(45, 75, 1), label='female')
 
-    plt.title("Age distribution in UK BIOBANK", fontsize=17)
+    plt.title("Age distribution in UK BIOBANK by gender", fontsize=17)
     plt.axis('tight')
     plt.xlabel("Age at MRI scan [years]", fontsize=15)
     plt.ylabel("Number of subjects", fontsize=15)
