@@ -110,7 +110,7 @@ def balancing_sample(demographics_data_df, dict_sig, gender_observed):
 
 def main():
     # Define random seed for sampling methods
-    np.random.seed = 123
+    np.random.seed(123)
 
     # Load freesurfer data
     dataset_fs = pd.read_csv(PROJECT_ROOT + '/data/BIOBANK/Scanner1/freesurferData.csv')
