@@ -7,12 +7,13 @@ Step 3: Chi-square contingency analysis
 Step 4: Remove subjects based on chi-square results to achieve homogeneous sample in terms of gender and ethnicity"""
 
 import itertools
+from pathlib import Path
 
 import pandas as pd
 import numpy as np
 import scipy.stats as stats
 
-PROJECT_ROOT = '/home/lea/PycharmProjects/predicted_brain_age'
+PROJECT_ROOT = Path.cwd()
 
 
 def save_fre_table(input_df, col_name):
@@ -20,7 +21,7 @@ def save_fre_table(input_df, col_name):
 
     fre_table = input_df[col_name].value_counts()
     file_name = col_name + '_fre_table.csv'
-    fre_table.to_csv(PROJECT_ROOT + '/outputs/' + file_name)
+    fre_table.to_csv(PROJECT_ROOT / 'outputs' / file_name)
 
 
 def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
@@ -113,17 +114,10 @@ def main():
     np.random.seed(123)
 
     # Load freesurfer data
-    dataset_fs = pd.read_csv(PROJECT_ROOT + '/data/BIOBANK/Scanner1/freesurferData.csv')
-
-    # Create a new 'eid' col in FS dataset to match supplementary demographic data
-    dataset_fs['Participant_ID'] = dataset_fs['Image_ID']. \
-        str.split('_', expand=True)[0]
-    dataset_fs['ID'] = dataset_fs['Participant_ID']. \
-        str.split('-', expand=True)[1]
-    dataset_fs['ID'] = pd.to_numeric(dataset_fs['ID'])
+    dataset_fs = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
 
     # Loading supplementary demographic data
-    dataset_dem = pd.read_csv(PROJECT_ROOT + '/data/BIOBANK/Scanner1/ukb22321.csv',
+    dataset_dem = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'ukb22321.csv',
                               usecols=['eid', '31-0.0', '21003-2.0', '21000-0.0'])
     dataset_dem.columns = ['ID', 'Gender', 'Ethnicity', 'Age']
     dataset_dem_excl_nan = dataset_dem.dropna()
@@ -171,7 +165,7 @@ def main():
     homogeneous_ids = pd.DataFrame(reduced_dataset['Image_ID'])
 
     # Output final dataset
-    homogeneous_ids.to_csv(PROJECT_ROOT + '/outputs/homogeneous_dataset.csv', index=False)
+    homogeneous_ids.to_csv(PROJECT_ROOT / 'outputs' / 'homogeneous_dataset.csv', index=False)
 
 
 if __name__ == "__main__":
