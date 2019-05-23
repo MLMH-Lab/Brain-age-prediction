@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
+PROJECT_ROOT = Path.cwd()
 
 
 def normalise_region_df(normalised_df, df, region_name):
