@@ -7,14 +7,14 @@ PROJECT_ROOT = Path.cwd()
 
 
 def main():
-    # Load freesurfer data as csv
-    dataset_freesurfer = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
+    # Load freesurfer data
+    dataset_fs = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
 
     # Load IDs for subjects from balanced dataset
     ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'outputs' / 'homogeneous_dataset.csv')
 
     # Make freesurfer dataset homogeneous
-    dataset_balanced = pd.merge(dataset_freesurfer, ids_homogeneous, on='Image_ID')
+    dataset_balanced = pd.merge(dataset_fs, ids_homogeneous, on='Image_ID')
 
     # Loading demographic data to access age per participant
     dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'ukb22321.csv'),
