@@ -7,6 +7,8 @@ PROJECT_ROOT = Path.cwd()
 
 
 def main():
+    experiment_name = 'total'
+
     # Load freesurfer data
     dataset_fs = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
 
@@ -27,8 +29,9 @@ def main():
     dataset_csv = pd.merge(dataset_dem, dataset_balanced, on='Participant_ID')
 
     # Create datasets as hdf5
-    dataset_csv.to_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData_total.h5', key='table',
-                       mode='w')
+    file_name = 'freesurferData_' + experiment_name + '.h5'
+
+    dataset_csv.to_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name, key='table', mode='w')
 
 
 if __name__ == "__main__":
