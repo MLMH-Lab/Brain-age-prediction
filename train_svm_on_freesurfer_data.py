@@ -28,25 +28,26 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
 
-PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
+PROJECT_ROOT = Path.cwd()
+
+warnings.filterwarnings('ignore')
 
 
 def main():
-    warnings.filterwarnings('ignore')
+    # Initialise random seed
+    np.random.seed(42)
+    random.seed(42)
+
     # Define what subjects dataset should contain: total, male or female
     subjects = 'total'
 
-    # Create output subdirectory if it does not exist.
+    # Create output subdirectory if it does not ex ist.
     output_dir = PROJECT_ROOT / 'outputs' / subjects
     output_dir.mkdir(exist_ok=True)
 
     # Load hdf5 file
     file_name = 'freesurferData_' + subjects + '.h5'
     dataset = pd.read_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name, key='table')
-
-    # Initialise random seed
-    np.random.seed = 42
-    random.seed = 42
 
     # Normalise regional volumes by total intracranial volume (tiv)
     regions = dataset[dataset.columns[5:-1]].values
