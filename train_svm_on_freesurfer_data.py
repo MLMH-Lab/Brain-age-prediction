@@ -12,8 +12,8 @@ Step 9: Retrain best model with whole training set
 Step 10: Predict test set
 Step 11: Print R_squared, mean absolute error (MAE), root mean squared error (RMSE)
 Step 12: Save model file, scaler file, predictions file
-Step 13: Print CV results"""
-
+Step 13: Print CV results
+"""
 from math import sqrt
 from pathlib import Path
 import random
@@ -28,6 +28,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
 
+from utils import COLUMNS_NAME
 PROJECT_ROOT = Path.cwd()
 
 warnings.filterwarnings('ignore')
@@ -38,46 +39,43 @@ def main():
     np.random.seed(42)
     random.seed(42)
 
-    # Define what subjects dataset should contain: total, male or female
-    subjects = 'total'
+    # Create output subdirectory
+    experiment_name = 'total'
 
-    # Create output subdirectory if it does not ex ist.
-    output_dir = PROJECT_ROOT / 'outputs' / subjects
+    output_dir = PROJECT_ROOT / 'outputs' / experiment_name
     output_dir.mkdir(exist_ok=True)
 
     # Load hdf5 file
-    file_name = 'freesurferData_' + subjects + '.h5'
+    file_name = 'freesurferData_' + experiment_name + '.h5'
     dataset = pd.read_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name, key='table')
 
     # Normalise regional volumes by total intracranial volume (tiv)
-    regions = dataset[dataset.columns[5:-1]].values
-    tiv = dataset.EstimatedTotalIntraCranialVol.values
-    tiv = tiv.reshape(len(dataset), 1)
-    regions_norm = np.true_divide(regions, tiv)  # Independent vars X
-    age = dataset[dataset.columns[2]].values  # Dependent var Y
+    regions = dataset[COLUMNS_NAME].values
 
-    # Create variable to hold CV variables
+    tiv = dataset.EstimatedTotalIntraCranialVol.values[:,np.newaxis]
+
+    regions_norm = np.true_divide(regions, tiv)
+    age = dataset['Age'].values
+
+    # Cross validation variables
     cv_r2_scores = []
     cv_mae = []
     cv_rmse = []
 
-    # Create dataframe to hold actual and predicted ages + df for loop to add predictions to
+    # Create dataframe to hold actual and predicted ages
     age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
-    age_predictions['Index'] = age_predictions.index
+    age_predictions = age_predictions.set_index('Participant_ID')
 
     n_repetitions = 10
     n_folds = 10
     n_nested_folds = 5
 
-    # Loop to repeat 10-fold CV 10 times
     for i_repetition in range(n_repetitions):
-
         # Create new empty column in age_predictions df to save age predictions of this repetition
         age_predictions['Prediction repetition %02d' % i_repetition] = np.nan
 
-        # Create 10-fold cross-validator, stratified by age
+        # Create 10-fold cross-validation scheme stratified by age
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
-
         for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
             print('Running repetition %02d, fold %02d' % (i_repetition, i_fold))
 
