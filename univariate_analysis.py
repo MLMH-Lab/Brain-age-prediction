@@ -17,78 +17,70 @@ import statsmodels.api as sm
 PROJECT_ROOT = Path.cwd()
 
 
-def normalise_region_df(normalised_df, df, region_name):
-    """Normalise regional volume within df, add quadratic and cubic age vars"""
+def normalise_region_df(df, region_name):
+    """Normalise region by total intracranial volume"""
+    return df[region_name] / df['EstimatedTotalIntraCranialVol'] * 100
 
-    normalised_df["Norm_vol_" + region_name] = df[region_name] / df['EstimatedTotalIntraCranialVol'] * 100
 
-
-def ols_reg(df, region_name, reg_output):
+def linear_regression(df, region_name):
     """Perform linear regression using ordinary least squares (OLS) method"""
 
-    endog = np.asarray(df['Norm_vol_' + region_name], dtype=float)
-    exog = np.asarray(sm.add_constant(df[['Age', 'Age2', 'Age3']]), dtype=float)
+    endog = df['Norm_vol_' + region_name].values
+    exog = sm.add_constant(df[['Age', 'Age^2', 'Age^3']].values)
+
     OLS_model = sm.OLS(endog, exog)
+
     OLS_results = OLS_model.fit()
 
-    # Access regression results
-    OLS_coeff = pd.DataFrame(OLS_results.params)
-    OLS_pvalue = pd.DataFrame(OLS_results.pvalues)
-    OLS_tvalue = pd.DataFrame(OLS_results.tvalues)
-    OLS_se = pd.DataFrame(OLS_results.bse)
-
-    # Add to reg_output df
-    OLS_df = pd.concat([OLS_coeff, OLS_se, OLS_tvalue, OLS_pvalue], ignore_index=True)
-    reg_output[region_name] = OLS_df
+    return OLS_results.params, OLS_results.bse, OLS_results.tvalues, OLS_results.pvalues
 
 
 def main():
-
     # Loading Freesurfer data
-    dataset_fs_all_regions = pd.read_csv(str(PROJECT_ROOT / 'data'/ 'BIOBANK'/'Scanner1'/'freesurferData.csv'))
+    dataset_fs = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'))
 
     # Loading demographic data
-    dataset_demographic = pd.read_csv(str(PROJECT_ROOT / 'data'/ 'BIOBANK'/'Scanner1'/'participants.tsv'), sep='\t')
-    dataset_demographic_excl_nan = dataset_demographic.dropna()
+    dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'), sep='\t')
+    dataset_dem = dataset_dem.dropna()
 
     # Create a new col in FS dataset to contain Participant_ID
-    dataset_fs_all_regions['Participant_ID'] = dataset_fs_all_regions['Image_ID']. \
-        str.split('_', expand=True)[0]
+    dataset_fs['Participant_ID'] = dataset_fs['Image_ID'].str.split('_', expand=True)[0]
 
     # Merge FS dataset and demographic dataset to access age
-    dataset_fs_dem = pd.merge(dataset_fs_all_regions, dataset_demographic_excl_nan, on='Participant_ID')
+    dataset = pd.merge(dataset_fs, dataset_dem, on='Participant_ID')
 
     # Create new df to add normalised regional volumes to
-    normalised_df = pd.DataFrame(dataset_fs_dem[['Participant_ID', 'Diagn', 'Gender', 'Age']])
-    normalised_df['Age2'] = normalised_df['Age'] ** 2
-    normalised_df['Age3'] = normalised_df['Age'] ** 3
+    normalised_df = pd.DataFrame(dataset[['Participant_ID', 'Diagn', 'Gender', 'Age']])
+    normalised_df['Age^2'] = normalised_df['Age'] ** 2
+    normalised_df['Age^3'] = normalised_df['Age'] ** 3
 
     # Create empty df for regression output; regions to be added
-    reg_output = pd.DataFrame({"Row_labels_stat": ['Coeff', 'Coeff', 'Coeff', 'Coeff',
-                                                   'std_err', 'std_err', 'std_err', 'std_err',
-                                                   't', 't', 't', 't',
-                                                   'p_val', 'p_val', 'p_val', 'p_val'],
-                               "Row_labels_exog": ['Constant', 'Age', 'Age2', 'Age3',
-                                                   'Constant', 'Age', 'Age2', 'Age3',
-                                                   'Constant', 'Age', 'Age2', 'Age3',
-                                                   'Constant', 'Age', 'Age2', 'Age3']})
-    reg_output.set_index('Row_labels_stat', 'Row_labels_exog')
+    regression_output = pd.DataFrame({"Row_labels_stat": ['Coeff', 'Coeff', 'Coeff', 'Coeff',
+                                                          'std_err', 'std_err', 'std_err', 'std_err',
+                                                          't_stats', 't_stats', 't_stats', 't_stats',
+                                                          'p_val', 'p_val', 'p_val', 'p_val'],
+                                      "Row_labels_exog": ['Constant', 'Age', 'Age2', 'Age3',
+                                                          'Constant', 'Age', 'Age2', 'Age3',
+                                                          'Constant', 'Age', 'Age2', 'Age3',
+                                                          'Constant', 'Age', 'Age2', 'Age3']})
+    regression_output.set_index('Row_labels_stat', 'Row_labels_exog')
 
     # Update normalised_df to contain normalised regions for all regions
-    cols_to_ignore = ['Image_ID', 'Participant_ID', 'Dataset', 'Age', 'Gender', 'Diagn', 'EstimatedTotalIntraCranialVol']
-    region_cols = []
-    for col in dataset_fs_dem.columns:
-        if col not in cols_to_ignore:
-            region_cols.append(col)
+    cols_to_ignore = ['Image_ID', 'Participant_ID', 'Dataset', 'Age', 'Gender', 'Diagn',
+                      'EstimatedTotalIntraCranialVol']
+    region_cols = list(dataset.columns.difference(cols_to_ignore))
 
-    for region in region_cols:
-        normalise_region_df(normalised_df, dataset_fs_dem, region)
+    for region_name in region_cols:
+        print(region_name)
+        normalised_df["Norm_vol_" + region_name] = normalise_region_df(dataset, region_name)
 
         # Linear regression - ordinary least squares (OLS)
-        ols_reg(normalised_df, region, reg_output)
+        coeff, std_err, t_value, p_value = linear_regression(normalised_df, region_name)
+
+        regression_output[region_name] = np.concatenate((coeff, std_err, t_value, p_value), axis=0)
 
     # Output to csv
-    reg_output.to_csv(str(PROJECT_ROOT / 'outputs'/ 'OLS_result.csv'), index=False)
+    regression_output.to_csv(str(PROJECT_ROOT / 'outputs' / 'OLS_result.csv'), index=False)
 
 
 if __name__ == "__main__":
