@@ -72,12 +72,12 @@ def main():
 
     for i_repetition in range(n_repetitions):
         # Create new empty column in age_predictions df to save age predictions of this repetition
-        age_predictions['Prediction repetition %02d' % i_repetition] = np.nan
+        age_predictions['Prediction repetition {:02d}'.format(i_repetition)] = np.nan
 
         # Create 10-fold cross-validation scheme stratified by age
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
         for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
-            print('Running repetition %02d, fold %02d' % (i_repetition, i_fold))
+            print('Running repetition {:02d}, fold {:02d}'.format(i_repetition, i_fold))
 
             x_train, x_test = regions_norm[train_index], regions_norm[test_index]
             y_train, y_test = age[train_index], age[test_index]
@@ -140,8 +140,8 @@ def main():
                 age_predictions.iloc[[sub_index], [col_index]] = row['predictions']
 
             # Print results of the CV fold
-            print('Repetition %02d, Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
-                  % (i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
+            print('Repetition {:02d}, Fold {:02d}, R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}'
+                .format(i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
 
     # Save predictions
     age_predictions = age_predictions.drop('Index', axis=1)
@@ -151,7 +151,7 @@ def main():
     cv_r2_mean = np.mean(cv_r2_scores)
     cv_mae_mean = np.mean(cv_mae)
     cv_rmse_mean = np.mean(cv_rmse)
-    print('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
+    print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}'.format(cv_r2_mean, cv_mae_mean, cv_rmse_mean))
 
 
 if __name__ == "__main__":
