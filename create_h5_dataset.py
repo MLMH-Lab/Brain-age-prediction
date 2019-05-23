@@ -3,7 +3,7 @@
 from pathlib import Path
 import pandas as pd
 
-PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
+PROJECT_ROOT = Path.cwd()
 
 
 def main():
