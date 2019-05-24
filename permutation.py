@@ -14,35 +14,30 @@ from sklearn.svm import LinearSVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import GridSearchCV
 
-PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
+from utils import COLUMNS_NAME
+
+PROJECT_ROOT = Path.cwd()
+
+warnings.filterwarnings('ignore')
 
 
 def main(args):
-    # Ignore warnings
-    warnings.filterwarnings('ignore')
-    # Define what subjects dataset should contain: total, male or female
-    subjects = 'test'
-
-    # Create output subdirectory if it does not exist.
-    perm_dir = PROJECT_ROOT / 'outputs' / 'permutations'
+    # Create output subdirectory
+    experiment_name = 'total'
+    perm_dir = PROJECT_ROOT / 'outputs' / experiment_name / 'permutations'
     perm_dir.mkdir(exist_ok=True)
-    perm_subject_dir = perm_dir / subjects
-    perm_subject_dir.mkdir(exist_ok=True)
 
     # Load hdf5 file
-    subjects = 'total'
-    file_name = 'freesurferData_' + subjects + '.h5'
+    file_name = 'freesurferData_' + experiment_name + '.h5'
     dataset = pd.read_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name, key='table')
 
     # Normalise regional volumes by total intracranial volume (tiv)
-    regions = dataset[dataset.columns[5:-1]].values
-    tiv = dataset.EstimatedTotalIntraCranialVol.values
-    tiv = tiv.reshape(len(dataset), 1)
-    regions_norm = np.true_divide(regions, tiv)  # Independent vars X
-    age = dataset[dataset.columns[2]].values  # Dependent var Y
+    regions = dataset[COLUMNS_NAME].values
 
-    regions_norm = regions_norm[:60,:]
-    age = age[:60]
+    tiv = dataset.EstimatedTotalIntraCranialVol.values[:, np.newaxis]
+
+    regions_norm = np.true_divide(regions, tiv)
+    age = dataset['Age'].values
 
     n_features = regions.shape[1]
 
@@ -57,6 +52,7 @@ def main(args):
         np.random.seed(i_perm)
         random.seed(i_perm)
 
+        # Perform permutation
         age_permuted = np.random.permutation(age)
 
         # Create variables to hold best model coefficients and scores per permutation
@@ -90,12 +86,15 @@ def main(args):
                 # Systematic search for best hyperparameters
                 svm = LinearSVR(loss='epsilon_insensitive')
 
-                c_range = [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1]
-                search_space = [{'C': c_range}]
+                search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
+
                 nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
-                gridsearch = GridSearchCV(svm, param_grid=search_space, scoring='neg_mean_absolute_error',
-                                          refit=True, cv=nested_skf, verbose=1, n_jobs=1)
+                gridsearch = GridSearchCV(svm,
+                                          param_grid=search_space,
+                                          scoring='neg_mean_absolute_error',
+                                          refit=True, cv=nested_skf,
+                                          verbose=1, n_jobs=1)
 
                 gridsearch.fit(x_train, y_train)
 
@@ -116,8 +115,8 @@ def main(args):
                 i_iteration += 1
 
                 fold_time = time.time() - start
-                print('Finished permutation %02d, repetition %02d, fold %02d, ETA %f' % (
-                    i_perm, i_repetition, i_fold, fold_time * (n_repetitions * n_folds - i_iteration)))
+                print('Finished permutation {:02d}, repetition :{02d}, fold {:02d}, ETA {f}'
+                      .format(i_perm, i_repetition, i_fold, fold_time * (n_repetitions * n_folds - i_iteration)))
 
         # Create np array with mean coefficients - one row per permutation, one col per feature
         cv_coef_abs = np.abs(cv_coef)
@@ -128,20 +127,22 @@ def main(args):
         cv_mae_mean = np.mean(cv_mae)
         cv_rmse_mean = np.mean(cv_rmse)
 
-        print('%d: Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (i_perm, cv_r2_mean, cv_mae_mean, cv_rmse_mean))
+        print('{:d}: Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}'
+              .format(i_perm, cv_r2_mean, cv_mae_mean, cv_rmse_mean))
+
         mean_scores = np.array([cv_r2_mean, cv_mae_mean, cv_rmse_mean])
 
         # Save arrays with permutation coefs and scores as np files
-        filepath_coef = perm_subject_dir / ('perm_coef_%04d.npy' % i_perm)
-        filepath_scores = perm_subject_dir / ('perm_scores_%04d.npy' % i_perm)
+        filepath_coef = perm_dir / ('perm_coef_{:04d}.npy'.format(i_perm))
+        filepath_scores = perm_dir / ('perm_scores_{:04d}.npy'.format(i_perm))
         np.save(str(filepath_coef), cv_coef_mean)
         np.save(str(filepath_scores), mean_scores)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("index_min", help="index of first subject to run", type=int)
-    parser.add_argument("index_max", help="index of last subject to run", type=int)
+    parser.add_argument('index_min', help='index of first subject to run', type=int)
+    parser.add_argument('index_max', help='index of last subject to run', type=int)
     args = parser.parse_args()
 
     main(args)
