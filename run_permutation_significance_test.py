@@ -12,32 +12,77 @@ from utils import COLUMNS_NAME
 PROJECT_ROOT = Path.cwd()
 
 
+def get_assessed_model_mean_scores(experiment_dir, n_repetitions = 10, n_folds = 10):
+    """"""
+    model_scores = []
 
+    for i_repetition in range(n_repetitions):
+        for i_fold in range(n_folds):
+            model_file_name = '{:02d}_{:02d}_svm.joblib'.format(i_repetition, i_fold)
+            model_scores.append(np.load(experiment_dir / model_file_name))
+
+    return np.asarray(model_scores, dtype='float32')
+
+
+def get_permutation_mean_scores(perm_dir, n_perm=1000):
+    """"""
+    perm_scores = []
+
+    for i_perm in range(n_perm):
+
+        filepath_scores = perm_dir / ('perm_scores_{:04d}.npy'.format(i_perm))
+
+        try:
+            perm_scores.append(np.load(filepath_scores))
+        except FileNotFoundError:
+            print('File not found: {:}'.format(filepath_scores))
+
+    return np.asarray(perm_scores, dtype='float32')
+
+
+def get_permutation_p_value(assessed_score, perm_scores):
+    """"""
+    return (np.sum(assessed_score >= perm_scores) + 1.0) / (perm_scores.shape[0] + 1)
+
+
+def get_assessed_model_coefs(experiment_dir, n_repetitions = 10, n_folds = 10):
+    """"""
+    pass
+    # TODO
+
+
+def get_permutation_mean_relative_coefs(perm_dir, n_perm=1000):
+    """"""
+    pass
+    # TODO
 
 def main():
     # Create output subdirectory
     experiment_name = 'total'
 
-    # Define number of repetitions and folds used in SVM models
-    n_repetitions = 10
-    n_folds = 10
-
-    n_perm = 1000
-    n_features = len(COLUMNS_NAME)
-    n_scores = 3 # r2, MAE, RMSE
-
-    # Directory where SVM models are saved
-    model_output_dir = PROJECT_ROOT / 'outputs' / experiment_name
-
-    # Directory where permutation scores and coefficients are saved (2 files per permutation)
+    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     perm_dir = PROJECT_ROOT / 'outputs' / experiment_name / 'permutations'
 
-    # Significance level alpha with Bonferroni correction
-    bonferroni_alpha = 0.05 / n_perm
+    model_scores = get_assessed_model_mean_scores(experiment_dir)
+    perm_scores = get_permutation_mean_scores(perm_dir)
+
+    # Perform
+    scores_names = ['R2', 'MAE', 'RMSE']
+    p_value_scores = []
+    for (score_name, i_score) in zip(scores_names, range(model_scores.shape[1])):
+        p_value = get_permutation_p_value(np.mean(model_scores[:, i_score]), perm_scores[:,i_score])
+        p_value_scores.append(p_value)
+
+        print('{:} : {:4.3f}'.format(score_name, p_value))
+
+    # Perform x
+    model_coef = get_assessed_model_coefs(experiment_dir)
+    perm_coefs = get_permutation_mean_relative_coefs(perm_dir)
+
+    n_features = len(COLUMNS_NAME)
 
     # Assessing significance
     perm_coefs = []
-    perm_scores = []
     for i_perm in range(n_perm):
 
         filepath_coef = perm_dir / ('perm_coef_{:04d}.npy'.format(i_perm))
