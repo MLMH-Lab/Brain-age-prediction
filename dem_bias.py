@@ -23,98 +23,70 @@ def save_frequency_table(input_df, col_name):
     """Export frequency table of column as csv"""
 
     freq_table = input_df[col_name].value_counts()
+    print(col_name)
+    print(freq_table)
     file_name = col_name + '_freq_table.csv'
     freq_table.to_csv(PROJECT_ROOT / 'outputs' / file_name)
 
 
-def chi2_contingency_test(crosstab_df, age_combinations, sig_list, age1, age2):
-    """Perform multiple 2x2 Pearson chi-square analyses, corrected for multiple comparisons"""
+def check_balance_across_groups(crosstab_df):
+    """"""
+    combinations = list(itertools.combinations(crosstab_df.columns, 2))
+    significance_level = 0.05 / len(combinations)
 
-    contingency_table = crosstab_df[[age1, age2]]
-    chi2, p_value, _, _ = stats.chi2_contingency(contingency_table, correction=False)
+    for group1, group2 in combinations:
+        # print('{} vs {}'.format(group1, group2))
+        contingency_table = crosstab_df[[group1, group2]]
+        _, p_value, _, _ = stats.chi2_contingency(contingency_table, correction=False)
 
-    # Bonferroni correction for multiple comparisons; use sig_list to check which ages are most different
-    sig_level = 0.05 / len(age_combinations)
-    msg = 'Chi-square test for ages {} vs {} is significant:\nTest Statistic: {}\np-value: {}\n'
-    if p_value < sig_level:
-        sig_list.append(age1)
-        sig_list.append(age2)
-        # print(msg.format(age1, age2, chi2, p_value))
+        if p_value < significance_level:
+            return False, [group1, group2]
+
+    return True, [None]
 
 
-def chi2_contingency_analysis(demographics_data_df):
+
+def get_problematic_group(crosstab_df):
     """Perform contingency analysis of the subjects gender."""
+    balance_flag, problematic_groups = check_balance_across_groups(crosstab_df)
 
-    # Create list of unique age combinations for chi2 contingency analysis
-    gender_observed = pd.crosstab(demographics_data_df['Gender'], demographics_data_df['Age'])
-    age_list = list(gender_observed.columns)
-    age_combinations = list(itertools.product(age_list, age_list))
-    age_combinations_new = []
-    for age_tuple in age_combinations:
-        if (age_tuple[1], age_tuple[0]) not in age_combinations_new:
-            if age_tuple[0] != age_tuple[1]:
-                age_combinations_new.append(age_tuple)
+    if balance_flag:
+        return None
 
-    # Perform chi2 contingency analysis for each age combination
-    # sig_list is used to keep track of ages where gender proportion is significantly different
-    sig_list = []
-    for age_tuple in age_combinations_new:
-        chi2_contingency_test(gender_observed, age_combinations_new, sig_list, age_tuple[0], age_tuple[1])
+    conditions_proportions = crosstab_df.apply(lambda r: r / r.sum(), axis=0)
+    median_proportion = np.median(conditions_proportions.values[0,:])
+    problematic = conditions_proportions[problematic_groups].values[0,:]
 
-    # Assess how often each age is significantly different from the others
-    dict_sig = {}
-    for item in sig_list:
-        if item in dict_sig:
-            dict_sig[item] += 1
-        elif item not in dict_sig:
-            dict_sig[item] = 1
-        else:
-            print("error with " + str(item))
+    problematic_group = problematic_groups[np.argmax(np.abs(problematic - median_proportion))]
 
-    return dict_sig, gender_observed
+    return problematic_group
 
 
-def get_ids_to_drop(input_df, age, gender, n_to_drop):
-    """Extract random sample of participant IDs per age per gender to drop from total sample"""
+def get_balanced_dataset(demographic_df):
+    """"""
+    while True:
+        crosstab_df = pd.crosstab(demographic_df['Gender'], demographic_df['Age'])
 
-    df_filtered = input_df[(input_df['Age'] == age) & (input_df['Gender'] == gender)]
+        problematic_group = get_problematic_group(crosstab_df)
 
-    # random sample of IDs to drop
-    df_to_drop = df_filtered.sample(n_to_drop)
-    id_list = list(df_to_drop['ID'])
+        if problematic_group is None:
+            break
 
-    return id_list
+        condition_unbalanced = crosstab_df[problematic_group].idxmax()
 
-# TODO: make generic  function
-def balancing_sample(demographics_data_df, dict_sig, gender_observed):
-    """Fix gender balance."""
+        problematic_group_mask = (demographic_df['Age'] == problematic_group) &\
+                                 (demographic_df['Gender'] == condition_unbalanced)
 
-    print('Fixing unbalance...')
-    # Undersample the more prominent gender per age in dict_sig and store removed IDs in ids_to_drop
-    ids_to_drop = []
+        list_to_drop = list(demographic_df[problematic_group_mask].sample(1).index)
+        print('Dropping {:}'.format(list_to_drop))
+        demographic_df = demographic_df.drop(list_to_drop, axis=0)
 
-    for key in dict_sig.keys():
-
-        if dict_sig[key] > 4:
-            if gender_observed.loc['Female', key] > gender_observed.loc['Male', key]:
-                gender_higher = 'Female'
-            elif gender_observed.loc['Female', key] < gender_observed.loc['Male', key]:
-                gender_higher = 'Male'
-            else:
-                print("Error with: " + str(key))
-
-            gender_diff = gender_observed.loc['Female', key] - gender_observed.loc['Male', key]
-            diff_to_remove = int(abs(gender_diff) * 0.6)
-
-            ids_list = get_ids_to_drop(demographics_data_df, key, gender_higher, diff_to_remove)
-            ids_to_drop.extend(ids_list)
-
-    return demographics_data_df[~demographics_data_df.ID.isin(ids_to_drop)]
+    return demographic_df
 
 
 def main():
     # Define random seed for sampling methods
-    np.random.seed(123)
+    np.random.seed(42)
 
     # Load freesurfer data
     dataset_fs = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
@@ -155,7 +127,6 @@ def main():
     # Export ethnicity and age distribution for future reference
     save_frequency_table(dataset, 'Ethnicity')
     save_frequency_table(dataset, 'Age')
-    # TODO: Use figures instead to be related to the next command
 
     # Exclude ages with <100 participants,
     dataset = dataset[dataset['Age'] > 46]
@@ -163,18 +134,10 @@ def main():
     # Exclude non-white ethnicities due to small subgroups
     dataset = dataset[dataset['Ethnicity'] == 'White']
 
-    # -------------------------------------------------------------
-    # TODO: make it DRY
-    dict_sig, gender_observed = chi2_contingency_analysis(dataset)
-    print('Unbalanced groups')
-    print(dict_sig)
+    dataset = get_balanced_dataset(dataset)
 
-    dataset = balancing_sample(dataset, dict_sig, gender_observed)
-
-    dict_sig, gender_observed = chi2_contingency_analysis(dataset)
-    print('Unbalanced groups')
-    print(dict_sig)
-    # -------------------------------------------------------------
+    chi2_stats, p_value, _, _ = stats.chi2_contingency(pd.crosstab(dataset['Gender'], dataset['Age']))
+    print('chi2 statistics {:4.2f} p value {:4.3}'.format(chi2_stats, p_value))
 
     homogeneous_ids = pd.DataFrame(dataset['Image_ID'])
     homogeneous_ids.to_csv(PROJECT_ROOT / 'outputs' / 'homogeneous_dataset.csv', index=False)
