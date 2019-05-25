@@ -73,9 +73,9 @@ def main():
         n_nested_folds = 5
 
         for i_repetition in range(n_repetitions):
-
             # Create new empty column in age_predictions df to save age predictions of this repetition
-            age_predictions['Prediction repetition %02d' % i_repetition] = np.nan
+            repetition_column_name = 'Prediction repetition {:02d}'.format(i_repetition)
+            age_predictions[repetition_column_name] = np.nan
 
             # Create 10-fold cross-validator
             kf = KFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
@@ -126,14 +126,14 @@ def main():
                 model_file_name = '{:02d}_{:02d}_svm.joblib'.format(i_repetition, i_fold)
                 params_file_name = '{:02d}_{:02d}_svm_params.joblib'.format(i_repetition, i_fold)
 
-                dump(scaler, str(output_dir + '/' + scaler_file_name))
-                dump(params_results, str(output_dir + '/' + params_file_name))
-                dump(best_svm, str(output_dir + '/' +  model_file_name))
+                dump(scaler, output_dir / scaler_file_name)
+                dump(params_results, output_dir / params_file_name)
+                dump(best_svm, output_dir / model_file_name)
 
                 # Save model scores r2, MAE, RMSE
                 scores_array = np.array([r2_score, absolute_error, root_squared_error])
 
-                scores_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_scores.npy'
+                scores_file_name = '{:}_{:}_svm_scores.npy'.format(i_repetition, i_fold)
 
                 np.save(output_dir / scores_file_name, scores_array)
 
