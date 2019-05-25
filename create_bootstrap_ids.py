@@ -1,13 +1,13 @@
-"""Script to create gender-homogeneous bootstrap datasets to feed into create_h5_bootstrap script;
-Creates 50 bootstrap samples with increasing size"""
-
-
+"""
+Script to create gender-homogeneous bootstrap datasets to feed into create_h5_bootstrap script;
+Creates 50 bootstrap samples with increasing size
+"""
 from pathlib import Path
 import pandas as pd
 import numpy as np
 import os
 
-PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
+PROJECT_ROOT = Path.cwd()
 
 
 def main():

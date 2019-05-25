@@ -1,7 +1,8 @@
-"""Script to run SVM on bootstrap datasets of UK BIOBANK Scanner1
+"""
+Script to run SVM on bootstrap datasets of UK BIOBANK Scanner1
 IMPORTANT NOTE: This script is adapted from svm.py but uses KFold instead of StratifiedKFold
-to account for the bootstrap samples with few participants"""
-
+to account for the bootstrap samples with few participants
+"""
 from math import sqrt
 from pathlib import Path
 import random
@@ -18,13 +19,13 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
 
-PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
+from utils import COLUMNS_NAME
 
+PROJECT_ROOT = Path.cwd()
+
+warnings.filterwarnings('ignore')
 
 def main():
-    # Disable warnings
-    warnings.filterwarnings('ignore') # there's a deprecation warning for model_selection iid
-
     # index to keep track of bootstrap running
     run = 0
 
@@ -47,30 +48,30 @@ def main():
             os.makedirs(str(output_dir))
 
         # Initialise random seed
-        np.random.seed = 42
-        random.seed = 42
+        np.random.seed(42)
+        random.seed(42)
 
         # Normalise regional volumes by total intracranial volume (tiv)
-        regions = dataset[dataset.columns[5:-2]].values # note: first regional col is 5 now because of gender added to the dataset
-        tiv = dataset.EstimatedTotalIntraCranialVol.values
-        tiv = tiv.reshape(len(dataset), 1)
-        regions_norm = np.true_divide(regions, tiv)  # Independent vars X
-        age = dataset[dataset.columns[1]].values  # Dependent var Y
+        regions = dataset[COLUMNS_NAME].values
+
+        tiv = dataset.EstimatedTotalIntraCranialVol.values[:, np.newaxis]
+
+        regions_norm = np.true_divide(regions, tiv)
+        age = dataset['Age'].values
 
         # Create variable to hold CV variables
         cv_r2_scores = []
         cv_mae = []
         cv_rmse = []
 
-        # Create dataframe to hold actual and predicted ages + df for loop to add predictions to
+        # Create dataframe to hold actual and predicted ages
         age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
-        age_predictions['Index'] = age_predictions.index
+        age_predictions = age_predictions.set_index('Participant_ID')
 
         n_repetitions = 10
         n_folds = 10
         n_nested_folds = 5
 
-        # Loop to repeat 10-fold CV 10 times
         for i_repetition in range(n_repetitions):
 
             # Create new empty column in age_predictions df to save age predictions of this repetition
@@ -80,25 +81,28 @@ def main():
             kf = KFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
 
             for i_fold, (train_index, test_index) in enumerate(kf.split(regions_norm, age)):
-                print('Running repetition %02d, fold %02d' % (i_repetition, i_fold))
+                print('Running repetition {:02d}, fold {:02d}'.format(i_repetition, i_fold))
 
                 x_train, x_test = regions_norm[train_index], regions_norm[test_index]
                 y_train, y_test = age[train_index], age[test_index]
 
                 # Scaling in range [-1, 1]
-                scaling = RobustScaler()
-                x_train = scaling.fit_transform(x_train)
-                x_test = scaling.transform(x_test)
+                scaler = RobustScaler()
+                x_train = scaler.fit_transform(x_train)
+                x_test = scaler.transform(x_test)
 
                 # Systematic search for best hyperparameters
                 svm = LinearSVR(loss='epsilon_insensitive')
 
-                c_range = [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]
-                search_space = [{'C': c_range}]
+                search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
+
                 nested_kf = KFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
-                gridsearch = GridSearchCV(svm, param_grid=search_space, scoring='neg_mean_absolute_error',
-                                          refit=True, cv=nested_kf, verbose=3, n_jobs=1)
+                gridsearch = GridSearchCV(svm,
+                                          param_grid=search_space,
+                                          scoring='neg_mean_absolute_error',
+                                          refit=True, cv=nested_kf,
+                                          verbose=3, n_jobs=1)
 
                 gridsearch.fit(x_train, y_train)
 
@@ -118,33 +122,28 @@ def main():
                 cv_rmse.append(root_squared_error)
 
                 # Save scaler, model and model parameters
-                scaler_file_name = str(i_repetition) + '_' + str(i_fold) + '_scaler.joblib'
-                model_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm.joblib'
-                params_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_params.joblib'
-                dump(scaling, str(output_dir + '/' + scaler_file_name))
+                scaler_file_name = '{:02d}_{:02d}_scaler.joblib'.format(i_repetition, i_fold)
+                model_file_name = '{:02d}_{:02d}_svm.joblib'.format(i_repetition, i_fold)
+                params_file_name = '{:02d}_{:02d}_svm_params.joblib'.format(i_repetition, i_fold)
+
+                dump(scaler, str(output_dir + '/' + scaler_file_name))
                 dump(params_results, str(output_dir + '/' + params_file_name))
                 dump(best_svm, str(output_dir + '/' +  model_file_name))
 
                 # Save model scores r2, MAE, RMSE
                 scores_array = np.array([r2_score, absolute_error, root_squared_error])
-                scores_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_scores.npy'
-                filepath_scores = str(output_dir + '/' + scores_file_name)
-                np.save(filepath_scores, scores_array)
 
-                # Create new df to hold test_index and corresponding age prediction
-                new_df = pd.DataFrame()
-                new_df['index'] = test_index
-                new_df['predictions'] = predictions
+                scores_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_scores.npy'
+
+                np.save(output_dir / scores_file_name, scores_array)
 
                 # Add predictions per test_index to age_predictions
-                for index, row in new_df.iterrows():
-                    col_index = i_repetition + 3
-                    sub_index = int(row['index'])
-                    age_predictions.iloc[[sub_index], [col_index]] = row['predictions']
+                for row, value in zip(test_index, predictions):
+                    age_predictions.iloc[row, age_predictions.columns.get_loc(repetition_column_name)] = value
 
                 # Print results of the CV fold
-                print('Repetition %02d, Fold %02d, R2: %0.3f, MAE: %0.3f, RMSE: %0.3f'
-                      % (i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
+                print('Repetition {:02d}, Fold {:02d}, R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}'
+                      .format(i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
 
         # Save predictions
         age_predictions = age_predictions.drop('Index', axis=1)
@@ -154,7 +153,7 @@ def main():
         cv_r2_mean = np.mean(cv_r2_scores)
         cv_mae_mean = np.mean(cv_mae)
         cv_rmse_mean = np.mean(cv_rmse)
-        print('Mean R2: %0.3f, MAE: %0.3f, RMSE: %0.3f' % (cv_r2_mean, cv_mae_mean, cv_rmse_mean))
+        print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}'.format(cv_r2_mean, cv_mae_mean, cv_rmse_mean))
 
 
 if __name__ == "__main__":
