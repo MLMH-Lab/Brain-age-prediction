@@ -1,4 +1,5 @@
-"""Script to assess sample homogeneity in UK BIOBANK Scanner1: gender and ethnicity
+"""
+Script to assess sample homogeneity in UK BIOBANK Scanner1: gender and ethnicity
 
 Due to the limited number of non-white ethnicity we decided to exclude them from further analysis.
 
@@ -7,6 +8,7 @@ Step 2: Visualisation of distribution
 Step 3: Chi-square contingency analysis
 Step 4: Remove subjects based on chi-square results to achieve homogeneous sample in terms of gender and ethnicity
 
+Note:
 Supplementary data and labels acquired from https://biobank.ctsu.ox.ac.uk/crystal/search.cgi
 """
 import itertools
@@ -107,6 +109,11 @@ def plot_save_histogram(male_ages, female_ages):
 def main():
     # Define random seed for sampling methods
     np.random.seed(42)
+
+    # Create experiment's output directory
+    experiment_name = 'biobank_scanner1'
+    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
+    experiment_dir.mkdir(exist_ok=True)
 
     # Load freesurfer data
     dataset_fs = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
