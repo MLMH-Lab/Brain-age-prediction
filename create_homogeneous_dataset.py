@@ -88,7 +88,7 @@ def main():
 
     dataset_balanced = get_balanced_dataset(dataset)
 
-    homogeneous_ids = pd.DataFrame(dataset_balanced['ID'])
+    homogeneous_ids = pd.DataFrame(dataset_balanced['Participant_ID'])
     homogeneous_ids.to_csv(experiment_dir / ('dataset' + suffix_analysis_phase + '.csv'), index=False)
 
 
