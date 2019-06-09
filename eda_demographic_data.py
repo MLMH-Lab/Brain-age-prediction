@@ -44,7 +44,7 @@ def create_gender_histogram(output_dir, input_df, suffix):
 
     file_name = 'gender_age_dist' + suffix + '.png'
 
-    plt.savefig(output_dir / file_name)
+    plt.savefig(str(output_dir / file_name))
 
 
 def main():
