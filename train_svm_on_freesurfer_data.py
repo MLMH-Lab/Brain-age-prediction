@@ -29,30 +29,34 @@ from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
 
 from utils import COLUMNS_NAME
+
 PROJECT_ROOT = Path.cwd()
 
 warnings.filterwarnings('ignore')
 
 
 def main():
+    # ----------------------------------------------------------------------------------------
+    experiment_name = 'biobank_scanner1'
+
+    # ----------------------------------------------------------------------------------------
+    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
+    svm_dir = experiment_dir / 'SVM'
+    svm_dir.mkdir(exist_ok=True)
+    cv_dir = svm_dir / 'cv'
+    cv_dir.mkdir(exist_ok=True)
+
     # Initialise random seed
     np.random.seed(42)
     random.seed(42)
 
-    # Create output subdirectory
-    experiment_name = 'total'
-
-    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
-    experiment_dir.mkdir(exist_ok=True)
-
     # Load hdf5 file
-    file_name = 'freesurferData_' + experiment_name + '.h5'
-    dataset = pd.read_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name, key='table')
+    dataset = pd.read_hdf(experiment_dir / 'freesurferData.h5', key='table')
 
     # Normalise regional volumes by total intracranial volume (tiv)
     regions = dataset[COLUMNS_NAME].values
 
-    tiv = dataset.EstimatedTotalIntraCranialVol.values[:,np.newaxis]
+    tiv = dataset.EstimatedTotalIntraCranialVol.values[:, np.newaxis]
 
     regions_norm = np.true_divide(regions, tiv)
     age = dataset['Age'].values
@@ -123,16 +127,16 @@ def main():
             model_file_name = '{:02d}_{:02d}_svm.joblib'.format(i_repetition, i_fold)
             params_file_name = '{:02d}_{:02d}_svm_params.joblib'.format(i_repetition, i_fold)
 
-            dump(scaler, experiment_dir / scaler_file_name)
-            dump(params_results, experiment_dir / params_file_name)
-            dump(best_svm, experiment_dir / model_file_name)
+            dump(scaler, cv_dir / scaler_file_name)
+            dump(params_results, cv_dir / params_file_name)
+            dump(best_svm, cv_dir / model_file_name)
 
             # Save model scores r2, MAE, RMSE
             scores_array = np.array([r2_score, absolute_error, root_squared_error])
 
-            scores_file_name = str(i_repetition) + '_' + str(i_fold) + '_svm_scores.npy'
+            scores_file_name = '{:02d}_{:02d}_svm_scores.npy'.format(i_repetition, i_fold)
 
-            np.save(experiment_dir / scores_file_name, scores_array)
+            np.save(cv_dir / scores_file_name, scores_array)
 
             # Add predictions per test_index to age_predictions
             for row, value in zip(test_index, predictions):
@@ -143,7 +147,7 @@ def main():
                   .format(i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
 
     # Save predictions
-    age_predictions.to_csv(experiment_dir / 'age_predictions.csv', index=False)
+    age_predictions.to_csv(svm_dir / 'age_predictions.csv', index=False)
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
