@@ -1,37 +1,40 @@
 """Script to create dataset of UK BIOBANK Scanner1 in hdf5 format"""
 
 from pathlib import Path
+
 import pandas as pd
+
+from helper_functions import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
 
 
 def main():
-    experiment_name = 'total'
+    """Perform the exploratory data analysis."""
+    # ----------------------------------------------------------------------------------------
+    experiment_name = 'biobank_scanner1'
 
-    # Load freesurfer data
-    dataset_fs = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv')
+    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
+    id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
+    freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'
+    # ----------------------------------------------------------------------------------------
 
-    # Load IDs for subjects from balanced dataset
-    ids_homogeneous = pd.read_csv(PROJECT_ROOT / 'outputs' / 'homogeneous_dataset.csv')
+    # Create experiment's output directory
+    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
-    # Make freesurfer dataset homogeneous
-    dataset_balanced = pd.merge(dataset_fs, ids_homogeneous, on='Image_ID')
+    dataset = load_demographic_data(demographic_path, id_path)
 
-    # Loading demographic data to access age per participant
-    dataset_dem = pd.read_csv(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv', sep='\t')
-    dataset_dem = dataset_dem.dropna()
+    # Loading Freesurfer data
+    freesurfer = pd.read_csv(freesurfer_path)
 
-    # Create a new col in FS dataset to contain participant ID
-    dataset_balanced['Participant_ID'] = dataset_balanced['Image_ID'].str.split('_', expand=True)[0]
+    # Create a new col in FS dataset to contain Participant_ID
+    freesurfer['Participant_ID'] = freesurfer['Image_ID'].str.split('_', expand=True)[0]
 
     # Merge FS dataset and demographic dataset to access age
-    dataset_csv = pd.merge(dataset_dem, dataset_balanced, on='Participant_ID')
+    dataset = pd.merge(freesurfer, dataset, on='Participant_ID')
 
-    # Create datasets as hdf5
-    file_name = 'freesurferData_' + experiment_name + '.h5'
-
-    dataset_csv.to_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name, key='table', mode='w')
+    # Create dataset as hdf5
+    dataset.to_hdf(experiment_dir / 'freesurferData.h5', key='table', mode='w')
 
 
 if __name__ == "__main__":
