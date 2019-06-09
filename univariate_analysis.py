@@ -14,6 +14,8 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
+from helper_functions import load_demographic_data
+
 PROJECT_ROOT = Path.cwd()
 
 
@@ -36,6 +38,23 @@ def linear_regression(df, region_name):
 
 
 def main():
+    """Perform the exploratory data analysis."""
+    # ----------------------------------------------------------------------------------------
+    experiment_name = 'biobank_scanner1'
+    suffix_analysis_phase = '_initial_analysis'
+
+    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'ukb22321.csv'
+    id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
+    # ----------------------------------------------------------------------------------------
+
+    # Create experiment's output directory
+    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
+    univariate_dir = experiment_dir / 'univariate_analysis'
+    univariate_dir.mkdir(exist_ok=True)
+
+    dataset = load_demographic_data(demographic_path, id_path)
+
+
     # Loading Freesurfer data
     dataset_fs = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'))
 
