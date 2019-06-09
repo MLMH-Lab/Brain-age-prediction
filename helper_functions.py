@@ -7,7 +7,10 @@ import pandas as pd
 def load_demographic_data(demographic_path, id_path):
     """Load dataset using selected ids."""
 
-    demographic_df = pd.read_csv(demographic_path)
+    if demographic_path.suffix == '.tsv':
+        demographic_df = pd.read_csv(demographic_path, sep='\t')
+    else:
+        demographic_df = pd.read_csv(demographic_path)
 
     # if using UK Biobank supplementary data
     if 'eid' in demographic_df.columns:
@@ -35,7 +38,7 @@ def load_demographic_data(demographic_path, id_path):
 
     # if using participants.tsv file
     else:
-        demographic_df['ID'] = demographic_df['ID'].str.split('-').str[1]
+        demographic_df['ID'] = demographic_df['Participant_ID'].str.split('-').str[1]
 
     demographic_df['ID'] = pd.to_numeric(demographic_df['ID'])
     demographic_df = demographic_df.dropna()
