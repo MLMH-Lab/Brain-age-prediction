@@ -72,7 +72,7 @@ def main():
     # Create a new 'ID' column to match supplementary demographic data
     if 'Participant_ID' in id_df.columns:
         # For create_homogeneous_data.py output
-        id_df['ID'] = id_df['Image_ID'].str.split('-').str[1]
+        id_df['ID'] = id_df['Participant_ID'].str.split('-').str[1]
     else:
         # For freesurferData dataframe
         id_df['ID'] = id_df['Image_ID'].str.split('_').str[0]

@@ -84,3 +84,7 @@ def main():
 
     output_ids_df = pd.DataFrame(dataset['Participant_ID'])
     output_ids_df.to_csv(experiment_dir / output_ids_filename, index=False)
+
+
+if __name__ == "__main__":
+    main()
