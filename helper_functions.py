@@ -7,7 +7,7 @@ import pandas as pd
 def load_demographic_data(demographic_path, id_path):
     """Load dataset using selected ids."""
     # Loading demographic data
-    demographic_df = pd.read_csv(demographic_path, usecols=['eid', '31-0.0', '21003-2.0', '21000-0.0'])
+    demographic_df = pd.read_csv(demographic_path, usecols=['eid', '31-0.0', '21000-0.0', '21003-2.0'])
     demographic_df.columns = ['ID', 'Gender', 'Ethnicity', 'Age']
     demographic_df = demographic_df.dropna()
 
