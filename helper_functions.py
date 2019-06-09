@@ -58,4 +58,8 @@ def load_demographic_data(demographic_path, id_path):
     # Merge supplementary demographic data with ids
     dataset = pd.merge(id_df, demographic_df, on='ID')
 
+    if 'Participant_ID_y' in dataset.columns:
+        dataset['Participant_ID'] = dataset['Participant_ID_x']
+        dataset = dataset.drop(['Participant_ID_x', 'Participant_ID_y'], axis=1)
+
     return dataset
