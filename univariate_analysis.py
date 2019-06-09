@@ -41,10 +41,10 @@ def main():
     """Perform the exploratory data analysis."""
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
-    suffix_analysis_phase = '_initial_analysis'
 
-    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'ukb22321.csv'
+    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
     id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
+    freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'
     # ----------------------------------------------------------------------------------------
 
     # Create experiment's output directory
@@ -54,19 +54,14 @@ def main():
 
     dataset = load_demographic_data(demographic_path, id_path)
 
-
     # Loading Freesurfer data
-    dataset_fs = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'))
-
-    # Loading demographic data
-    dataset_dem = pd.read_csv(str(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'), sep='\t')
-    dataset_dem = dataset_dem.dropna()
+    freesurfer = pd.read_csv(freesurfer_path)
 
     # Create a new col in FS dataset to contain Participant_ID
-    dataset_fs['Participant_ID'] = dataset_fs['Image_ID'].str.split('_', expand=True)[0]
+    freesurfer['Participant_ID'] = freesurfer['Image_ID'].str.split('_', expand=True)[0]
 
     # Merge FS dataset and demographic dataset to access age
-    dataset = pd.merge(dataset_fs, dataset_dem, on='Participant_ID')
+    dataset = pd.merge(freesurfer, dataset, on='Participant_ID')
 
     # Create new df to add normalised regional volumes to
     normalised_df = pd.DataFrame(dataset[['Participant_ID', 'Diagn', 'Gender', 'Age']])
@@ -78,10 +73,12 @@ def main():
                                                           'std_err', 'std_err', 'std_err', 'std_err',
                                                           't_stats', 't_stats', 't_stats', 't_stats',
                                                           'p_val', 'p_val', 'p_val', 'p_val'],
+
                                       "Row_labels_exog": ['Constant', 'Age', 'Age2', 'Age3',
                                                           'Constant', 'Age', 'Age2', 'Age3',
                                                           'Constant', 'Age', 'Age2', 'Age3',
                                                           'Constant', 'Age', 'Age2', 'Age3']})
+
     regression_output.set_index('Row_labels_stat', 'Row_labels_exog')
 
     # Update normalised_df to contain normalised regions for all regions
@@ -99,7 +96,7 @@ def main():
         regression_output[region_name] = np.concatenate((coeff, std_err, t_value, p_value), axis=0)
 
     # Output to csv
-    regression_output.to_csv(str(PROJECT_ROOT / 'outputs' / 'OLS_result.csv'), index=False)
+    regression_output.to_csv(univariate_dir / 'OLS_result.csv', index=False)
 
 
 if __name__ == "__main__":
