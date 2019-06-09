@@ -4,3 +4,4 @@ statsmodels==0.9.0
 tables==3.4.4
 numpy==1.14.2
 sklearn
+https://github.com/JamesRitchie/scikit-rvm/archive/master.zip
