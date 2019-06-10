@@ -12,16 +12,16 @@ from utils import COLUMNS_NAME
 PROJECT_ROOT = Path.cwd()
 
 
-def get_assessed_model_mean_scores(experiment_dir, n_repetitions = 10, n_folds = 10):
+def get_assessed_model_mean_scores(cv_dir, n_repetitions=10, n_folds=10):
     """"""
-    model_scores = []
+    assessed_model_scores = []
 
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
-            model_file_name = '{:02d}_{:02d}_svm_scores.joblib'.format(i_repetition, i_fold)
-            model_scores.append(np.load(experiment_dir / model_file_name))
+            scores_filename = '{:02d}_{:02d}_svm_scores.joblib'.format(i_repetition, i_fold)
+            assessed_model_scores.append(np.load(cv_dir / scores_filename))
 
-    return np.asarray(model_scores, dtype='float32')
+    return np.asarray(assessed_model_scores, dtype='float32')
 
 
 def get_permutation_mean_scores(perm_dir, n_perm=1000):
@@ -75,13 +75,16 @@ def get_permutation_mean_relative_coefs(perm_dir, n_perm=1000):
 
 
 def main():
-    # Create output subdirectory
-    experiment_name = 'total'
+    # ----------------------------------------------------------------------------------------
+    experiment_name = 'biobank_scanner1'
 
+    # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
-    perm_dir = PROJECT_ROOT / 'outputs' / experiment_name / 'permutations'
+    svm_dir = experiment_dir / 'SVM'
+    cv_dir = svm_dir / 'cv'
+    perm_dir = experiment_dir / 'permutations'
 
-    model_scores = get_assessed_model_mean_scores(experiment_dir)
+    model_scores = get_assessed_model_mean_scores(cv_dir)
     perm_scores = get_permutation_mean_scores(perm_dir)
 
     # Perform
