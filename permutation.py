@@ -21,15 +21,18 @@ PROJECT_ROOT = Path.cwd()
 warnings.filterwarnings('ignore')
 
 
-def main(args):
-    # Create output subdirectory
-    experiment_name = 'total'
-    perm_dir = PROJECT_ROOT / 'outputs' / experiment_name / 'permutations'
-    perm_dir.mkdir(exist_ok=True)
+def main(index_min, index_max):
+    """"""
+    # ----------------------------------------------------------------------------------------
+    experiment_name = 'biobank_scanner1'
+
+    # ----------------------------------------------------------------------------------------
+    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
+    permutations_dir = experiment_dir / 'permutations'
+    permutations_dir.mkdir(exist_ok=True)
 
     # Load hdf5 file
-    file_name = 'freesurferData_' + experiment_name + '.h5'
-    dataset = pd.read_hdf(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / file_name, key='table')
+    dataset = pd.read_hdf(experiment_dir / 'freesurferData.h5', key='table')
 
     # Normalise regional volumes by total intracranial volume (tiv)
     regions = dataset[COLUMNS_NAME].values
@@ -41,12 +44,12 @@ def main(args):
 
     n_features = regions.shape[1]
 
-    n_repetitions = 1
-    n_folds = 3
-    n_nested_folds = 3
+    n_repetitions = 10
+    n_folds = 10
+    n_nested_folds = 5
 
     # Random permutation loop
-    for i_perm in range(args.index_min, args.index_max):
+    for i_perm in range(index_min, index_max):
 
         # Initialise random seed
         np.random.seed(i_perm)
@@ -133,8 +136,8 @@ def main(args):
         mean_scores = np.array([cv_r2_mean, cv_mae_mean, cv_rmse_mean])
 
         # Save arrays with permutation coefs and scores as np files
-        filepath_coef = perm_dir / ('perm_coef_{:04d}.npy'.format(i_perm))
-        filepath_scores = perm_dir / ('perm_scores_{:04d}.npy'.format(i_perm))
+        filepath_coef = permutations_dir / ('perm_coef_{:04d}.npy'.format(i_perm))
+        filepath_scores = permutations_dir / ('perm_scores_{:04d}.npy'.format(i_perm))
         np.save(str(filepath_coef), cv_coef_mean)
         np.save(str(filepath_scores), mean_scores)
 
@@ -145,4 +148,4 @@ if __name__ == "__main__":
     parser.add_argument('index_max', help='index of last subject to run', type=int)
     args = parser.parse_args()
 
-    main(args)
+    main(args.index_min, args.index_max)
