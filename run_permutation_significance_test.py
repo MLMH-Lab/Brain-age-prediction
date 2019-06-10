@@ -1,11 +1,8 @@
 """Significance testing of SVM permutations for BIOBANK Scanner1"""
-
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import os
-
-from sklearn.externals import joblib
+from sklearn.externals.joblib import load
 
 from utils import COLUMNS_NAME
 
@@ -40,22 +37,22 @@ def get_permutation_mean_scores(perm_dir, n_perm=1000):
     return np.asarray(perm_scores, dtype='float32')
 
 
-def get_permutation_p_value(assessed_score, perm_scores):
+def get_permutation_p_value(assessed_value, perm_values):
     """"""
-    return (np.sum(assessed_score >= perm_scores) + 1.0) / (perm_scores.shape[0] + 1)
+    return (np.sum(assessed_value >= perm_values) + 1.0) / (perm_values.shape[0] + 1)
 
 
-def get_assessed_model_coefs(experiment_dir, n_repetitions = 10, n_folds = 10):
+def get_assessed_model_coefs(experiment_dir, n_repetitions=10, n_folds=10):
     """"""
-    model_coefs = []
+    assessed_model_coefs = []
 
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
-            model_file_name = '{:02d}_{:02d}_svm.joblib'.format(i_repetition, i_fold)
-            model = np.load(experiment_dir / model_file_name)
-            model_coefs.append(model.coef_)
+            model_filename = '{:02d}_{:02d}_svm.joblib'.format(i_repetition, i_fold)
+            model = load(experiment_dir / model_filename)
+            assessed_model_coefs.append(model.coef_)
 
-    return np.asarray(model_coefs, dtype='float32')
+    return np.asarray(assessed_model_coefs, dtype='float32')
 
 
 def get_permutation_mean_relative_coefs(perm_dir, n_perm=1000):
@@ -84,40 +81,42 @@ def main():
     cv_dir = svm_dir / 'cv'
     perm_dir = experiment_dir / 'permutations'
 
-    model_scores = get_assessed_model_mean_scores(cv_dir)
+    assessed_model_scores = get_assessed_model_mean_scores(cv_dir)
     perm_scores = get_permutation_mean_scores(perm_dir)
 
     # Perform
-    scores_names = ['R2', 'MAE', 'RMSE']
+    score_names = ['R2', 'MAE', 'RMSE']
     p_value_scores = []
-    for (score_name, i_score) in zip(scores_names, range(model_scores.shape[1])):
-        p_value = get_permutation_p_value(np.mean(model_scores[:, i_score]), perm_scores[:,i_score])
+    for i_score, score_name in enumerate(score_names):
+        p_value = get_permutation_p_value(np.mean(assessed_model_scores[:, i_score]), perm_scores[:, i_score])
         p_value_scores.append(p_value)
 
         print('{:} : {:4.3f}'.format(score_name, p_value))
 
-    scores_csv = pd.DataFrame([np.mean(model_scores, axis=0), p_value_scores],
-                              columns=scores_names,
+    scores_csv = pd.DataFrame([np.mean(assessed_model_scores, axis=0), p_value_scores],
+                              columns=score_names,
                               index=['score', 'p value'])
-    scores_csv.to_csv(PROJECT_ROOT / 'outputs' / experiment_name / 'scores_sig.csv')
 
-    # Perform x
-    model_coef = get_assessed_model_coefs(experiment_dir)
-    model_coef = np.abs(model_coef) / np.sum(np.abs(model_coef), axis=-1)
-    perm_relative_coefs = get_permutation_mean_relative_coefs(perm_dir)
+    scores_csv.to_csv(perm_dir / 'scores_sig.csv')
 
-    p_value_coef = []
-    for i in range(model_coef.shape[0]):
-        p_value = get_permutation_p_value(np.mean(model_coef[:, i_score]), perm_relative_coefs[:, i_score])
-        p_value_coef.append(p_value)
+    # Perform
+    assessed_model_coefs = get_assessed_model_coefs(experiment_dir)
+    assessed_mean_relative_coefs = np.abs(assessed_model_coefs) / np.sum(np.abs(assessed_model_coefs), axis=-1)
+    perm_mean_relative_coefs = get_permutation_mean_relative_coefs(perm_dir)
+
+    p_value_coefs = []
+    for i in range(assessed_mean_relative_coefs.shape[0]):
+        p_value = get_permutation_p_value(np.mean(assessed_mean_relative_coefs[:, i_score]),
+                                          perm_mean_relative_coefs[:, i_score])
+        p_value_coefs.append(p_value)
 
     # Save as csv
-    coef_csv = pd.DataFrame([np.mean(model_coef, axis=0), p_value_coef],
+    coef_csv = pd.DataFrame([np.mean(assessed_mean_relative_coefs, axis=0), p_value_coefs],
                             columns=COLUMNS_NAME,
                             index=['coefficient', 'p value'])
     coef_csv = coef_csv.transpose()
     coef_csv = coef_csv.sort_values(by=['p value'])
-    coef_csv.to_csv(PROJECT_ROOT / 'outputs' / experiment_name / 'coef_sig.csv')
+    coef_csv.to_csv(perm_dir / 'coefs_sig.csv')
 
 
 if __name__ == "__main__":
