@@ -42,8 +42,6 @@ def main(index_min, index_max):
     regions_norm = np.true_divide(regions, tiv)
     age = dataset['Age'].values
 
-    n_features = regions.shape[1]
-
     n_repetitions = 10
     n_folds = 10
     n_nested_folds = 5
@@ -60,15 +58,16 @@ def main(index_min, index_max):
 
         # Create variables to hold best model coefficients and scores per permutation
         cv_row = n_repetitions * n_folds
+        n_features = regions.shape[1]
         cv_coef = np.zeros([cv_row, n_features])
 
         # Set i_iteration for adding coef arrays per repetition per fold to cv_coef
         i_iteration = 0
 
         # Create variable to hold CV scores per permutation
-        cv_r2_scores = np.array([[]])
-        cv_mae = np.array([[]])
-        cv_rmse = np.array([[]])
+        cv_r2_scores = []
+        cv_mae = []
+        cv_rmse = []
 
         # Loop to repeat n_folds-fold CV n_repetitions times
         for i_repetition in range(n_repetitions):
@@ -76,7 +75,6 @@ def main(index_min, index_max):
 
             # Create 10-fold cross-validator, stratified by age
             skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
-
             for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
                 x_train, x_test = regions_norm[train_index], regions_norm[test_index]
                 y_train, y_test = age_permuted[train_index], age_permuted[test_index]
@@ -111,9 +109,9 @@ def main(index_min, index_max):
                 root_squared_error = sqrt(mean_squared_error(y_test, predictions))
                 r2_score = best_svm.score(x_test, y_test)
 
-                cv_r2_scores = np.append(cv_r2_scores, r2_score)
-                cv_mae = np.append(cv_mae, absolute_error)
-                cv_rmse = np.append(cv_rmse, root_squared_error)
+                cv_r2_scores.append(r2_score)
+                cv_mae.append(absolute_error)
+                cv_rmse.append(root_squared_error)
 
                 i_iteration += 1
 
