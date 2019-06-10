@@ -123,20 +123,20 @@ def main():
             cv_rmse.append(root_squared_error)
 
             # Save scaler, model and model parameters
-            scaler_file_name = '{:02d}_{:02d}_scaler.joblib'.format(i_repetition, i_fold)
-            model_file_name = '{:02d}_{:02d}_svm.joblib'.format(i_repetition, i_fold)
-            params_file_name = '{:02d}_{:02d}_svm_params.joblib'.format(i_repetition, i_fold)
+            scaler_filename = '{:02d}_{:02d}_scaler.joblib'.format(i_repetition, i_fold)
+            model_filename = '{:02d}_{:02d}_svm.joblib'.format(i_repetition, i_fold)
+            params_filename = '{:02d}_{:02d}_svm_params.joblib'.format(i_repetition, i_fold)
 
-            dump(scaler, cv_dir / scaler_file_name)
-            dump(params_results, cv_dir / params_file_name)
-            dump(best_svm, cv_dir / model_file_name)
+            dump(scaler, cv_dir / scaler_filename)
+            dump(params_results, cv_dir / params_filename)
+            dump(best_svm, cv_dir / model_filename)
 
             # Save model scores r2, MAE, RMSE
             scores_array = np.array([r2_score, absolute_error, root_squared_error])
 
-            scores_file_name = '{:02d}_{:02d}_svm_scores.npy'.format(i_repetition, i_fold)
+            scores_filename = '{:02d}_{:02d}_svm_scores.npy'.format(i_repetition, i_fold)
 
-            np.save(cv_dir / scores_file_name, scores_array)
+            np.save(cv_dir / scores_filename, scores_array)
 
             # Add predictions per test_index to age_predictions
             for row, value in zip(test_index, predictions):
