@@ -24,8 +24,6 @@ def main():
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     bootstrap_dir = experiment_dir / 'bootstrap_analysis'
     bootstrap_dir.mkdir(exist_ok=True)
-    ids_dir = bootstrap_dir / 'ids'
-    ids_dir.mkdir(exist_ok=True)
 
     # Set random seed for random sampling of subjects
     np.random.seed(42)
@@ -39,8 +37,10 @@ def main():
     # Loop to create 50 bootstrap samples that each contain 1 male, 1 female per age group/year
     for i_n_subjects in range(1, 51):
         print(i_n_subjects)
-        ids_with_n_subjects_dir = ids_dir / '{:02d}'.format(i_n_subjects)
+        ids_with_n_subjects_dir = bootstrap_dir / '{:02d}'.format(i_n_subjects)
         ids_with_n_subjects_dir.mkdir(exist_ok=True)
+        ids_dir = ids_with_n_subjects_dir / 'ids'
+        ids_dir.mkdir(exist_ok=True)
 
         for i_bootstrap in range(10):
             # Create empty df to add bootstrap subjects to
@@ -62,7 +62,7 @@ def main():
 
             # Export dataset_bootstrap as csv
             ids_filename = 'homogeneous_bootstrap_{:02d}_n_{:02d}.csv'.format(i_bootstrap, i_n_subjects)
-            dataset_bootstrap.to_csv(ids_with_n_subjects_dir / ids_filename, index=False)
+            dataset_bootstrap.to_csv(ids_dir / ids_filename, index=False)
 
 
 if __name__ == "__main__":
