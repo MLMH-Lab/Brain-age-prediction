@@ -16,7 +16,6 @@ def main():
     """"""
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
-    suffix_analysis_phase = '_homogeneous'
 
     demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
     id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
@@ -38,28 +37,32 @@ def main():
     age_max = int(dataset['Age'].max())  # 73
 
     # Loop to create 50 bootstrap samples that each contain 1 male, 1 female per age group/year
-    for i in range(1, 51):
+    for i_n_subjects in range(1, 51):
+        print(i_n_subjects)
+        ids_with_n_subjects_dir = ids_dir / '{:02d}'.format(i_n_subjects)
+        ids_with_n_subjects_dir.mkdir(exist_ok=True)
 
-        # Create empty df to add bootstrap subjects to
-        dataset_bootstrap = pd.DataFrame(columns=dataset.columns)
+        for i_bootstrap in range(10):
+            # Create empty df to add bootstrap subjects to
+            dataset_bootstrap = pd.DataFrame(columns=['Participant_ID'])
 
-        # Loop over ages
-        for age in range(age_min, (age_max + 1)):
+            # Loop over ages
+            for age in range(age_min, (age_max + 1)):
 
-            # Get dataset for specific age only
-            age_group = dataset.groupby('Age').get_group(age)
+                # Get dataset for specific age only
+                age_group = dataset.groupby('Age').get_group(age)
 
-            # Loop over genders (0: female, 1:male)
-            for gender in range(2):
-                gender_group = age_group.groupby('Gender').get_group(gender)
+                # Loop over genders (0: female, 1:male)
+                for gender in range(2):
+                    gender_group = age_group.groupby('Gender').get_group(gender)
 
-                # Extract random subject of that gender and add to dataset_bootstrap
-                random_row = gender_group.sample(n=i, replace=True)
-                dataset_bootstrap = pd.concat([dataset_bootstrap, random_row])
+                    # Extract random subject of that gender and add to dataset_bootstrap
+                    random_row = gender_group.sample(n=i_n_subjects, replace=True)
+                    dataset_bootstrap = pd.concat([dataset_bootstrap, pd.DataFrame(random_row['Participant_ID'])])
 
-        # Export dataset_bootstrap as csv
-        ids_filename = 'homogeneous_bootstrap_{:02d}.csv'.format(i)
-        dataset_bootstrap.to_csv(ids_dir / ids_filename, index=False, columns=['ID'])
+            # Export dataset_bootstrap as csv
+            ids_filename = 'homogeneous_bootstrap_{:02d}_n_{:02d}.csv'.format(i_bootstrap, i_n_subjects)
+            dataset_bootstrap.to_csv(ids_with_n_subjects_dir / ids_filename, index=False)
 
 
 if __name__ == "__main__":
