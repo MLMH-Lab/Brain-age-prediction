@@ -3,31 +3,42 @@ Script to create gender-homogeneous bootstrap datasets to feed into create_h5_bo
 Creates 50 bootstrap samples with increasing size
 """
 from pathlib import Path
+
 import pandas as pd
 import numpy as np
-import os
+
+from helper_functions import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
 
 
 def main():
-    # Load final homogeneous dataset with Image IDs, age and gender variables
-    dataset = pd.read_hdf(PROJECT_ROOT / 'data/BIOBANK/Scanner1/homogeneous_dataset_freesurferData.h5', key='table')
+    """"""
+    # ----------------------------------------------------------------------------------------
+    experiment_name = 'biobank_scanner1'
+    suffix_analysis_phase = '_homogeneous'
+
+    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
+    id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
+    # ----------------------------------------------------------------------------------------
+    # Create experiment's output directory
+    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
+    bootstrap_dir = experiment_dir / 'bootstrap_analysis'
+    bootstrap_dir.mkdir(exist_ok=True)
+    ids_dir = bootstrap_dir / 'ids'
+    ids_dir.mkdir(exist_ok=True)
 
     # Set random seed for random sampling of subjects
     np.random.seed(42)
 
-    # Find range of ages in homogeneous dataset
-    age_min = int(dataset['Age'].min()) # 47
-    age_max = int(dataset['Age'].max()) # 73
+    dataset = load_demographic_data(demographic_path, id_path)
 
-    # Define or create directory to save bootstrap datasets
-    bootstrap_dir = Path(str(PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'bootstrap' / 'bootstrap_ids'))
-    if not os.path.exists(str(bootstrap_dir)):
-        os.makedirs(str(bootstrap_dir))
+    # Find range of ages in homogeneous dataset
+    age_min = int(dataset['Age'].min())  # 47
+    age_max = int(dataset['Age'].max())  # 73
 
     # Loop to create 50 bootstrap samples that each contain 1 male, 1 female per age group/year
-    for i in range(1,51):
+    for i in range(1, 51):
 
         # Create empty df to add bootstrap subjects to
         dataset_bootstrap = pd.DataFrame(columns=dataset.columns)
@@ -47,8 +58,8 @@ def main():
                 dataset_bootstrap = pd.concat([dataset_bootstrap, random_row])
 
         # Export dataset_bootstrap as csv
-        file_name = 'homogeneous_bootstrap_' + str(i) + '.csv'
-        dataset_bootstrap.to_csv(str(bootstrap_dir / file_name), index=False, columns=['Image_ID'])
+        ids_filename = 'homogeneous_bootstrap_{:02d}.csv'.format(i)
+        dataset_bootstrap.to_csv(ids_dir / ids_filename, index=False, columns=['ID'])
 
 
 if __name__ == "__main__":
