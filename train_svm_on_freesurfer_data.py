@@ -39,6 +39,7 @@ def main():
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
 
+    dataset_path = PROJECT_ROOT / 'outputs' / experiment_name / 'freesurferData.h5'
     # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     svm_dir = experiment_dir / 'SVM'
@@ -51,7 +52,7 @@ def main():
     random.seed(42)
 
     # Load hdf5 file
-    dataset = pd.read_hdf(experiment_dir / 'freesurferData.h5', key='table')
+    dataset = pd.read_hdf(dataset_path, key='table')
 
     # Normalise regional volumes by total intracranial volume (tiv)
     regions = dataset[COLUMNS_NAME].values
