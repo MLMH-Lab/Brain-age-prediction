@@ -9,7 +9,7 @@ from helper_functions import load_demographic_data
 PROJECT_ROOT = Path.cwd()
 
 
-def create_dataset(experiment_name, demographic_path, id_path, freesurfer_path, output_dir):
+def create_dataset(demographic_path, id_path, freesurfer_path, output_dir):
     """Perform the exploratory data analysis."""
     dataset = load_demographic_data(demographic_path, id_path)
 
@@ -36,4 +36,4 @@ if __name__ == "__main__":
     output_dir = PROJECT_ROOT / 'outputs' / experiment_name
     # ----------------------------------------------------------------------------------------
 
-    create_dataset()
+    create_dataset(demographic_path, id_path, freesurfer_path, output_dir)
