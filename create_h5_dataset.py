@@ -9,7 +9,7 @@ from helper_functions import load_demographic_data
 PROJECT_ROOT = Path.cwd()
 
 
-def create_dataset(demographic_path, id_path, freesurfer_path, output_dir):
+def create_dataset(demographic_path, id_path, freesurfer_path, dataset_path):
     """Perform the exploratory data analysis."""
     dataset = load_demographic_data(demographic_path, id_path)
 
@@ -23,7 +23,7 @@ def create_dataset(demographic_path, id_path, freesurfer_path, output_dir):
     dataset = pd.merge(freesurfer, dataset, on='Participant_ID')
 
     # Create dataset as hdf5
-    dataset.to_hdf(output_dir / 'freesurferData.h5', key='table', mode='w')
+    dataset.to_hdf(dataset_path, key='table', mode='w')
 
 
 if __name__ == "__main__":
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
     id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
     freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'
-    output_dir = PROJECT_ROOT / 'outputs' / experiment_name
+    dataset_path = PROJECT_ROOT / 'outputs' / experiment_name / 'freesurferData.h5'
     # ----------------------------------------------------------------------------------------
 
-    create_dataset(demographic_path, id_path, freesurfer_path, output_dir)
+    create_dataset(demographic_path, id_path, freesurfer_path, dataset_path)
