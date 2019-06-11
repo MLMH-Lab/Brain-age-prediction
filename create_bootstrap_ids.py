@@ -17,7 +17,7 @@ def main():
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
 
-    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
+    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants_scanner1.tsv'
     id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
     # ----------------------------------------------------------------------------------------
     # Create experiment's output directory
@@ -42,7 +42,8 @@ def main():
         ids_dir = ids_with_n_subjects_dir / 'ids'
         ids_dir.mkdir(exist_ok=True)
 
-        for i_bootstrap in range(10):
+        n_bootstrap = 1000
+        for i_bootstrap in range(n_bootstrap):
             # Create empty df to add bootstrap subjects to
             dataset_bootstrap = pd.DataFrame(columns=['Participant_ID'])
 
