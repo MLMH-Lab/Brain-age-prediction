@@ -21,7 +21,7 @@ def main():
     experiment_name = 'biobank_scanner1'
 
     demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'ukb22321.csv'
-    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants_scanner1.tsv'
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
     id_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'
 
     output_ids_filename = 'cleaned_ids.csv'
