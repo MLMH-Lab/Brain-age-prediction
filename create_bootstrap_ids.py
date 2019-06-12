@@ -17,7 +17,7 @@ def main():
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
 
-    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants_scanner1.tsv'
+    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
     id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
     # ----------------------------------------------------------------------------------------
     # Create experiment's output directory
@@ -62,7 +62,7 @@ def main():
                     dataset_bootstrap = pd.concat([dataset_bootstrap, pd.DataFrame(random_row['Participant_ID'])])
 
             # Export dataset_bootstrap as csv
-            ids_filename = 'homogeneous_bootstrap_{:02d}_n_{:02d}.csv'.format(i_bootstrap, i_n_subjects)
+            ids_filename = 'homogeneous_bootstrap_{:04d}_n_{:02d}.csv'.format(i_bootstrap, i_n_subjects)
             dataset_bootstrap.to_csv(ids_dir / ids_filename, index=False)
 
 
