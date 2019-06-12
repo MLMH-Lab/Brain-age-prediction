@@ -73,7 +73,6 @@ def main():
 
     n_repetitions = 10
     n_folds = 10
-    n_nested_folds = 5
 
     for i_repetition in range(n_repetitions):
         # Create new empty column in age_predictions df to save age predictions of this repetition
@@ -112,7 +111,7 @@ def main():
 
             # Save scaler, model and model parameters
             scaler_filename = '{:02d}_{:02d}_scaler.joblib'.format(i_repetition, i_fold)
-            model_filename = '{:02d}_{:02d}_gpr.joblib'.format(i_repetition, i_fold)
+            model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
 
             dump(scaler, cv_dir / scaler_filename)
             dump(gpr, cv_dir / model_filename)
@@ -120,7 +119,7 @@ def main():
             # Save model scores r2, MAE, RMSE
             scores_array = np.array([r2_score, absolute_error, root_squared_error])
 
-            scores_filename = '{:02d}_{:02d}_gpr_scores.npy'.format(i_repetition, i_fold)
+            scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
 
             np.save(cv_dir / scores_filename, scores_array)
 

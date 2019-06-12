@@ -125,8 +125,8 @@ def main():
 
             # Save scaler, model and model parameters
             scaler_filename = '{:02d}_{:02d}_scaler.joblib'.format(i_repetition, i_fold)
-            model_filename = '{:02d}_{:02d}_svm.joblib'.format(i_repetition, i_fold)
-            params_filename = '{:02d}_{:02d}_svm_params.joblib'.format(i_repetition, i_fold)
+            model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
+            params_filename = '{:02d}_{:02d}_params.joblib'.format(i_repetition, i_fold)
 
             dump(scaler, cv_dir / scaler_filename)
             dump(params_results, cv_dir / params_filename)
@@ -135,7 +135,7 @@ def main():
             # Save model scores r2, MAE, RMSE
             scores_array = np.array([r2_score, absolute_error, root_squared_error])
 
-            scores_filename = '{:02d}_{:02d}_svm_scores.npy'.format(i_repetition, i_fold)
+            scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
 
             np.save(cv_dir / scores_filename, scores_array)
 
