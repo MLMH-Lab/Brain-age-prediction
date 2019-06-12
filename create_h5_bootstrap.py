@@ -27,10 +27,10 @@ def main():
 
     # Loop over the 50 samples created in script create_bootstrap_ids
     for i_bootstrap in range(n_bootstrap):
-        ids_filename = 'homogeneous_bootstrap_{:02d}_n_{:02d}.csv'.format(i_bootstrap, i_n_subjects)
+        ids_filename = 'homogeneous_bootstrap_{:04d}_n_{:02d}.csv'.format(i_bootstrap, i_n_subjects)
         id_path = ids_with_n_subjects_dir / 'ids' / ids_filename
 
-        dataset_filename = 'homogeneous_bootstrap_{:02d}_n_{:02d}.h5'.format(i_bootstrap, i_n_subjects)
+        dataset_filename = 'homogeneous_bootstrap_{:04d}_n_{:02d}.h5'.format(i_bootstrap, i_n_subjects)
         dataset_path = dataset_dir / dataset_filename
 
         create_dataset(demographic_path, id_path, freesurfer_path, dataset_path)
