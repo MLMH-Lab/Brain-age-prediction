@@ -8,6 +8,7 @@ from pathlib import Path
 import random
 import warnings
 
+from scipy import stats
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import KFold
@@ -62,6 +63,7 @@ def main():
         cv_r2_scores = []
         cv_mae = []
         cv_rmse = []
+        cv_age_error_corr = []
 
         n_repetitions = 2
         n_folds = 2
@@ -85,7 +87,6 @@ def main():
                 # search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
                 search_space = {'C': [2 ** -3, 2 ** -1]}
 
-
                 nested_kf = KFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
                 gridsearch = GridSearchCV(svm,
@@ -103,18 +104,24 @@ def main():
                 absolute_error = mean_absolute_error(y_test, predictions)
                 root_squared_error = sqrt(mean_squared_error(y_test, predictions))
                 r2_score = best_svm.score(x_test, y_test)
+                age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
                 cv_r2_scores.append(r2_score)
                 cv_mae.append(absolute_error)
                 cv_rmse.append(root_squared_error)
+                cv_age_error_corr.append(age_error_corr)
 
         # Variables for CV means across all repetitions
         cv_r2_mean = np.mean(cv_r2_scores)
         cv_mae_mean = np.mean(cv_mae)
         cv_rmse_mean = np.mean(cv_rmse)
-        print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}'.format(cv_r2_mean, cv_mae_mean, cv_rmse_mean))
+        cv_age_error_corr_mean = np.mean(np.abs(cv_age_error_corr))
+        print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, CORR: {:0.3f}'.format(cv_r2_mean,
+                                                                                    cv_mae_mean,
+                                                                                    cv_rmse_mean,
+                                                                                    cv_age_error_corr_mean))
 
-        mean_scores = np.array([cv_r2_mean, cv_mae_mean, cv_rmse_mean])
+        mean_scores = np.array([cv_r2_mean, cv_mae_mean, cv_rmse_mean, cv_age_error_corr_mean])
 
         # Save arrays with permutation coefs and scores as np files
         filepath_scores = scores_dir / ('boot_scores_{:04d}.npy'.format(i_bootstrap))
