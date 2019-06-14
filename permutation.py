@@ -5,6 +5,7 @@ import random
 import time
 import warnings
 
+from scipy import stats
 import pandas as pd
 import numpy as np
 import argparse
@@ -69,6 +70,7 @@ def main(index_min, index_max):
         cv_r2_scores = []
         cv_mae = []
         cv_rmse = []
+        cv_age_error_corr = []
 
         # Loop to repeat n_folds-fold CV n_repetitions times
         for i_repetition in range(n_repetitions):
@@ -109,10 +111,12 @@ def main(index_min, index_max):
                 absolute_error = mean_absolute_error(y_test, predictions)
                 root_squared_error = sqrt(mean_squared_error(y_test, predictions))
                 r2_score = best_svm.score(x_test, y_test)
+                age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
                 cv_r2_scores.append(r2_score)
                 cv_mae.append(absolute_error)
                 cv_rmse.append(root_squared_error)
+                cv_age_error_corr.append(age_error_corr)
 
                 i_iteration += 1
 
@@ -128,11 +132,12 @@ def main(index_min, index_max):
         cv_r2_mean = np.mean(cv_r2_scores)
         cv_mae_mean = np.mean(cv_mae)
         cv_rmse_mean = np.mean(cv_rmse)
+        cv_age_error_corr_mean = np.mean(np.abs(cv_rmse))
 
-        print('{:d}: Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}'
-              .format(i_perm, cv_r2_mean, cv_mae_mean, cv_rmse_mean))
+        print('{:d}: Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, Error corr: {:0.3f}'
+              .format(i_perm, cv_r2_mean, cv_mae_mean, cv_rmse_mean, cv_age_error_corr_mean))
 
-        mean_scores = np.array([cv_r2_mean, cv_mae_mean, cv_rmse_mean])
+        mean_scores = np.array([cv_r2_mean, cv_mae_mean, cv_rmse_mean, cv_age_error_corr_mean])
 
         # Save arrays with permutation coefs and scores as np files
         filepath_coef = permutations_dir / ('perm_coef_{:04d}.npy'.format(i_perm))
