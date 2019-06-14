@@ -29,8 +29,6 @@ def main():
 
     i_n_subjects = 1
     n_bootstrap = 1000
-
-    dataset_path = PROJECT_ROOT / 'outputs' / experiment_name / 'freesurferData.h5'
     # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
