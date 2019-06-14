@@ -21,6 +21,7 @@ import warnings
 
 import pandas as pd
 import numpy as np
+from scipy import stats
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
@@ -66,6 +67,7 @@ def main():
     cv_r2_scores = []
     cv_mae = []
     cv_rmse = []
+    cv_age_error_corr = []
 
     # Create dataframe to hold actual and predicted ages
     age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
@@ -95,7 +97,7 @@ def main():
             # Systematic search for best hyperparameters
             kernel = DotProduct()
 
-            gpr = GaussianProcessRegressor(kernel=kernel, random_state = 0)
+            gpr = GaussianProcessRegressor(kernel=kernel, random_state=0)
 
             gpr.fit(x_train, y_train)
 
@@ -104,10 +106,12 @@ def main():
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
             r2_score = gpr.score(x_test, y_test)
+            age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
             cv_r2_scores.append(r2_score)
             cv_mae.append(absolute_error)
             cv_rmse.append(root_squared_error)
+            cv_age_error_corr.append(age_error_corr)
 
             # Save scaler, model and model parameters
             scaler_filename = '{:02d}_{:02d}_scaler.joblib'.format(i_repetition, i_fold)
@@ -117,7 +121,7 @@ def main():
             dump(gpr, cv_dir / model_filename)
 
             # Save model scores r2, MAE, RMSE
-            scores_array = np.array([r2_score, absolute_error, root_squared_error])
+            scores_array = np.array([r2_score, absolute_error, root_squared_error, cv_age_error_corr])
 
             scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
 
@@ -128,8 +132,8 @@ def main():
                 age_predictions.iloc[row, age_predictions.columns.get_loc(repetition_column_name)] = value
 
             # Print results of the CV fold
-            print('Repetition {:02d}, Fold {:02d}, R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}'
-                  .format(i_repetition, i_fold, r2_score, absolute_error, root_squared_error))
+            print('Repetition {:02d}, Fold {:02d}, R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, CORR: {:0.3f}'
+                  .format(i_repetition, i_fold, r2_score, absolute_error, root_squared_error, age_error_corr))
 
     # Save predictions
     age_predictions.to_csv(gpr_dir / 'age_predictions.csv', index=False)
@@ -138,7 +142,11 @@ def main():
     cv_r2_mean = np.mean(cv_r2_scores)
     cv_mae_mean = np.mean(cv_mae)
     cv_rmse_mean = np.mean(cv_rmse)
-    print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}'.format(cv_r2_mean, cv_mae_mean, cv_rmse_mean))
+    cv_age_error_corr_mean = np.mean(np.abs(cv_rmse))
+    print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, CORR: {:0.3f}'.format(cv_r2_mean,
+                                                                                cv_mae_mean,
+                                                                                cv_rmse_mean,
+                                                                                cv_age_error_corr_mean))
 
 
 if __name__ == "__main__":
