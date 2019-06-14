@@ -28,7 +28,7 @@ def main():
     experiment_name = 'biobank_scanner1'
 
     i_n_subjects = 50
-    n_bootstrap = 1000
+    n_bootstrap = 500
     # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
@@ -63,9 +63,9 @@ def main():
         cv_mae = []
         cv_rmse = []
 
-        n_repetitions = 10
-        n_folds = 10
-        n_nested_folds = 5
+        n_repetitions = 2
+        n_folds = 2
+        n_nested_folds = 2
 
         for i_repetition in range(n_repetitions):
             # Create 10-fold cross-validator
@@ -82,7 +82,9 @@ def main():
                 # Systematic search for best hyperparameters
                 svm = LinearSVC(loss='hinge')
 
-                search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
+                # search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
+                search_space = {'C': [2 ** -3, 2 ** -1]}
+
 
                 nested_kf = KFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
@@ -90,7 +92,7 @@ def main():
                                           param_grid=search_space,
                                           scoring='neg_mean_absolute_error',
                                           refit=True, cv=nested_kf,
-                                          verbose=0, n_jobs=1)
+                                          verbose=0, n_jobs=28)
 
                 gridsearch.fit(x_train, y_train)
 
