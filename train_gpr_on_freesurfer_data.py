@@ -136,7 +136,7 @@ def main():
                   .format(i_repetition, i_fold, r2_score, absolute_error, root_squared_error, age_error_corr))
 
     # Save predictions
-    age_predictions.to_csv(gpr_dir / 'age_predictions.csv', index=False)
+    age_predictions.to_csv(gpr_dir / 'age_predictions.csv')
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
