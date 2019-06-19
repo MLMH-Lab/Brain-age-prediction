@@ -20,52 +20,6 @@ PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
 
 
 def main():
-    # Define what subjects dataset should contain: total, male or female
-    subjects = 'total'
-
-    # Define output subdirectory
-    output_dir = PROJECT_ROOT / 'outputs' / subjects
-
-    # Load SVR age predictions
-    age_pred = pd.read_csv(output_dir / 'age_predictions.csv')
-
-    # Add new columns to age_pred as mean, median, std of age predictions
-    pred_repetition = 10
-    last_col = pred_repetition + 2
-    age_pred['Mean_predicted_age'] = age_pred.iloc[:, 2:last_col].mean(axis=1)
-    age_pred['Median_predicted_age'] = age_pred.iloc[:, 2:last_col].median(axis=1)
-    age_pred['Std_predicted_age'] = age_pred.iloc[:, 2:last_col].std(axis=1)
-
-    # Add new columns to age_pred for age prediction error BrainAGE (Brain Age Gap Estimate)
-    # BrainAGE is the difference between mean/median predicted and chronological age
-    age_pred['BrainAGE_predmean'] = age_pred['Mean_predicted_age'] - age_pred['Age']
-    age_pred['BrainAGE_predmedian'] = age_pred['Median_predicted_age'] - age_pred['Age']
-
-    # Add new columns to age_pred for absolute BrainAGE
-    age_pred['Abs_BrainAGE_predmean'] = abs(age_pred['BrainAGE_predmean'])
-    age_pred['Abs_BrainAGE_predmedian'] = abs(age_pred['BrainAGE_predmedian'])
-
-    # Add new columns to age_pred for BrainAGER (Brain Age Gap Estimate Residualized)
-    # BrainAGER is a more robust measure of age prediction error (see Le et al. 2018)
-    x = age_pred['Age']
-    y = age_pred['Mean_predicted_age']
-    x = sm.add_constant(x)
-    brainager_model_predmean = sm.OLS(y, x)
-    brainager_results_predmean = brainager_model_predmean.fit()
-    brainager_residuals_predmean = brainager_results_predmean.resid
-    age_pred['BrainAGER_predmean'] = brainager_residuals_predmean
-
-    x = age_pred['Age']
-    y = age_pred['Median_predicted_age']
-    x = sm.add_constant(x)
-    brainager_model_predmedian = sm.OLS(y, x)
-    brainager_results_predmedian = brainager_model_predmedian.fit()
-    brainager_residuals_predmedian = brainager_results_predmedian.resid
-    age_pred['BrainAGER_predmedian'] = brainager_residuals_predmedian
-
-    # Add new columsn to age_pred for absolute BrainAGER
-    age_pred['Abs_BrainAGER_predmean'] = abs(age_pred['BrainAGER_predmean'])
-    age_pred['Abs_BrainAGER_predmedian'] = abs(age_pred['BrainAGER_predmedian'])
 
     # Extract participant ID in age_pred to match ID format in demographic dataset
     age_pred['ID'] = age_pred['Participant_ID'].str.split('-', expand=True)[1]

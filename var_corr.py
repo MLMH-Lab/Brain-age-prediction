@@ -40,6 +40,10 @@ import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
 PROJECT_ROOT = Path.cwd()
+uni_code = 4
+prof_qual_code = 3
+a_level_code = 2
+gcse_code = 1
 
 
 def spearman(df, x, y):
@@ -52,11 +56,6 @@ def spearman(df, x, y):
     if spearman_p < alpha:
         print('n=%s, %s and %s - reject H0: p = %.3f, rho = %.3f'
               % (n, x, y, spearman_p, spearman_rho))
-    # elif spearman_p >= alpha:
-    #     print('%s and %s are uncorrelated (fail to reject H0): p = %.3f, rho = %.3f'
-    #           % (x, y, spearman_p, spearman_rho))
-    # else:
-    #     print('Error with %s and %s' % (x, y))
 
 
 def ols_reg(df, indep, dep):
@@ -102,77 +101,37 @@ def main():
     """"""
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
-
-    dataset_path = PROJECT_ROOT / 'outputs' / experiment_name / 'freesurferData.h5'
     # ----------------------------------------------------------------------------------------
+    correlation_dir = PROJECT_ROOT / 'outputs' / experiment_name / 'correlation_analysis'
 
-    # Load dataset with age vars, demographic data from Biobank, demographic data from IMD
-    dataset = pd.read_csv(str(PROJECT_ROOT / 'outputs' / subjects / 'age_predictions_demographics.csv'))
+    ensemble_df = pd.read_csv(correlation_dir / 'ensemble_output.csv')
+    ensemble_df['ID'] = ensemble_df['Participant_ID'].str.split('-').str[1]
+    ensemble_df['ID'] = pd.to_numeric(ensemble_df['ID'])
+
+    variables_df = pd.read_csv(correlation_dir / 'variables_biobank.csv')
+
+    dataset = pd.merge(ensemble_df, variables_df, on='ID')
 
     # Correlation variables
-    y_list = ['Abs_BrainAGE_predmean', 'Abs_BrainAGE_predmedian',
-              'Abs_BrainAGER_predmean', 'Abs_BrainAGER_predmedian',
-              'BrainAGE_predmean', 'BrainAGE_predmedian',
+    y_list = ['BrainAGE_predmean', 'BrainAGE_predmedian',
               'BrainAGER_predmean', 'BrainAGER_predmedian',
               'Std_predicted_age']
-    x_list = ['Education_highest',
-              'Air_pollution',
+
+    x_list = ['Air_pollution',
               'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
               'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
 
     # Spearman correlation per variable
     print("Spearman correlation")
     for y in y_list:
-        for x in y_list:
+        for x in x_list:
             dataset_y = dataset.dropna(subset=[y])
             spearman(dataset_y, x, y)
 
-    # Linear regression per variable
-    print("\n OLS regression")
-    for x in x_list:
-        for y in y_list:
-            dataset_y = dataset.dropna(subset=[y])
-            ols_reg(dataset_y, x, y)
-
-    bonferroni_alpha = 0.05 / 25
-    bon2 = 0.001 / 17
-
-    # TODO: fix loop below
-    print("\n OLS regression adjusted for chron. age")
-    for indepvar in y_list:
-        dataset_reduced = dataset.dropna(subset=[indepvar])
-        # depvar = dataset_reduced['Mean_predicted_age']
-        # # indep = dataset_reduced[['Age', y]]
-        # # print(indep)
-        model = sm.OLS(dataset_reduced['Mean_predicted_age'], dataset_reduced[['Age', indepvar]]).fit()
-        print(model.pvalues[1], model.pvalues[1] < bonferroni_alpha, model.pvalues[1] < bon2)
-        print(model.params[1])
-        print(model.summary())
-
-    # TODO: clean up the below script - which analyses do we actually need to keep?
-
-    # Scatterplots
-    age_predmean_plot = dataset.plot(x='Age', y='Mean_predicted_age', kind='scatter')
-    age_brainage_plot = dataset.plot(x='Age', y='BrainAGE_predmean', kind='scatter')
-    age_brainager_plot = dataset.plot(x='Age', y='BrainAGER_predmean', kind='scatter')
-    brainage_brainager_plot = dataset.plot(x='BrainAGER_predmean', y='BrainAGE_predmean', kind='scatter')
-    education_plot = dataset.plot(x='education_highest', y='BrainAGE_predmean', kind='scatter')
-    air_pollution_plot = dataset.plot(x='Air_pollution', y='BrainAGER_predmean', kind='scatter')
-    traffic_intensity_plot = dataset.plot(x='Traffic_intensity', y='BrainAGER_predmean', kind='scatter')
-    inv_dist_plot = dataset.plot(x='Inverse_dist_road', y='BrainAGER_predmean', kind='scatter')
-    greenspace_plot = dataset.plot(x='Greenspace_perc', y='BrainAGER_predmean', kind='scatter')
-    garden_plot = dataset.plot(x='Garden_perc', y='BrainAGER_predmean', kind='scatter')
-    water_plot = dataset.plot(x='Water_perc', y='BrainAGER_predmean', kind='scatter')
-    nat_env_plot = dataset.plot(x='Natural_env_perc', y='BrainAGER_predmean', kind='scatter')
-
-    # EXPLORATORY ANALYSIS OF EDUCATION
 
     # Perform one-way ANOVA for education groups
     # Alternative to: ols_reg(dataset_y, 'Diff age-mean', 'Education_highest') ?
-    uni_code = 4
-    prof_qual_code = 3
-    a_level_code = 2
-    gcse_code = 1
+
 
     dataset_uni = dataset.groupby('Education_highest').get_group(uni_code)
     dataset_prof_qual = dataset.groupby('Education_highest').get_group(prof_qual_code)
@@ -183,17 +142,6 @@ def main():
         f_stat, pvalue = f_oneway(dataset_uni[x], dataset_prof_qual[x], dataset_a_level[x], dataset_gcse[x])
         print(x, f_stat, pvalue)
 
-    # Boxplot for education
-    df_edu = pd.concat([dataset_gcse['BrainAGER_predmean'], dataset_a_level['BrainAGER_predmean'],
-                        dataset_prof_qual['BrainAGER_predmean'], dataset_uni['BrainAGER_predmean']],
-                       axis=1, keys=['Uni', 'Prof_qual', 'A_levels', 'GCSE'])
-
-    edu_plot = pd.DataFrame.boxplot(df_edu)
-    plt.xlabel('Highest level of education obtained')
-    plt.ylabel('BrainAGER')
-
-    output_img_path = PROJECT_ROOT / 'outputs' / 'edu_brainager_BIOBANK.png'
-    plt.savefig(str(output_img_path))
 
     # Holm-Bonferroni method for multiple comparisons
     dataset_edu = dataset.dropna(subset=['Education_highest'])

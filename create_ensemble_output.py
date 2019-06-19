@@ -59,11 +59,13 @@ def main():
 
     # Add new columns to age_pred for BrainAGER (Brain Age Gap Estimate Residualized)
     # BrainAGER is a more robust measure of age prediction error (see Le et al. 2018)
-    age_predictions_df['BrainAGER_predmean'] = get_brainager(ensemble_df['Age'],
-                                                             ensemble_df['Mean_predicted_age'])
+    ensemble_df['BrainAGER_predmean'] = get_brainager(ensemble_df['Age'],
+                                                      ensemble_df['Mean_predicted_age'])
 
-    age_predictions_df['BrainAGER_predmedian'] = get_brainager(ensemble_df['Age'],
-                                                               ensemble_df['Median_predicted_age'])
+    ensemble_df['BrainAGER_predmedian'] = get_brainager(ensemble_df['Age'],
+                                                        ensemble_df['Median_predicted_age'])
+
+    ensemble_df.to_csv(correlation_dir / 'ensemble_output.csv', index=False)
 
 
 if __name__ == "__main__":
