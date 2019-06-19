@@ -36,12 +36,10 @@ import pandas as pd
 import numpy as np
 from scipy.stats import spearmanr, f_oneway, ttest_ind
 from statsmodels.stats.multicomp import MultiComparison
-from statsmodels.stats.multitest import multipletests
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
-
-PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
+PROJECT_ROOT = Path.cwd()
 
 
 def spearman(df, x, y):
@@ -101,8 +99,12 @@ def cohend(d1, d2):
 
 
 def main():
-    # Define what subjects dataset should contain: total, male or female
-    subjects = 'total'
+    """"""
+    # ----------------------------------------------------------------------------------------
+    experiment_name = 'biobank_scanner1'
+
+    dataset_path = PROJECT_ROOT / 'outputs' / experiment_name / 'freesurferData.h5'
+    # ----------------------------------------------------------------------------------------
 
     # Load dataset with age vars, demographic data from Biobank, demographic data from IMD
     dataset = pd.read_csv(str(PROJECT_ROOT / 'outputs' / subjects / 'age_predictions_demographics.csv'))
@@ -143,7 +145,7 @@ def main():
         # # indep = dataset_reduced[['Age', y]]
         # # print(indep)
         model = sm.OLS(dataset_reduced['Mean_predicted_age'], dataset_reduced[['Age', indepvar]]).fit()
-        print(model.pvalues[1], model.pvalues[1]<bonferroni_alpha, model.pvalues[1]<bon2)
+        print(model.pvalues[1], model.pvalues[1] < bonferroni_alpha, model.pvalues[1] < bon2)
         print(model.params[1])
         print(model.summary())
 
@@ -162,7 +164,6 @@ def main():
     garden_plot = dataset.plot(x='Garden_perc', y='BrainAGER_predmean', kind='scatter')
     water_plot = dataset.plot(x='Water_perc', y='BrainAGER_predmean', kind='scatter')
     nat_env_plot = dataset.plot(x='Natural_env_perc', y='BrainAGER_predmean', kind='scatter')
-
 
     # EXPLORATORY ANALYSIS OF EDUCATION
 
@@ -185,13 +186,13 @@ def main():
     # Boxplot for education
     df_edu = pd.concat([dataset_gcse['BrainAGER_predmean'], dataset_a_level['BrainAGER_predmean'],
                         dataset_prof_qual['BrainAGER_predmean'], dataset_uni['BrainAGER_predmean']],
-                        axis=1, keys=['Uni', 'Prof_qual', 'A_levels', 'GCSE'])
+                       axis=1, keys=['Uni', 'Prof_qual', 'A_levels', 'GCSE'])
 
     edu_plot = pd.DataFrame.boxplot(df_edu)
     plt.xlabel('Highest level of education obtained')
     plt.ylabel('BrainAGER')
 
-    output_img_path = PROJECT_ROOT/'outputs'/'edu_brainager_BIOBANK.png'
+    output_img_path = PROJECT_ROOT / 'outputs' / 'edu_brainager_BIOBANK.png'
     plt.savefig(str(output_img_path))
 
     # Holm-Bonferroni method for multiple comparisons
@@ -200,7 +201,7 @@ def main():
     print(mod.tukeyhsd())
 
     # bonferroni-corrected alpha for multiple t-tests
-    alpha_bon = 0.05/6
+    alpha_bon = 0.05 / 6
 
     for x in x_list:
         plist = []
