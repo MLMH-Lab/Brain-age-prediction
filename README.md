@@ -37,9 +37,10 @@ Order of scripts:
 5.  svm: Create SVR model
 6.  permutation: Permutation of SVR models
 7.  permutation_sig: Assess significance of SVR models
-8.  var_corr: Analyse demographic covariates in BIOBANK dataset
-9.  education_age: Assess and visualise education distribution (!This this script does not run in this position (age_predictions_demographics.csv missing))
-10.  lsoa_corr: Analyse demographic covariates from English Index of Multiple Deprivation
+8.  create_corr_dataset: Create csv file including covariates
+9.  var_corr: Analyse demographic covariates in BIOBANK dataset
+10.  education_age: Assess and visualise education distribution
+11.  lsoa_corr: Analyse demographic covariates from English Index of Multiple Deprivation
 
 
 ## Citation
