@@ -14,6 +14,8 @@ Put paper abstract here
 - [Matplotlib](https://matplotlib.org/)
 - [Statsmodels](https://www.statsmodels.org/)
 - [Scikit-learn](https://scikit-learn.org/)
+- [Pandas](https://pandas.pydata.org/)
+- [PyTables](https://www.pytables.org/)
 
 
 ## Installing the dependencies
