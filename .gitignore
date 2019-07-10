@@ -1,4 +1,12 @@
-.idea/
+# Environments
 venv/
+
+# Pycharm
+.idea/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Project's dataset
 data/
 !data/README.md
