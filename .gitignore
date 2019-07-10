@@ -3,6 +3,7 @@ venv/
 
 # Pycharm
 .idea/
+__pycache__/
 
 # Project's dataset
 data/
