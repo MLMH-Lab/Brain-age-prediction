@@ -46,7 +46,7 @@ def ttest_ind_corrected(a, b, k=10, r=10):
         k: number of folds
         r: number of repetitions
 
-    Returns:
+    Returns: #TODO: add what it returns
 
     """
     df = k * r - 1
