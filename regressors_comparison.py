@@ -1,5 +1,7 @@
 """
-Comparing classifiers
+Comparing classifiers using a version of the paired Student’s t-test that is
+corrected for the violation of the independence assumption from repeated k-fold cross-validation
+when training the model
 
 Based on:
 https://machinelearningmastery.com/statistical-significance-tests-for-comparing-machine-learning-algorithms/
@@ -31,7 +33,7 @@ def ttest_ind_corrected(a, b, k=10, r=10):
     C. Nadeau and Y. Bengio, Mach Learning 2003.)
 
 
-    n1 is the number of instances used  for training, and n2 the number of instances used for testing
+    n1 is the number of instances used for training, and n2 the number of instances used for testing
 
     n2 / n1 = 1/ (nfolds-1) = 1/(k-1)
     r-times k-fold cross-validations there are r,r>1, runs and k,k>1, folds.
@@ -43,7 +45,7 @@ def ttest_ind_corrected(a, b, k=10, r=10):
     Args:
         a: performances from classifier A
         b: performances from classifier B
-        k: number of folds
+        k: number of folds #TODO: could we not use the same variable names as in other scripts to make the names more meaningful?
         r: number of repetitions
 
     Returns: #TODO: add what it returns
@@ -74,6 +76,7 @@ def main():
     # ----------------------------------------------------------------------------------------
     combinations = list(itertools.combinations(list_of_classifiers, 2))
 
+    # Bonferroni correction for multiple comparisons
     corrected_alpha = 0.05 / len(combinations)
 
     results_df = pd.DataFrame(columns=['regressors', 'p-value', 'stats'])
@@ -85,18 +88,15 @@ def main():
         mae_a = []
         mae_b = []
 
-        # Number of repetitions reduced for testing
-        n_repetitions = 2
-        n_folds = 2
-        # n_repetitions = 10
-        # n_folds = 10
+        n_repetitions = 10
+        n_folds = 10
 
         for i_repetition in range(n_repetitions):
             for i_fold in range(n_folds):
                 scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
 
-                performance_a = np.load(classifier_a_dir / 'cv' / scores_filename, allow_pickle=True)[1]
-                performance_b = np.load(classifier_b_dir / 'cv' / scores_filename, allow_pickle=True)[1]
+                performance_a = np.load(classifier_a_dir / 'cv' / scores_filename)[1]
+                performance_b = np.load(classifier_b_dir / 'cv' / scores_filename)[1]
 
                 mae_a.append(performance_a)
                 mae_b.append(performance_b)
