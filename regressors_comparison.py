@@ -42,7 +42,7 @@ def ttest_ind_corrected(a, b, k=10, r=10):
 
     Args:
         a: performances from classifier A
-        b: performances from classifier A
+        b: performances from classifier B
         k: number of folds
         r: number of repetitions
 
@@ -85,14 +85,18 @@ def main():
         mae_a = []
         mae_b = []
 
+        # Number of repetitions reduced for testing
         n_repetitions = 2
         n_folds = 2
+        # n_repetitions = 10
+        # n_folds = 10
+
         for i_repetition in range(n_repetitions):
             for i_fold in range(n_folds):
                 scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
 
-                performance_a = np.load(classifier_a_dir / 'cv' / scores_filename)[1]
-                performance_b = np.load(classifier_b_dir / 'cv' / scores_filename)[1]
+                performance_a = np.load(classifier_a_dir / 'cv' / scores_filename, allow_pickle=True)[1]
+                performance_b = np.load(classifier_b_dir / 'cv' / scores_filename, allow_pickle=True)[1]
 
                 mae_a.append(performance_a)
                 mae_b.append(performance_b)
