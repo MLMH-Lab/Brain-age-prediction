@@ -1,8 +1,10 @@
-""""""
+"""
+Compares performance of SVM models with different hyperparameters C
+"""
+
 from pathlib import Path
 import itertools
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.externals import joblib
@@ -13,7 +15,7 @@ PROJECT_ROOT = Path.cwd()
 
 
 def main():
-    """"""
+    """Pairwise comparison of SVM classifier performances with different hyperparameters"""
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
     # ----------------------------------------------------------------------------------------
@@ -38,10 +40,12 @@ def main():
 
     combinations = list(itertools.combinations(range(scores_params.shape[1]), 2))
 
+    # Bonferroni correction for multiple comparisons
     corrected_alpha = 0.05 / len(combinations)
 
     results_df = pd.DataFrame(columns=['params', 'p-value', 'stats'])
 
+    # Corrected repeated k-fold cv test to compare performance of two SVM classifiers at a time
     for param_a, param_b in combinations:
         statistic, pvalue = ttest_ind_corrected(scores_params[:, param_a], scores_params[:, param_b],
                                                 k=n_folds,
