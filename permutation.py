@@ -44,9 +44,9 @@ def main(index_min, index_max):
     regions_norm = np.true_divide(regions, tiv)
     age = dataset['Age'].values
 
-    n_repetitions = 10
-    n_folds = 10
-    n_nested_folds = 5
+    n_repetitions = 2
+    n_folds = 2
+    n_nested_folds = 2
 
     # Random permutation loop
     for i_perm in range(index_min, index_max):
@@ -121,7 +121,7 @@ def main(index_min, index_max):
                 i_iteration += 1
 
                 fold_time = time.time() - start
-                print('Finished permutation {:02d}, repetition :{02d}, fold {:02d}, ETA {f}'
+                print('Finished permutation {:02d}, repetition {:02d}, fold {:02d}, ETA {:02f}'
                       .format(i_perm, i_repetition, i_fold, fold_time * (n_repetitions * n_folds - i_iteration)))
 
         # Create np array with mean coefficients - one row per permutation, one col per feature
