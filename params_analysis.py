@@ -1,5 +1,5 @@
 """
-Compares performance of SVM models with different hyperparameters C
+Compares performance of SVM models with different hyperparameters C.
 """
 
 from pathlib import Path
@@ -15,7 +15,7 @@ PROJECT_ROOT = Path.cwd()
 
 
 def main():
-    """Pairwise comparison of SVM classifier performances with different hyperparameters"""
+    """Pairwise comparison of SVM classifier performances with different hyperparameters."""
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
     # ----------------------------------------------------------------------------------------
