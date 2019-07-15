@@ -1,5 +1,4 @@
-"""
-Comparing classifiers using a version of the paired Student’s t-test that is
+"""Comparing classifiers using a version of the paired Student’s t-test that is
 corrected for the violation of the independence assumption from repeated k-fold cross-validation
 when training the model
 
@@ -20,11 +19,10 @@ from scipy import stats
 PROJECT_ROOT = Path.cwd()
 
 
-def ttest_ind_corrected(a, b, k=10, r=10):
-    """
-        Corrected repeated k-fold cv test
+def ttest_ind_corrected(performance_a, performance_b, k=10, r=10):
+    """Corrected repeated k-fold cv test
 
-                The test assumes that the classifiers were evaluated using cross
+    The test assumes that the classifiers were evaluated using cross
     validation. The number of folds is determined from the length of the vector
     of differences, as `len(diff) / runs`. The variance includes a correction
     for underestimation of variance due to overlapping training sets, as
@@ -43,17 +41,19 @@ def ttest_ind_corrected(a, b, k=10, r=10):
 
 
     Args:
-        a: performances from classifier A
-        b: performances from classifier B
-        k: number of folds #TODO: could we not use the same variable names as in other scripts to make the names more meaningful?
+        performance_a: performances from classifier A
+        performance_b: performances from classifier B
+        k: number of folds
         r: number of repetitions
 
-    Returns: #TODO: add what it returns
+    Returns:
+         t: t-statistic of the corrected test.
+         prob: p-value of the corrected test.
 
     """
     df = k * r - 1
 
-    x = a - b
+    x = performance_a - performance_b
     m = np.mean(x)
 
     sigma_2 = np.var(x, ddof=1)
@@ -115,7 +115,6 @@ def main():
                                        ignore_index=True)
 
         results_df.to_csv(PROJECT_ROOT / 'outputs' / experiment_name / 'regressors_comparison.csv', index=False)
-
 
 
 if __name__ == "__main__":
