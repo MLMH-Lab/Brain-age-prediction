@@ -1,4 +1,4 @@
-"""Script to implement GPR in BIOBANK Scanner1 freesurfer data to predict brain age
+"""Script to implement GPR in BIOBANK Scanner1 freesurfer data to predict brain age.
 """
 from math import sqrt
 from pathlib import Path
@@ -59,8 +59,8 @@ def main():
     age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
     age_predictions = age_predictions.set_index('Participant_ID')
 
-    n_repetitions = 2
-    n_folds = 2
+    n_repetitions = 10
+    n_folds = 10
 
     for i_repetition in range(n_repetitions):
         # Create new empty column in age_predictions df to save age predictions of this repetition

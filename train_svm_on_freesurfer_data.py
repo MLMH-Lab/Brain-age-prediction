@@ -1,4 +1,4 @@
-"""Script to implement SVM in BIOBANK Scanner1 freesurfer data to predict brain age
+"""Script to implement SVM in BIOBANK Scanner1 freesurfer data to predict brain age.
 
 Step 1: Set global random seed
 Step 2: Normalise by TiV
