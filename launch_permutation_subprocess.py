@@ -1,7 +1,7 @@
 from pathlib import Path
 import subprocess
 
-PROJECT_ROOT = Path('/media/kcl_1/HDD/PycharmProjects/predicted_brain_age')
+PROJECT_ROOT = Path.cwd()
 venv_python = PROJECT_ROOT / 'venv' / 'bin' / 'python3'
 code_perm = PROJECT_ROOT / 'src' / 'BIOBANK' / 'Scanner1' / 'permutation.py'
 
