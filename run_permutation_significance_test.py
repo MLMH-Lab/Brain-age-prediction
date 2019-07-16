@@ -9,16 +9,28 @@ from utils import COLUMNS_NAME
 PROJECT_ROOT = Path.cwd()
 
 
-def get_assessed_model_mean_scores(cv_dir, n_repetitions=10, n_folds=10):
+# def get_assessed_model_mean_scores(cv_dir, n_repetitions=10, n_folds=10):
+#     """"""
+#     assessed_model_scores = []
+#
+#     for i_repetition in range(n_repetitions):
+#         for i_fold in range(n_folds):
+#             scores_filename = '{:02d}_{:02d}_svm_scores.joblib'.format(i_repetition, i_fold)
+#             assessed_model_scores.append(np.load(cv_dir / scores_filename))
+#
+#     return np.asarray(assessed_model_scores, dtype='float32')
+
+
+def get_assessed_model_mean_scores(cv_dir, n_repetitions=5, n_folds=5):
     """"""
     assessed_model_scores = []
 
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
-            scores_filename = '{:02d}_{:02d}_svm_scores.joblib'.format(i_repetition, i_fold)
-            assessed_model_scores.append(np.load(cv_dir / scores_filename))
+            scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
+            assessed_model_scores.append(np.load((cv_dir / scores_filename), allow_pickle=True))
 
-    return np.asarray(assessed_model_scores, dtype='float32')
+    return np.asarray(assessed_model_scores)
 
 
 def get_permutation_mean_scores(perm_dir, n_perm=1000):
@@ -85,7 +97,7 @@ def main():
     perm_scores = get_permutation_mean_scores(perm_dir)
 
     # Perform
-    score_names = ['R2', 'MAE', 'RMSE']
+    score_names = ['R2', 'MAE', 'RMSE', 'CORR']
     p_value_scores = []
     for i_score, score_name in enumerate(score_names):
         p_value = get_permutation_p_value(np.mean(assessed_model_scores[:, i_score]), perm_scores[:, i_score])
