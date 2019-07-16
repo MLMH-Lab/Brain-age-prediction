@@ -44,9 +44,9 @@ def main(index_min, index_max):
     regions_norm = np.true_divide(regions, tiv)
     age = dataset['Age'].values
 
-    n_repetitions = 2
-    n_folds = 2
-    n_nested_folds = 2
+    n_repetitions = 10
+    n_folds = 10
+    n_nested_folds = 5
 
     # Random permutation loop
     for i_perm in range(index_min, index_max):
