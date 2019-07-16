@@ -9,18 +9,6 @@ from utils import COLUMNS_NAME
 PROJECT_ROOT = Path.cwd()
 
 
-# def get_assessed_model_mean_scores(cv_dir, n_repetitions=10, n_folds=10):
-#     """"""
-#     assessed_model_scores = []
-#
-#     for i_repetition in range(n_repetitions):
-#         for i_fold in range(n_folds):
-#             scores_filename = '{:02d}_{:02d}_svm_scores.joblib'.format(i_repetition, i_fold)
-#             assessed_model_scores.append(np.load(cv_dir / scores_filename))
-#
-#     return np.asarray(assessed_model_scores, dtype='float32')
-
-
 def get_assessed_model_mean_scores(cv_dir, n_repetitions=5, n_folds=5):
     """"""
     assessed_model_scores = []
@@ -28,7 +16,7 @@ def get_assessed_model_mean_scores(cv_dir, n_repetitions=5, n_folds=5):
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
             scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
-            assessed_model_scores.append(np.load((cv_dir / scores_filename), allow_pickle=True))
+            assessed_model_scores.append(np.load(cv_dir / scores_filename))
 
     return np.asarray(assessed_model_scores)
 
@@ -60,7 +48,7 @@ def get_assessed_model_coefs(experiment_dir, n_repetitions=10, n_folds=10):
 
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
-            model_filename = '{:02d}_{:02d}_svm.joblib'.format(i_repetition, i_fold)
+            model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
             model = load(experiment_dir / model_filename)
             assessed_model_coefs.append(model.coef_)
 
@@ -112,14 +100,14 @@ def main():
     scores_csv.to_csv(perm_dir / 'scores_sig.csv')
 
     # Perform
-    assessed_model_coefs = get_assessed_model_coefs(experiment_dir)
-    assessed_mean_relative_coefs = np.abs(assessed_model_coefs) / np.sum(np.abs(assessed_model_coefs), axis=-1)
+    assessed_model_coefs = get_assessed_model_coefs(cv_dir)
+    assessed_mean_relative_coefs = np.abs(assessed_model_coefs) / np.sum(np.abs(assessed_model_coefs), axis=0)
     perm_mean_relative_coefs = get_permutation_mean_relative_coefs(perm_dir)
 
     p_value_coefs = []
-    for i in range(assessed_mean_relative_coefs.shape[0]):
-        p_value = get_permutation_p_value(np.mean(assessed_mean_relative_coefs[:, i_score]),
-                                          perm_mean_relative_coefs[:, i_score])
+    for i in range(assessed_mean_relative_coefs.shape[1]):
+        p_value = get_permutation_p_value(np.mean(assessed_mean_relative_coefs[:, i]),
+                                          perm_mean_relative_coefs[:, i])
         p_value_coefs.append(p_value)
 
     # Save as csv
