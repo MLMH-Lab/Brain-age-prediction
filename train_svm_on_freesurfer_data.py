@@ -137,7 +137,7 @@ def main():
             dump(best_svm, cv_dir / model_filename)
 
             # Save model scores r2, MAE, RMSE
-            scores_array = np.array([r2_score, absolute_error, root_squared_error, cv_age_error_corr])
+            scores_array = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
 
             scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
 
