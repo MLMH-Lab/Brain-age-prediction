@@ -35,11 +35,11 @@ def main():
     age_max = int(dataset['Age'].max())  # 73
 
     # Loop to create 50 bootstrap samples that each contain 1 male, 1 female per age group/year
-    for i_n_subjects in range(1, 51):
-        print(i_n_subjects)
-        ids_with_n_subjects_dir = bootstrap_dir / '{:02d}'.format(i_n_subjects)
-        ids_with_n_subjects_dir.mkdir(exist_ok=True)
-        ids_dir = ids_with_n_subjects_dir / 'ids'
+    for i_n_subject_pairs in range(1, 51):
+        print(i_n_subject_pairs)
+        ids_with_n_subject_pairs_dir = bootstrap_dir / '{:02d}'.format(i_n_subject_pairs)
+        ids_with_n_subject_pairs_dir.mkdir(exist_ok=True)
+        ids_dir = ids_with_n_subject_pairs_dir / 'ids'
         ids_dir.mkdir(exist_ok=True)
 
         n_bootstrap = 1000
