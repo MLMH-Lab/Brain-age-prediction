@@ -34,7 +34,7 @@ def main():
     age_min = int(dataset['Age'].min())  # 47
     age_max = int(dataset['Age'].max())  # 73
 
-    # Loop to create 50 bootstrap samples that each contain 1 male, 1 female per age group/year
+    # Loop to create 50 bootstrap samples that each contain up to 50 gender-balanced subject pairs per age group/year
     for i_n_subject_pairs in range(1, 51):
         print(i_n_subject_pairs)
         ids_with_n_subject_pairs_dir = bootstrap_dir / '{:02d}'.format(i_n_subject_pairs)
@@ -58,11 +58,11 @@ def main():
                     gender_group = age_group.groupby('Gender').get_group(gender)
 
                     # Extract random subject of that gender and add to dataset_bootstrap
-                    random_row = gender_group.sample(n=i_n_subjects, replace=True)
+                    random_row = gender_group.sample(n=i_n_subject_pairs, replace=True)
                     dataset_bootstrap = pd.concat([dataset_bootstrap, pd.DataFrame(random_row['Participant_ID'])])
 
             # Export dataset_bootstrap as csv
-            ids_filename = 'homogeneous_bootstrap_{:04d}_n_{:02d}.csv'.format(i_bootstrap, i_n_subjects)
+            ids_filename = 'homogeneous_bootstrap_{:04d}_n_{:02d}.csv'.format(i_bootstrap, i_n_subject_pairs)
             dataset_bootstrap.to_csv(ids_dir / ids_filename, index=False)
 
 
