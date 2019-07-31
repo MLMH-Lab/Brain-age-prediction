@@ -42,12 +42,13 @@ def main():
         ids_dir = ids_with_n_subject_pairs_dir / 'ids'
         ids_dir.mkdir(exist_ok=True)
 
+        # Loop to create 1000 random subject samples of the same size (with replacement) per bootstrap sample
         n_bootstrap = 1000
         for i_bootstrap in range(n_bootstrap):
             # Create empty df to add bootstrap subjects to
             dataset_bootstrap = pd.DataFrame(columns=['Participant_ID'])
 
-            # Loop over ages
+            # Loop over ages (27 in total)
             for age in range(age_min, (age_max + 1)):
 
                 # Get dataset for specific age only
