@@ -1,5 +1,5 @@
 """
-Script to run SVM on bootstrap datasets of UK BIOBANK Scanner1
+Script to run SVM (linear SVR) on bootstrap datasets of UK BIOBANK Scanner1
 IMPORTANT NOTE: This script is adapted from svm.py but uses KFold instead of StratifiedKFold
 to account for the bootstrap samples with few participants
 """
