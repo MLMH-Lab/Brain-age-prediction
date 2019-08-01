@@ -35,6 +35,8 @@ def main():
     age_max = 73
     std = np.sqrt(((age_max - age_min) ** 2) / 12)
 
+    fig = plt.figure(figsize=(20, 5))
+
     # Draw lines
     plt.plot(i_n_subject_pairs_list, scores_i_n_subject_pairs_mean, color="#111111", label="SVM performance")
     plt.plot(i_n_subject_pairs_list, std * np.ones_like(i_n_subject_pairs_list), '--', color="#111111",
@@ -53,7 +55,7 @@ def main():
     plt.ylabel("Mean Absolute Error")
     plt.legend(loc="best")
     plt.tight_layout()
-    plt.show()
+    plt.savefig(str(experiment_dir / 'bootstrap_analysis' / 'bootstrap_analysis.png'))
 
 
 if __name__ == "__main__":
