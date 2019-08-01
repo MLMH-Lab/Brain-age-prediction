@@ -1,5 +1,4 @@
 """Plot results of bootstrap analysis"""
-
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -15,15 +14,14 @@ def main():
     # ----------------------------------------------------------------------------------------
 
     i_n_subject_pairs_list = range(1, 51)
-    # n_bootstrap = 1000
-    n_bootstrap = 20
+    n_bootstrap = 1000
 
     scores_i_n_subject_pairs_mean = []
     scores_i_n_subject_pairs_std = []
 
     for i_n_subject_pairs in i_n_subject_pairs_list:
         ids_with_n_subject_pairs_dir = experiment_dir / 'bootstrap_analysis' / ('{:02d}'.format(i_n_subject_pairs))
-        scores_dir = ids_with_n_subject_pairs_dir / 'scores' #TODO: should this loop over scores and scores_classifier or compare them in some way?
+        scores_dir = ids_with_n_subject_pairs_dir / 'scores'  # TODO: should this loop over scores and scores_classifier or compare them in some way?
         scores_bootstrap = []
         for i_bootstrap in range(n_bootstrap):
             # Save arrays with permutation coefs and scores as np files
@@ -39,7 +37,8 @@ def main():
 
     # Draw lines
     plt.plot(i_n_subject_pairs_list, scores_i_n_subject_pairs_mean, color="#111111", label="SVM performance")
-    plt.plot(i_n_subject_pairs_list, std * np.ones_like(i_n_subject_pairs_list), '--', color="#111111", label="Chance line")
+    plt.plot(i_n_subject_pairs_list, std * np.ones_like(i_n_subject_pairs_list), '--', color="#111111",
+             label="Chance line")
 
     # Draw bands
     plt.fill_between(i_n_subject_pairs_list,
@@ -50,7 +49,7 @@ def main():
     # Create plot
     plt.title("Bootstrap Analysis")
     plt.xlabel("Number of subjects")
-    plt.xticks(i_n_subject_pairs_list, np.multiply(i_n_subject_pairs_list,(73-47)))
+    plt.xticks(i_n_subject_pairs_list, np.multiply(i_n_subject_pairs_list, (73 - 47)))
     plt.ylabel("Mean Absolute Error")
     plt.legend(loc="best")
     plt.tight_layout()
