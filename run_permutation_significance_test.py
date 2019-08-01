@@ -111,7 +111,8 @@ def main():
 
     # Perform
     assessed_model_coefs = get_assessed_model_coefs(cv_dir)
-    assessed_mean_relative_coefs = np.abs(assessed_model_coefs) / np.sum(np.abs(assessed_model_coefs), axis=0)
+    assessed_mean_relative_coefs = np.divide(np.abs(assessed_model_coefs),
+                                             np.sum(np.abs(assessed_model_coefs), axis=1)[:,np.newaxis])
     perm_mean_relative_coefs = get_permutation_mean_relative_coefs(perm_dir)
 
     p_value_coefs = []
