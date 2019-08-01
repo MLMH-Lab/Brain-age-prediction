@@ -37,9 +37,13 @@ def get_permutation_mean_scores(perm_dir, n_perm=1000):
     return np.asarray(perm_scores, dtype='float32')
 
 
-def get_permutation_p_value(assessed_value, perm_values):
+def get_permutation_p_value(assessed_value, perm_values, greater_is_better=True):
     """"""
-    return (np.sum(assessed_value >= perm_values) + 1.0) / (perm_values.shape[0] + 1)
+    if greater_is_better:
+        p_value = (np.sum(assessed_value <= perm_values) + 1.0) / (perm_values.shape[0] + 1)
+    else:
+        p_value = (np.sum(assessed_value >= perm_values) + 1.0) / (perm_values.shape[0] + 1)
+    return p_value
 
 
 def get_assessed_model_coefs(experiment_dir, n_repetitions=10, n_folds=10):
@@ -88,7 +92,13 @@ def main():
     score_names = ['R2', 'MAE', 'RMSE', 'CORR']
     p_value_scores = []
     for i_score, score_name in enumerate(score_names):
-        p_value = get_permutation_p_value(np.mean(assessed_model_scores[:, i_score]), perm_scores[:, i_score])
+        if score_name in ['MAE','RMSE']:
+            p_value = get_permutation_p_value(np.mean(assessed_model_scores[:, i_score]),
+                                              perm_scores[:, i_score],
+                                              greater_is_better=False)
+        else:
+            p_value = get_permutation_p_value(np.mean(assessed_model_scores[:, i_score]),
+                                              perm_scores[:, i_score])
         p_value_scores.append(p_value)
 
         print('{:} : {:4.3f}'.format(score_name, p_value))
