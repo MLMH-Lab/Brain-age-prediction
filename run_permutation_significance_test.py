@@ -9,7 +9,7 @@ from utils import COLUMNS_NAME
 PROJECT_ROOT = Path.cwd()
 
 
-def get_assessed_model_mean_scores(cv_dir, n_repetitions=5, n_folds=5):
+def get_assessed_model_mean_scores(cv_dir, n_repetitions=10, n_folds=10):
     """"""
     assessed_model_scores = []
 
