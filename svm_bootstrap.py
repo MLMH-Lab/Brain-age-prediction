@@ -41,8 +41,7 @@ def main():
         scores_dir.mkdir(exist_ok=True)
 
         # Loop over the 1000 random subject samples per bootstrap
-        # n_bootstrap = 1000
-        n_bootstrap = 20
+        n_bootstrap = 1000
         for i_bootstrap in range(n_bootstrap):
             print('Sample number within bootstrap: ', i_bootstrap)
             dataset_filename = 'homogeneous_bootstrap_{:04d}_n_{:02d}.h5'.format(i_bootstrap, i_n_subject_pairs)
@@ -69,9 +68,9 @@ def main():
             cv_rmse = []
             cv_age_error_corr = []
 
-            n_repetitions = 2
-            n_folds = 2
-            n_nested_folds = 2
+            n_repetitions = 10
+            n_folds = 10
+            n_nested_folds = 5
 
             for i_repetition in range(n_repetitions):
                 # Create 10-fold cross-validator
@@ -88,8 +87,7 @@ def main():
                     # Systematic search for best hyperparameters
                     svm = LinearSVR(loss='epsilon_insensitive')
 
-                    # search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
-                    search_space = {'C': [2 ** -1]}
+                    search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
 
                     nested_kf = KFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
 
@@ -97,7 +95,7 @@ def main():
                                               param_grid=search_space,
                                               scoring='neg_mean_absolute_error',
                                               refit=True, cv=nested_kf,
-                                              verbose=0, n_jobs=29)
+                                              verbose=0, n_jobs=1)
 
                     gridsearch.fit(x_train, y_train)
 
