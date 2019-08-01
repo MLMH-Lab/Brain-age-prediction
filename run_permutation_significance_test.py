@@ -122,7 +122,6 @@ def main():
                                           perm_mean_relative_coefs[:, i])
         p_value_coefs.append(p_value)
 
-    # Save coefficient p values as csv
     coef_csv = pd.DataFrame([np.mean(assessed_mean_relative_coefs, axis=0), p_value_coefs],
                             columns=COLUMNS_NAME,
                             index=['coefficient', 'p value'])
