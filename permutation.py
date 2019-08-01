@@ -125,8 +125,8 @@ def main(index_min, index_max):
                       .format(i_perm, i_repetition, i_fold, fold_time * (n_repetitions * n_folds - i_iteration)))
 
         # Create np array with mean coefficients - one row per permutation, one col per feature
-        cv_coef_abs = np.abs(cv_coef)
-        cv_coef_mean = np.mean(cv_coef_abs, axis=0)
+        cv_mean_relative_coefs = np.divide(np.abs(cv_coef), np.sum(np.abs(cv_coef), axis=1)[:, np.newaxis])
+        cv_coef_mean = np.mean(cv_mean_relative_coefs, axis=0)
 
         # Variables for CV means across all repetitions - one row per permutation
         cv_r2_mean = np.mean(cv_r2_scores)
