@@ -10,7 +10,7 @@ PROJECT_ROOT = Path.cwd()
 
 
 def get_assessed_model_mean_scores(cv_dir, n_repetitions=10, n_folds=10):
-    """"""
+    """Load scores of all SVM models run"""
     assessed_model_scores = []
 
     for i_repetition in range(n_repetitions):
@@ -22,7 +22,7 @@ def get_assessed_model_mean_scores(cv_dir, n_repetitions=10, n_folds=10):
 
 
 def get_permutation_mean_scores(perm_dir, n_perm=1000):
-    """"""
+    """Load scores of all permutations run"""
     perm_scores = []
 
     for i_perm in range(n_perm):
@@ -38,7 +38,7 @@ def get_permutation_mean_scores(perm_dir, n_perm=1000):
 
 
 def get_permutation_p_value(assessed_value, perm_values, greater_is_better=True):
-    """"""
+    """Calculate p value of SVM model performance"""
     if greater_is_better:
         p_value = (np.sum(assessed_value <= perm_values) + 1.0) / (perm_values.shape[0] + 1)
     else:
@@ -47,7 +47,7 @@ def get_permutation_p_value(assessed_value, perm_values, greater_is_better=True)
 
 
 def get_assessed_model_coefs(experiment_dir, n_repetitions=10, n_folds=10):
-    """"""
+    """Load model coefficients of all SVM models run"""
     assessed_model_coefs = []
 
     for i_repetition in range(n_repetitions):
@@ -60,7 +60,7 @@ def get_assessed_model_coefs(experiment_dir, n_repetitions=10, n_folds=10):
 
 
 def get_permutation_mean_relative_coefs(perm_dir, n_perm=1000):
-    """"""
+    """Load coefficients of all permutations run"""
     perm_relative_coefs = []
 
     for i_perm in range(n_perm):
@@ -88,7 +88,7 @@ def main():
     assessed_model_scores = get_assessed_model_mean_scores(cv_dir)
     perm_scores = get_permutation_mean_scores(perm_dir)
 
-    # Perform
+    # Assess SVM model performance by calculating p values for R2, MAE, RMSE and CORR
     score_names = ['R2', 'MAE', 'RMSE', 'CORR']
     p_value_scores = []
     for i_score, score_name in enumerate(score_names):
@@ -103,13 +103,14 @@ def main():
 
         print('{:} : {:4.3f}'.format(score_name, p_value))
 
+    # Save SVM model performance p values as csv
     scores_csv = pd.DataFrame([np.mean(assessed_model_scores, axis=0), p_value_scores],
                               columns=score_names,
                               index=['score', 'p value'])
 
     scores_csv.to_csv(perm_dir / 'scores_sig.csv')
 
-    # Perform
+    # Assess significance of SVM model coefficients
     assessed_model_coefs = get_assessed_model_coefs(cv_dir)
     assessed_mean_relative_coefs = np.divide(np.abs(assessed_model_coefs),
                                              np.sum(np.abs(assessed_model_coefs), axis=1)[:,np.newaxis])
@@ -121,7 +122,7 @@ def main():
                                           perm_mean_relative_coefs[:, i])
         p_value_coefs.append(p_value)
 
-    # Save as csv
+    # Save coefficient p values as csv
     coef_csv = pd.DataFrame([np.mean(assessed_mean_relative_coefs, axis=0), p_value_coefs],
                             columns=COLUMNS_NAME,
                             index=['coefficient', 'p value'])
