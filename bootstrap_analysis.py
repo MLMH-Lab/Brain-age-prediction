@@ -21,7 +21,7 @@ def main():
 
     for i_n_subject_pairs in i_n_subject_pairs_list:
         ids_with_n_subject_pairs_dir = experiment_dir / 'bootstrap_analysis' / ('{:02d}'.format(i_n_subject_pairs))
-        scores_dir = ids_with_n_subject_pairs_dir / 'scores'  # TODO: should this loop over scores and scores_classifier or compare them in some way?
+        scores_dir = ids_with_n_subject_pairs_dir / 'scores'
         scores_bootstrap = []
         for i_bootstrap in range(n_bootstrap):
             # Save arrays with permutation coefs and scores as np files
