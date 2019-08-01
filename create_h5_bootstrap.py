@@ -1,7 +1,6 @@
 """Script to create bootstrap datasets of UK BIOBANK Scanner1 in hdf5 format using create_h5_dataset script;
 Uses ids from create_bootstrap_ids
 """
-
 from pathlib import Path
 
 from create_h5_dataset import create_dataset
