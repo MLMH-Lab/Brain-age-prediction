@@ -1,5 +1,7 @@
-"""Create dataset with variables from English Indices of Deprivation, publicly available online [1];
-This dataset was merged with the UK Biobank data based on the participants' home coordinates using the QGIS application
+"""Create dataset with variables from English Indices of Deprivation, publicly available online [1],
+for correlation analysis in var_corr;
+The English Indices of Deprivation data were merged with the UK Biobank data based on the
+participants' home coordinates using the QGIS application
 
 References:
 [1] Department for Communities and Local Government. English Indices of Deprivation 2015. 2015.

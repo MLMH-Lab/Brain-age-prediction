@@ -1,4 +1,20 @@
-"""Add demographic variables from UK BIOBANK."""
+"""Create dataset with demographic variables from UK Biobank for correlation analysis in var_corr;
+
+The following UK Biobank variables are assessed [variable data field - variable name]:
+6138-2.0, 6138-2.1, 6138-2.2, 6138-2.3, 6138-2.4 - Which of the following qualifications do you have? (up to 5 selections)
+24005-0.0 - Particulate matter air pollution (pm10); 2010
+24009-0.0 - Traffic intensity on the nearest road
+24010-0.0 - Inverse distance to the nearest road
+24014-0.0 - Close to major road (binary)
+24500-0.0 - Greenspace percentage
+24501-0.0 - Domestic garden percentage
+24502-0.0 - Water percentage
+24506-0.0 - Natural environment percentage
+
+Note: Baseline assessment data chosen for 24500-24506 because data is not available for all subjects at next assessment;
+no data available for imaging assessment
+
+Variable information available at https://biobank.ctsu.ox.ac.uk/crystal/label.cgi"""
 
 from pathlib import Path
 
