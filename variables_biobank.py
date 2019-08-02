@@ -59,12 +59,14 @@ def main():
     variables_df['Education_4'] = variables_df['Education_4'].map(education_dict)
     variables_df['Education_5'] = variables_df['Education_5'].map(education_dict)
 
-    # Create col for maximum of education level per respondent
+    # Create col for maximum of education level per respondent and drop original variables
     variables_df['Education_highest'] = variables_df[['Education_1',
                                                       'Education_2',
                                                       'Education_3',
                                                       'Education_4',
                                                       'Education_5']].apply(max, axis=1)
+    variables_df = variables_df.drop(['Education_1', 'Education_2', 'Education_3', 'Education_4', 'Education_5'],
+                                     axis=1)
 
     # output csv with age variables and demographic variables
     variables_df.to_csv(correlation_dir / 'variables_biobank.csv', index=False)
