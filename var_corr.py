@@ -1,34 +1,5 @@
-"""Script to assess correlations between difference in actual and
-predicted age with demographic variables in UK BIOBANK Scanner1
-
-Variables to assess [variable code - variable name, code names (where applicable)]:
-6138-2.0, 6138-2.1, 6138-2.2, 6138-2.3, 6138-2.4 - Which of the following qualifications do you have? (up to 5 selections possible)
-1	College or University degree
-2	A levels/AS levels or equivalent
-3	O levels/GCSEs or equivalent
-4	CSEs or equivalent
-5	NVQ or HND or HNC or equivalent
-6	Other professional qualifications eg: nursing, teaching
--7	None of the above
--3	Prefer not to answer
-Researcher notes:
-- CSE is the predecessor of GCSE, so can be treated the same
-- NVQ/HND/HNC are work-based qualifications/degrees, comparable to short undergraduate degrees
-
-24005-0.0 - Particulate matter air pollution (pm10); 2010
-24009-0.0 - Traffic intensity on the nearest road
-24010-0.0 - Inverse distance to the nearest road
-24014-0.0 - Close to major road (binary)
-24500-0.0 - Greenspace percentage
-24501-0.0 - Domestic garden percentage
-24502-0.0 - Water percentage
-24506-0.0 - Natural environment percentage
-
-Note: Baseline assessment data chosen for 24500-24506 because data is not available for all subjects at next assessment;
-no data available for imaging assessment
-
-Variable information available at https://biobank.ctsu.ox.ac.uk/crystal/label.cgi;
-"""
+"""Script to assess correlations between BrainAGE/BrainAGER and demographic variables in UK Biobank
+(dataset created in variables_biobank.py)"""
 
 from pathlib import Path
 
@@ -40,6 +11,7 @@ import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
 PROJECT_ROOT = Path.cwd()
+
 uni_code = 4
 prof_qual_code = 3
 a_level_code = 2
@@ -56,29 +28,6 @@ def spearman(df, x, y):
     if spearman_p < alpha:
         print('n=%s, %s and %s - reject H0: p = %.3f, rho = %.3f'
               % (n, x, y, spearman_p, spearman_rho))
-
-
-def ols_reg(df, indep, dep):
-    """Perform linear regression using ordinary least squares (OLS) method"""
-
-    endog = np.asarray(df[indep], dtype=float)
-    exog = np.asarray(sm.add_constant(df[dep]), dtype=float)
-    OLS_model = sm.OLS(endog, exog)
-    OLS_results = OLS_model.fit()
-    print(OLS_results.summary())
-    OLS_p = OLS_results.pvalues[1]
-    OLS_coeff = OLS_results.params[1]
-
-    alpha = 0.05
-    n = len(df)
-    if OLS_p < alpha:
-        print('n=%s, %s and %s - reject H0: p = %.3f, coef = %.3f'
-              % (n, indep, dep, OLS_p, OLS_coeff))
-    # elif OLS_p >= alpha:
-    #     print('%s and %s - fail to reject H0: p = %.3f, coef = %.3f'
-    #           % (indep, dep, OLS_p, OLS_coeff))
-    # else:
-    #     print('Error with %s and %s' % (indep, dep))
 
 
 def cohend(d1, d2):
@@ -129,24 +78,11 @@ def main():
             spearman(dataset_y, x, y)
 
 
-    # Perform one-way ANOVA for education groups
-    # Alternative to: ols_reg(dataset_y, 'Diff age-mean', 'Education_highest') ?
-
-
     dataset_uni = dataset.groupby('Education_highest').get_group(uni_code)
     dataset_prof_qual = dataset.groupby('Education_highest').get_group(prof_qual_code)
     dataset_a_level = dataset.groupby('Education_highest').get_group(a_level_code)
     dataset_gcse = dataset.groupby('Education_highest').get_group(gcse_code)
 
-    for x in x_list:
-        f_stat, pvalue = f_oneway(dataset_uni[x], dataset_prof_qual[x], dataset_a_level[x], dataset_gcse[x])
-        print(x, f_stat, pvalue)
-
-
-    # Holm-Bonferroni method for multiple comparisons
-    dataset_edu = dataset.dropna(subset=['Education_highest'])
-    mod = MultiComparison(dataset_edu['Abs_BrainAGER_predmean'], dataset_edu['Education_highest'])
-    print(mod.tukeyhsd())
 
     # bonferroni-corrected alpha for multiple t-tests
     alpha_bon = 0.05 / 6
