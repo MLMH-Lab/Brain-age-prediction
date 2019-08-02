@@ -1,14 +1,11 @@
-"""
-Script to explore distribution of education with regards to age in UK BIOBANK dataset from scanner1
-Aim is to plot a histogram of age vs number of subjects for education level
-"""
+"""Script to plots distribution of education with regards to age in UK Biobank Scanner1 dataset"""
 
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
 
-PROJECT_ROOT = Path('/home/lea/PycharmProjects/predicted_brain_age')
+PROJECT_ROOT = Path.cwd()
 
 
 def plot_save_histogram_education(edu_level_1, edu_level_2, edu_level_3, edu_level_4):
@@ -37,11 +34,19 @@ def plot_save_histogram_education(edu_level_1, edu_level_2, edu_level_3, edu_lev
 
 
 def main():
-    # Define what subjects were modeled: total, male or female
-    subjects = 'total'
+    """"""
+    # ----------------------------------------------------------------------------------------
+    experiment_name = 'biobank_scanner1'
+    # ----------------------------------------------------------------------------------------
+    correlation_dir = PROJECT_ROOT / 'outputs' / experiment_name / 'correlation_analysis'
 
-    # Loading dataset with age and highest education level
-    dataset = pd.read_csv(PROJECT_ROOT / 'outputs' / subjects / 'age_predictions_demographics.csv')
+    ensemble_df = pd.read_csv(correlation_dir / 'ensemble_output.csv')
+    ensemble_df['ID'] = ensemble_df['Participant_ID'].str.split('-').str[1]
+    ensemble_df['ID'] = pd.to_numeric(ensemble_df['ID'])
+
+    variables_df = pd.read_csv(correlation_dir / 'variables_biobank.csv')
+
+    dataset = pd.merge(ensemble_df, variables_df, on='ID')
     dataset = dataset.dropna(subset=['Education_highest'])
 
     # Histogram of age distribution by education level
