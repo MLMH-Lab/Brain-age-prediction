@@ -66,19 +66,19 @@ def main():
 
     # Create empty dataframe to store correlation results
     corr_output = pd.DataFrame({'Row_labels_1': ['Air_pollution', 'Air_pollution', 'Air_pollution',
-                                                    'Traffic_intensity', 'Traffic_intensity', 'Traffic_intensity',
-                                                    'Inverse_dist_road', 'Inverse_dist_road', 'Inverse_dist_road',
-                                                    'Greenspace_perc', 'Greenspace_perc', 'Greenspace_perc',
-                                                    'Garden_perc', 'Garden_perc', 'Garden_perc',
-                                                    'Water_perc', 'Water_perc', 'Water_perc',
-                                                    'Natural_env_perc', 'Natural_env_perc', 'Natural_env_perc'],
-                               'Row_labels_2': ['n', 'p_val', 'rho',
-                                                   'n', 'p_val', 'rho',
-                                                   'n', 'p_val', 'rho',
-                                                   'n', 'p_val', 'rho',
-                                                   'n', 'p_val', 'rho',
-                                                   'n', 'p_val', 'rho',
-                                                   'n', 'p_val', 'rho']})
+                                                 'Traffic_intensity', 'Traffic_intensity', 'Traffic_intensity',
+                                                 'Inverse_dist_road', 'Inverse_dist_road', 'Inverse_dist_road',
+                                                 'Greenspace_perc', 'Greenspace_perc', 'Greenspace_perc',
+                                                 'Garden_perc', 'Garden_perc', 'Garden_perc',
+                                                 'Water_perc', 'Water_perc', 'Water_perc',
+                                                 'Natural_env_perc', 'Natural_env_perc', 'Natural_env_perc'],
+                                'Row_labels_2': ['n', 'p_val', 'rho',
+                                                 'n', 'p_val', 'rho',
+                                                 'n', 'p_val', 'rho',
+                                                 'n', 'p_val', 'rho',
+                                                 'n', 'p_val', 'rho',
+                                                 'n', 'p_val', 'rho',
+                                                 'n', 'p_val', 'rho']})
     corr_output.set_index('Row_labels_1', 'Row_labels_2')
 
     # Spearman's correlation per variable, add to corr_output
@@ -167,6 +167,7 @@ def main():
         education_output[y] = y_results
 
     education_output.to_csv(correlation_dir / 'education_ttest_output.csv')
+
 
 if __name__ == "__main__":
     main()
