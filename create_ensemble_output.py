@@ -46,25 +46,18 @@ def main():
         repetition_column_name.append('Prediction repetition {:02d}'.format(i_repetition))
 
     ensemble_df['Mean_predicted_age'] = age_predictions_df[repetition_column_name].mean(axis=1)
-    ensemble_df['Median_predicted_age'] = age_predictions_df[repetition_column_name].median(axis=1)
-    ensemble_df['Std_predicted_age'] = age_predictions_df[repetition_column_name].std(axis=1)
 
     # Add new columns to ensemble_df for age prediction error BrainAGE (Brain Age Gap Estimate)
-    # BrainAGE is the difference between mean/median predicted and chronological age
+    # BrainAGE is the difference between mean predicted and chronological age
     ensemble_df['BrainAGE_predmean'] = ensemble_df['Mean_predicted_age'] - ensemble_df['Age']
-    ensemble_df['BrainAGE_predmedian'] = ensemble_df['Median_predicted_age'] - ensemble_df['Age']
 
     # Add new columns to ensemble_df for absolute BrainAGE
     ensemble_df['Abs_BrainAGE_predmean'] = abs(ensemble_df['BrainAGE_predmean'])
-    ensemble_df['Abs_BrainAGE_predmedian'] = abs(ensemble_df['BrainAGE_predmedian'])
 
     # Add new columns to ensemble_df for BrainAGER (Brain Age Gap Estimate Residualized)
     # BrainAGER is a more robust measure of age prediction error (see Le et al. 2018)
     ensemble_df['BrainAGER_predmean'] = get_brainager(ensemble_df['Age'],
                                                       ensemble_df['Mean_predicted_age'])
-
-    ensemble_df['BrainAGER_predmedian'] = get_brainager(ensemble_df['Age'],
-                                                        ensemble_df['Median_predicted_age'])
 
     ensemble_df.to_csv(correlation_dir / 'ensemble_output.csv', index=False)
 
