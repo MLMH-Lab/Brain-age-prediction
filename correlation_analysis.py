@@ -9,10 +9,10 @@ from scipy.stats import spearmanr, ttest_ind
 
 PROJECT_ROOT = Path.cwd()
 
-uni_code = 4
-prof_qual_code = 3
-a_level_code = 2
-gcse_code = 1
+UNIVERSITY_CODE = 4
+PROFESSIONAL_QUAL_CODE = 3
+A_LEVEL_CODE = 2
+GCSE_CODE = 1
 
 
 def spearman(df, x, y):
@@ -110,10 +110,10 @@ def main():
                                                       'p_val', 'rho']})
     education_output.set_index('Row_labels_1', 'Row_labels_2')
 
-    dataset_uni = dataset.groupby('Education_highest').get_group(uni_code)
-    dataset_prof_qual = dataset.groupby('Education_highest').get_group(prof_qual_code)
-    dataset_a_level = dataset.groupby('Education_highest').get_group(a_level_code)
-    dataset_gcse = dataset.groupby('Education_highest').get_group(gcse_code)
+    dataset_uni = dataset.groupby('Education_highest').get_group(UNIVERSITY_CODE)
+    dataset_prof_qual = dataset.groupby('Education_highest').get_group(PROFESSIONAL_QUAL_CODE)
+    dataset_a_level = dataset.groupby('Education_highest').get_group(A_LEVEL_CODE)
+    dataset_gcse = dataset.groupby('Education_highest').get_group(GCSE_CODE)
 
     # Independent t-tests with alpha corrected for multiple comparisons using Bonferroni's method
     alpha_corrected = 0.05 / 6

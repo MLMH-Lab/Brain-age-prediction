@@ -1,4 +1,4 @@
-"""Create dataset with demographic variables from UK Biobank for correlation analysis in var_corr;
+"""Create dataset with demographic variables from UK Biobank for correlation analysis;
 
 The following UK Biobank variables are assessed [variable data field - variable name]:
 6138-2.0, 6138-2.1, 6138-2.2, 6138-2.3, 6138-2.4 - Which of the following qualifications do you have? (up to 5 selections)
