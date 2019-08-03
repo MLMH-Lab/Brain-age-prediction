@@ -24,11 +24,9 @@ def spearman(df, x, y):
     n = len(df)
 
     if spearman_p < alpha:
-        print('n=%s, %s and %s - reject H0: p = %.3f, rho = %.3f'
-              % (n, x, y, spearman_p, spearman_rho))
+        print('n={}, {} and {} - reject H0: p = {:6.3}, rho = {:6.3}'.format(n, x, y, spearman_p, spearman_rho))
     else:
-        print('n=%s, %s and %s - not significant: p = %.3f, rho = %.3f'
-              % (n, x, y, spearman_p, spearman_rho))
+        print('n={}, {} and {} - not significant: p = {:6.3}, rho = {:6.3}'.format(n, x, y, spearman_p, spearman_rho))
 
 
 def cohend(d1, d2):
@@ -127,42 +125,42 @@ def main():
         y_results.append(pval)
         y_results.append(effect_size)
         if pval < alpha_corrected:
-            print("uni vs prof_qual [t-test pval, cohen's d]", pval, effect_size)
+            print("uni vs prof_qual [t-test pval, cohen's d]: {:6.3}, {:6.3}".format(pval, effect_size))
 
         tstat, pval = ttest_ind(dataset_uni[y], dataset_a_level[y])
         effect_size = cohend(dataset_uni[y], dataset_a_level[y])
         y_results.append(pval)
         y_results.append(effect_size)
         if pval < alpha_corrected:
-            print("uni vs a_level [t-test pval, cohen's d]", pval, effect_size)
+            print("uni vs a_level [t-test pval, cohen's d]: {:6.3}, {:6.3}".format(pval, effect_size))
 
         tstat, pval = ttest_ind(dataset_uni[y], dataset_gcse[y])
         effect_size = cohend(dataset_uni[y], dataset_gcse[y])
         y_results.append(pval)
         y_results.append(effect_size)
         if pval < alpha_corrected:
-            print("uni vs gcse [t-test pval, cohen's d]", pval, effect_size)
+            print("uni vs gcse [t-test pval, cohen's d]: {:6.3}, {:6.3}".format(pval, effect_size))
 
         tstat, pval = ttest_ind(dataset_prof_qual[y], dataset_a_level[y])
         effect_size = cohend(dataset_prof_qual[y], dataset_a_level[y])
         y_results.append(pval)
         y_results.append(effect_size)
         if pval < alpha_corrected:
-            print("prof_qual vs a_level [t-test pval, cohen's d]", pval, effect_size)
+            print("prof_qual vs a_level [t-test pval, cohen's d]: {:6.3}, {:6.3}".format(pval, effect_size))
 
         tstat, pval = ttest_ind(dataset_prof_qual[y], dataset_gcse[y])
         effect_size = cohend(dataset_prof_qual[y], dataset_gcse[y])
         y_results.append(pval)
         y_results.append(effect_size)
         if pval < alpha_corrected:
-            print("prof_qual vs gcse [t-test pval, cohen's d]", pval, effect_size)
+            print("prof_qual vs gcse [t-test pval, cohen's d]: {:6.3}, {:6.3}".format(pval, effect_size))
 
         tstat, pval = ttest_ind(dataset_a_level[y], dataset_gcse[y])
         effect_size = cohend(dataset_a_level[y], dataset_gcse[y])
         y_results.append(pval)
         y_results.append(effect_size)
         if pval < alpha_corrected:
-            print("a_level vs gcse [t-test pval, cohen's d]", pval, effect_size)
+            print("a_level vs gcse [t-test pval, cohen's d]: {:6.3}, {:6.3}".format(pval, effect_size))
 
         education_output[y] = y_results
 
