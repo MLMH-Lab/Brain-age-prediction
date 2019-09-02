@@ -125,7 +125,7 @@ def main():
     cv_r2_mean = np.mean(cv_r2_scores)
     cv_mae_mean = np.mean(cv_mae)
     cv_rmse_mean = np.mean(cv_rmse)
-    cv_age_error_corr_mean = np.mean(np.abs(cv_rmse))
+    cv_age_error_corr_mean = np.mean(np.abs(cv_age_error_corr))
     print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, CORR: {:0.3f}'.format(cv_r2_mean,
                                                                                 cv_mae_mean,
                                                                                 cv_rmse_mean,
