@@ -3,7 +3,7 @@ import subprocess
 
 PROJECT_ROOT = Path.cwd()
 venv_python = PROJECT_ROOT / 'venv' / 'bin' / 'python3'
-code_perm = PROJECT_ROOT / 'src' / 'BIOBANK' / 'Scanner1' / 'permutation.py'
+code_perm = PROJECT_ROOT / 'permutation.py'
 
 n_threads = 6
 initial_index_perm = 0
