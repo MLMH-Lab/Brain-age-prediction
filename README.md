@@ -40,7 +40,7 @@ Order of scripts:
 6.  train_svm_on_freesurfer_data: Create SVR models
 7.  train_rvm_on_freesurfer_data: Create RVM models
 8.  train_gpr_on_freesurfer_data: Create GPR models
-9.  run_permutation_subprocess: Permutation of SVR models
+9.  launch_permutation_subprocess: Permutation of SVR models
 10. run_permutation_significance_test: Assess significance of SVR models
 11. params_analysis: Compare SVM models with different hyperparameters
 12. create_bootstrap_ids: Create gender-homogeneous bootstrap datasets
