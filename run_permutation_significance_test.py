@@ -1,4 +1,10 @@
-"""Significance testing of SVM permutations for BIOBANK Scanner1"""
+"""Significance testing of SVM permutations for BIOBANK Scanner1
+
+Ref:
+Gaonkar, B., & Davatzikos, C. (2012, October). Deriving statistical significance maps for SVM based image
+ classification and group comparisons. In International Conference on Medical Image Computing and Computer-Assisted
+ Intervention (pp. 723-730). Springer, Berlin, Heidelberg.
+"""
 from pathlib import Path
 import numpy as np
 import pandas as pd

@@ -1,4 +1,8 @@
-"""Plot results of bootstrap analysis"""
+"""Plot results of bootstrap analysis
+
+Ref:
+https://machinelearningmastery.com/calculate-bootstrap-confidence-intervals-machine-learning-results-python/
+"""
 from pathlib import Path
 
 import matplotlib.pyplot as plt
