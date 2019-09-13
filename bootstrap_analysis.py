@@ -18,7 +18,7 @@ def main():
     # ----------------------------------------------------------------------------------------
 
     i_n_subject_pairs_list = range(1, 51)
-    n_bootstrap = 10
+    n_bootstrap = 1000
 
     scores_i_n_subject_pairs = []
 
