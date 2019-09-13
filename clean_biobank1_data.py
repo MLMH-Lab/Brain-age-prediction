@@ -24,7 +24,7 @@ def main():
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
     id_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'
 
-    output_ids_filename = 'cleaned_ids.csv'
+    output_ids_filename = 'cleaned_ids_noqc.csv'
     # ----------------------------------------------------------------------------------------
     # Create experiment's output directory
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name

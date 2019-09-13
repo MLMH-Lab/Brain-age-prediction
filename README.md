@@ -34,27 +34,28 @@ Install dependencies
 Order of scripts:
 1.  eda_demographic_data: Assess and visualise dataset in terms of age, gender, ethnicity
 2.  clean_biobank1_data: Remove subjects with a brain-based disorder, ethnic minorities, and age groups with <100 subjects
-3.  create_homogeneous_dataset: Create dataset that is homogeneous in terms of age and gender
-4.  univariate_analysis: Univariate analysis of age and regional volume
-5.  create_h5_dataset: Create hdf5 file of homogeneous dataset for machine learning analysis
-6.  train_svm_on_freesurfer_data: Create SVR models
-7.  train_rvm_on_freesurfer_data: Create RVM models
-8.  train_gpr_on_freesurfer_data: Create GPR models
-9.  permutation: Permutation of SVR models
-10. run_permutation_significance_test: Assess significance of SVR models
-11. params_analysis: Compare SVM models with different hyperparameters
-12. create_bootstrap_ids: Create gender-homogeneous bootstrap datasets
-13. create_h5_bootstrap: Create bootstrap files in hdf5 format
-14. svm_bootstrap: Run SVR on bootstrap datasets
-15. svm_classifier_bootstrap: Run SVC on bootstrap datasets
-16. regressors_comparison: Compares performance of SVM, RVM and GPR models
-17. regressor_classifier_comparison: Compare performance of SVR and SVC models
-18. create_ensemble_output: Create variables for average age predictions and prediction errors
-19. create_variables_biobank: Prepare Biobank variables for correlation analysis
-20. correlation_analysis: Perform correlation analysis of age predictions and Biobank variables
-21. eda_education_age: Assess and visualise distribution of education levels across age groups
-22. create_variables_indices_of_deprivation (optional): Prepare variables from English Indices of Deprivation for correlation analysis
-23. lsoa_corr: erform correlation analysis of age predictions and English Indices of Deprivation
+3.  qualitycheck_biobank1_data: Remove subjects that did not pass quality checks of MRI and Freesurfer segmentation
+4.  create_homogeneous_dataset: Create dataset that is homogeneous in terms of age and gender
+5.  univariate_analysis: Univariate analysis of age and regional volume
+6.  create_h5_dataset: Create hdf5 file of homogeneous dataset for machine learning analysis
+7.  train_svm_on_freesurfer_data: Create SVR models
+8.  train_rvm_on_freesurfer_data: Create RVM models
+9.  train_gpr_on_freesurfer_data: Create GPR models
+10.  permutation: Permutation of SVR models
+11. run_permutation_significance_test: Assess significance of SVR models
+12. params_analysis: Compare SVM models with different hyperparameters
+13. create_bootstrap_ids: Create gender-homogeneous bootstrap datasets
+14. create_h5_bootstrap: Create bootstrap files in hdf5 format
+15. svm_bootstrap: Run SVR on bootstrap datasets
+16. svm_classifier_bootstrap: Run SVC on bootstrap datasets
+17. regressors_comparison: Compares performance of SVM, RVM and GPR models
+18. regressor_classifier_comparison: Compare performance of SVR and SVC models
+19. create_ensemble_output: Create variables for average age predictions and prediction errors
+20. create_variables_biobank: Prepare Biobank variables for correlation analysis
+21. correlation_analysis: Perform correlation analysis of age predictions and Biobank variables
+22. eda_education_age: Assess and visualise distribution of education levels across age groups
+23. create_variables_indices_of_deprivation (optional): Prepare variables from English Indices of Deprivation for correlation analysis
+24. lsoa_corr: erform correlation analysis of age predictions and English Indices of Deprivation
 
 
 ## Citation
