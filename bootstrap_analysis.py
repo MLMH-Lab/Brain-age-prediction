@@ -18,10 +18,9 @@ def main():
     # ----------------------------------------------------------------------------------------
 
     i_n_subject_pairs_list = range(1, 51)
-    n_bootstrap = 1000
+    n_bootstrap = 10
 
-    scores_i_n_subject_pairs_mean = []
-    scores_i_n_subject_pairs_std = []
+    scores_i_n_subject_pairs = []
 
     for i_n_subject_pairs in i_n_subject_pairs_list:
         ids_with_n_subject_pairs_dir = experiment_dir / 'bootstrap_analysis' / ('{:02d}'.format(i_n_subject_pairs))
@@ -32,24 +31,26 @@ def main():
             filepath_scores = scores_dir / ('boot_scores_{:04d}.npy'.format(i_bootstrap))
             scores_bootstrap.append(np.load(str(filepath_scores))[1])
 
-        scores_i_n_subject_pairs_mean.append(np.mean(scores_bootstrap))
-        scores_i_n_subject_pairs_std.append(np.std(scores_bootstrap))
+        scores_i_n_subject_pairs.append(scores_bootstrap)
 
     age_min = 47
     age_max = 73
-    std = np.sqrt(((age_max - age_min) ** 2) / 12)
+    std_uniform_dist = np.sqrt(((age_max - age_min) ** 2) / 12)
 
-    fig = plt.figure(figsize=(20, 5))
+    plt.figure(figsize=(20, 5))
 
     # Draw lines
-    plt.plot(i_n_subject_pairs_list, scores_i_n_subject_pairs_mean, color="#111111", label="SVM performance")
-    plt.plot(i_n_subject_pairs_list, std * np.ones_like(i_n_subject_pairs_list), '--', color="#111111",
-             label="Chance line")
+    plt.plot(i_n_subject_pairs_list,
+             np.mean(scores_i_n_subject_pairs, axis=1),
+             color="#111111", label="SVM performance")
+
+    plt.plot(i_n_subject_pairs_list, std_uniform_dist * np.ones_like(i_n_subject_pairs_list), '--',
+             color="#111111", label="Chance line")
 
     # Draw bands
     plt.fill_between(i_n_subject_pairs_list,
-                     scores_i_n_subject_pairs_mean - np.multiply(1.96, scores_i_n_subject_pairs_std),
-                     scores_i_n_subject_pairs_mean + np.multiply(1.96, scores_i_n_subject_pairs_std),
+                     np.percentile(scores_i_n_subject_pairs, 2.5, axis=1),
+                     np.percentile(scores_i_n_subject_pairs, 97.5, axis=1),
                      color="#DDDDDD")
 
     # Create plot
