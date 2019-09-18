@@ -32,7 +32,7 @@ Install dependencies
 ## How to run
 
 Order of scripts:
-1.  eda_demographic_data: Assess and visualise dataset in terms of age, gender, ethnicity
+1. eda_demographic_data: Assess and visualise dataset in terms of age, gender, ethnicity
 2.  clean_biobank1_data: Remove subjects with a brain-based disorder, ethnic minorities, and age groups with <100 subjects
 3.  qualitycheck_biobank1_data: Remove subjects that did not pass quality checks of MRI and Freesurfer segmentation
 4.  create_homogeneous_dataset: Create dataset that is homogeneous in terms of age and gender
