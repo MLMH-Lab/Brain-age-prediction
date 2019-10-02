@@ -41,8 +41,8 @@ bash antsBrainExtraction.sh \
   -m ${ants_brain_mask} \
   -o ${working_data}/subjects_output/${file_name}_
 
-#bash antsRegistrationSyNQuick.sh \
-bash antsRegistrationSyN.sh \
+bash antsRegistrationSyNQuick.sh \
+#bash antsRegistrationSyN.sh \
   -d 3 \
   -f ${ants_template} \
   -m ${working_data}/subjects_output/${file_name}_BrainExtractionBrain.nii.gz \
