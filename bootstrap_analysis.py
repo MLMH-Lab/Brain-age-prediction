@@ -68,8 +68,6 @@ def main():
     plt.tight_layout()
     plt.savefig(str(experiment_dir / 'bootstrap_analysis' / 'bootstrap_analysis.png'))
 
-
-
     # Independent dataset
     plt.figure(figsize=(20, 5))
 
