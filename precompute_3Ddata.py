@@ -6,7 +6,6 @@ import numpy as np
 import nibabel as nib
 from nilearn.masking import apply_mask
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 
 # ---------------------------------------------------------------------------------
@@ -15,41 +14,57 @@ from sklearn.preprocessing import MinMaxScaler
 
 PROJECT_ROOT = Path.cwd()
 # TODO: Change the path. Here you should load the voxel data?
-dataset_path = Path('/Volumes/Elements/BIOBANK/SCANNER01')
+# dataset_path = Path('/Volumes/Elements/BIOBANK/SCANNER01')
+dataset_path = Path('/media/jed15/ELEMENTS/BIOBANK/SCANNER01')
 # sites_path = "./data/sites3.csv"
-kernel_file = './outputs/kernels/img.npz'
-input_data_type = "*.nii.gz"
-
+kernel_path = PROJECT_ROOT / 'outputs' / 'kernels'
+input_data_type = ".nii.gz"
+# Create output folder if it does not exist
+if not kernel_path.exists():
+    kernel_path.mkdir()
 # ---------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------
 
 demographics = pd.read_csv((dataset_path / 'participants.tsv'), sep='\t')
 demographics.set_index('Participant_ID', inplace=True)
-print("Reading images with format {} from: %s".format(input_data_type,
+print("Reading images with format {} from: {}".format(input_data_type,
                                                       dataset_path))
+# Drop demographics for which we don't have age
+subjects_id_to_drop = demographics[demographics['Age'].isna()]
+demographics.drop(subjects_id_to_drop.index, inplace=True)
 
 # Get list of subjects for which we have data
-subjects_path = glob.glob(str(dataset_path / 'sub-*Warped.nii.gz'))
+images_path = glob.glob(str(dataset_path / 'sub-*Warped.nii.gz'))
+# Get list of subjects for which we have data
+subjects_path = [str(dataset_path / '{}_ses-bl_T1w_Warped{}'.format(subject_id,
+                input_data_type)) for subject_id in demographics.index]
 subjects_path.sort()
+# Subjects for which we have data but no demographic
+missing_image = set(subjects_path).difference(images_path)
+print('Removing {} subjects as we have their demographics but no image'.format(len(missing_image)))
+# Drop subjects for which we have demographics but no image
+subjects_path = [path for path in subjects_path if path not in missing_image]
+
 # Get only the subject's ID from their path
 subjects_id = [re.findall('sub-\d+', subject)[0] for subject in
                subjects_path]
+
 # TODO: Get a list of 100 subjects, for testing purposes
 subjects_id = subjects_id[:100]
 subjects_path = subjects_path[:100]
 
 # Get demographics only for the subjects we have information for
-demographics = demographics[demographics.index.isin(subjects_id)]
-
-# n_samples = len(labels)
-# if n_samples != len(paths_train):
-#     raise ValueError('Different number of labels and images files')
-# Select demographics for group of interst
-
-print("Loading images")
-print("   # of images samples: %d " % len(subjects_id))
+missing_demo = demographics.index.isin(subjects_id)
+demographics = demographics[missing_demo]
+print('Removing {} subjects as we don\'t have their demographics'.format(sum(missing_demo)))
 
 n_samples = len(subjects_id)
+if n_samples != len(demographics):
+    raise ValueError('Different number of subject\'s and images files')
+
+print('Total number of images: {}'.format(len(subjects_id)))
+print("Loading images")
+print("   # of images samples: %d " % len(subjects_id))
 
 # Load the mask image
 brain_mask = PROJECT_ROOT / 'imaging_preprocessing_ANTs' / \
@@ -75,7 +90,7 @@ for ii in range(int(np.ceil(n_samples / np.float(step_size)))):
     # read in the images in this block
     images_1 = []
     for k, path in enumerate(block_paths_1):
-        img = nib.load(path)
+        img = nib.load(str(path))
         # Extract only the brain voxels. This will create a 1D array.
         img = apply_mask(img, mask_img)
         img = np.asarray(img, dtype='float64')
@@ -107,7 +122,7 @@ for ii in range(int(np.ceil(n_samples / np.float(step_size)))):
 
             images_2 = []
             for k, path in enumerate(block_paths_2):
-                img = nib.load(path)
+                img = nib.load(str(path))
                 img = apply_mask(img, mask_img)
                 img = np.asarray(img, dtype='float64')
                 img = np.nan_to_num(img)
@@ -119,10 +134,13 @@ for ii in range(int(np.ceil(n_samples / np.float(step_size)))):
         block_K = np.dot(images_1, np.transpose(images_2))
         K[start_ind_1:stop_ind_1, start_ind_2:stop_ind_2] = block_K
         K[start_ind_2:stop_ind_2, start_ind_1:stop_ind_1] = np.transpose(block_K)
-        # plt.imshow(K)
-        # plt.savefig('k-matrix.png')
+
+gram_df = pd.DataFrame(columns=subjects_id, data=K)
+gram_df['subject_ID'] = subjects_id
+gram_df = gram_df.set_index('subject_ID')
+
 print("")
 print("Saving Dataset")
-print("   Kernel+Labels:" + kernel_file)
-np.savez(kernel_file, kernel=K)
+print("   Kernel Path: {}".format(str(kernel_path)))
+gram_df.to_csv((kernel_path / 'kernel.csv'))
 print("Done")
