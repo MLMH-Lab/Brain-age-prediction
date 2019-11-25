@@ -8,22 +8,28 @@ from nilearn.masking import apply_mask
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
-# ---------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # CHANGE HERE
-# ---------------------------------------------------------------------------------
-
+# ------------------------------------------------------------------------------
 PROJECT_ROOT = Path.cwd()
-# TODO: Change the path. Here you should load the voxel data?
-# dataset_path = Path('/Volumes/Elements/BIOBANK/SCANNER01')
-dataset_path = Path('/media/jed15/ELEMENTS/BIOBANK/SCANNER01')
-# sites_path = "./data/sites3.csv"
+dataset_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1'
 kernel_path = PROJECT_ROOT / 'outputs' / 'kernels'
 input_data_type = ".nii.gz"
 # Create output folder if it does not exist
-if not kernel_path.exists():
-    kernel_path.mkdir()
-# ---------------------------------------------------------------------------------
-# ---------------------------------------------------------------------------------
+kernel_path.mkdir(exist_ok=True, parents=True)
+
+# ------------------------------------------------------------------------------
+# Get the same subject's IDs for those used on the freesurfer analysis and make
+# sure that we have IDs for which we have age and iamges
+# ------------------------------------------------------------------------------
+freesurfer_idx_file = 'cleaned_ids_noqc.csv'
+freesurfer_idx_path = PROJECT_ROOT / 'outputs' / 'biobank_scanner1' / freesurfer_idx_file
+try:
+    freesurfer_idx = pd.read_csv(freesurfer_idx_path)
+except IOError:
+    print('No file {}. Run the clean_biobank1_data.py script to generate \
+          it.'.format(freesurfer_idx_file))
+    raise
 
 demographics = pd.read_csv((dataset_path / 'participants.tsv'), sep='\t')
 demographics.set_index('Participant_ID', inplace=True)
@@ -44,10 +50,19 @@ missing_image = set(subjects_path).difference(images_path)
 print('Removing {} subjects as we have their demographics but no image'.format(len(missing_image)))
 # Drop subjects for which we have demographics but no image
 subjects_path = [path for path in subjects_path if path not in missing_image]
-
 # Get only the subject's ID from their path
 subjects_id = [re.findall('sub-\d+', subject)[0] for subject in
                subjects_path]
+
+# Check if we have the same ids as the freesurfer analysis
+missing_subj = freesurfer_idx[~freesurfer_idx['Participant_ID'].isin(subjects_id)]
+
+# Save a csv file with missing ids
+if not missing_subj.empty:
+    print('Saving csv file with different ids between freesurfer and current \
+          analysis')
+    missing_subj.to_csv(PROJECT_ROOT / 'outputs' / 'biobank_scanner1' /
+                        'missing_subjects.csv')
 
 # TODO: Get a list of 100 subjects, for testing purposes
 subjects_id = subjects_id[:100]
@@ -66,6 +81,8 @@ print('Total number of images: {}'.format(len(subjects_id)))
 print("Loading images")
 print("   # of images samples: %d " % len(subjects_id))
 
+# Calculate the Gram matrix
+# ------------------------------------------------------------------------------
 # Load the mask image
 brain_mask = PROJECT_ROOT / 'imaging_preprocessing_ANTs' / \
              'mni_icbm152_t1_tal_nlin_sym_09c_mask.nii'
@@ -136,11 +153,11 @@ for ii in range(int(np.ceil(n_samples / np.float(step_size)))):
         K[start_ind_2:stop_ind_2, start_ind_1:stop_ind_1] = np.transpose(block_K)
 
 gram_df = pd.DataFrame(columns=subjects_id, data=K)
-gram_df['subject_ID'] = subjects_id
-gram_df = gram_df.set_index('subject_ID')
+gram_df['Participant_ID'] = subjects_id
+gram_df = gram_df.set_index('Participant_ID')
 
 print("")
-print("Saving Dataset")
+print("Saving kernel for this dataset")
 print("   Kernel Path: {}".format(str(kernel_path)))
 gram_df.to_csv((kernel_path / 'kernel.csv'))
 print("Done")

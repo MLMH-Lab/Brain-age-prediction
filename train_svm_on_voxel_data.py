@@ -1,5 +1,7 @@
 """
 Script to implement SVM in BIOBANK Scanner1 using voxel data to predict brain age.
+This scipt assumes that a kernel has been already pre-computed. To compute the
+kernel use the script `precompute_3Ddata.py`
 """
 from math import sqrt
 from pathlib import Path
@@ -21,12 +23,11 @@ PROJECT_ROOT = Path.cwd()
 warnings.filterwarnings('ignore')
 
 def main():
-    # ----------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
 
     # TODO: Change the path. Here you should load the voxel data?
-    # dataset_path = Path('/Volumes/Elements/BIOBANK/SCANNER01')
-    dataset_path = Path('/media/jed15/ELEMENTS/BIOBANK/SCANNER01')
+    dataset_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1'
     kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel.csv'
 
     # Load demographics
@@ -40,7 +41,7 @@ def main():
     demographics = demographics[demographics.index.isin(kernel.index)]
 
     # Compute SVM
-    # ----------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     svm_dir = experiment_dir / 'voxel_SVM'
     svm_dir.mkdir(exist_ok=True, parents=True)
@@ -76,17 +77,12 @@ def main():
         for i_fold, (train_index, test_index) in enumerate(skf.split(kernel, age)):
             print('Running repetition {:02d}, fold {:02d}'.format(i_repetition, i_fold))
 
-            x_train = kernel.iloc[train_index, train_index]
-            x_test = kernel.iloc[test_index, test_index]
+            x_train = kernel.iloc[train_index, train_index].values
+            x_test = kernel.iloc[test_index, train_index].values
             y_train, y_test = age[train_index], age[test_index]
 
-            # Scaling using inter-quartile
-            # scaler = RobustScaler()
-            # x_train = scaler.fit_transform(x_train)
-            # x_test = scaler.transform(x_test)
-
             # Systematic search for best hyperparameters
-            svm = SVR(kernel='precomputed', loss='epsilon_insensitive')
+            svm = SVR(kernel='precomputed')
 
             search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0,
                                   2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
@@ -120,7 +116,6 @@ def main():
             cv_age_error_corr.append(age_error_corr)
 
             # Save scaler, model and model parameters
-            scaler_filename = '{:02d}_{:02d}_scaler.joblib'.format(i_repetition, i_fold)
             model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
             params_filename = '{:02d}_{:02d}_params.joblib'.format(i_repetition, i_fold)
 
@@ -143,8 +138,6 @@ def main():
             # Print results of the CV fold
             print('Repetition {:02d}, Fold {:02d}, R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, CORR: {:0.3f}'
                   .format(i_repetition, i_fold, r2_score, absolute_error, root_squared_error, age_error_corr))
-            import pdb
-            pdb.set_trace()
 
     # Save predictions
     age_predictions.to_csv(svm_dir / 'age_predictions.csv')
