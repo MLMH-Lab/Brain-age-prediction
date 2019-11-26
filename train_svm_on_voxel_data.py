@@ -1,32 +1,32 @@
 """
 Script to implement SVM in BIOBANK Scanner1 using voxel data to predict brain age.
-This scipt assumes that a kernel has been already pre-computed. To compute the
+
+This script assumes that a kernel has been already pre-computed. To compute the
 kernel use the script `precompute_3Ddata.py`
 """
 from math import sqrt
 from pathlib import Path
 import random
 import warnings
+
 from scipy import stats
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import RobustScaler
 from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
-from nilearn.masking import apply_mask
 
 PROJECT_ROOT = Path.cwd()
 
 warnings.filterwarnings('ignore')
 
+
 def main():
     # --------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
 
-    # TODO: Change the path. Here you should load the voxel data?
     dataset_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1'
     kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel.csv'
 
@@ -36,9 +36,6 @@ def main():
 
     # Load the Gram matrix
     kernel = pd.read_csv(kernel_path, header=0, index_col=0)
-
-    # Get demographics for subject's ID in the kernel
-    demographics = demographics[demographics.index.isin(kernel.index)]
 
     # Compute SVM
     # --------------------------------------------------------------------------
@@ -119,13 +116,11 @@ def main():
             model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
             params_filename = '{:02d}_{:02d}_params.joblib'.format(i_repetition, i_fold)
 
-            # dump(scaler, cv_dir / scaler_filename)
             dump(params_results, cv_dir / params_filename)
             dump(best_svm, cv_dir / model_filename)
 
             # Save model scores r2, MAE, RMSE
-            scores_array = np.array([r2_score, absolute_error, root_squared_error,
-                                     age_error_corr])
+            scores_array = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
 
             scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
 
@@ -155,4 +150,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
