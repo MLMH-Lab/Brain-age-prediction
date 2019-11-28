@@ -18,6 +18,8 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
 
+from helper_functions import load_demographic_data
+
 PROJECT_ROOT = Path.cwd()
 
 warnings.filterwarnings('ignore')
@@ -27,11 +29,17 @@ def main():
     # --------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
 
-    dataset_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1'
+    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
+    id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
+    freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'
+
     kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel.csv'
 
     # Load demographics
-    demographics = pd.read_csv((dataset_path / 'participants.tsv'), sep='\t')
+    demographics = load_demographic_data(demographic_path, id_path)
+    freesurfer = pd.read_csv(freesurfer_path)
+    freesurfer['Participant_ID'] = freesurfer['Image_ID'].str.split('_', expand=True)[0]
+    demographics = pd.merge(freesurfer, demographics, on='Participant_ID')
     demographics.set_index('Participant_ID', inplace=True)
 
     # Load the Gram matrix
