@@ -113,13 +113,14 @@ def main():
     # Get the same subject's IDs for those used on the FreeSurfer analysis and make
     # sure that we have IDs for which we have age and images
     # ------------------------------------------------------------------------------
-    freesurfer_ids_file = 'cleaned_ids.csv'
-    freesurfer_ids_path = PROJECT_ROOT / 'outputs' / 'biobank_scanner1' / freesurfer_ids_file
+    experiment_name = 'biobank_scanner1'
+    freesurfer_ids_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
 
     try:
         subject_ids = pd.read_csv(freesurfer_ids_path)
     except IOError:
-        print('No file {}. Run the clean_biobank1_data.py script to generate it.'.format(freesurfer_ids_file))
+        print('No file {}. Run the clean_biobank1_data.py script to generate
+              it.'.format(freesurfer_ids_path))
         raise
 
     # Get list of subjects for which we have data
