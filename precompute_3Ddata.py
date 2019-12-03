@@ -119,8 +119,8 @@ def main():
     try:
         subject_ids = pd.read_csv(freesurfer_ids_path)
     except IOError:
-        print('No file {}. Run the clean_biobank1_data.py script to generate
-              it.'.format(freesurfer_ids_path))
+        print('No file {}. Run the clean_biobank1_data.py script to generate'
+              ' it.'.format(freesurfer_ids_path))
         raise
 
     # Get list of subjects for which we have data
