@@ -1,6 +1,6 @@
 """
 Script to create gender-homogeneous bootstraped datasets to feed into create_h5_bootstrap script;
-Creates 50 bootstrap samples with increasing size
+Creates 20 bootstrap samples with increasing size
 """
 from pathlib import Path
 
@@ -35,8 +35,8 @@ def main():
     age_max = int(dataset['Age'].max())  # 73
 
     # Number maximum of pairs
-    n_max_pair = 50
-    # Loop to create 50 bootstrap samples that each contain up to 50 gender-balanced subject pairs per age group/year
+    n_max_pair = 20
+    # Loop to create 20 bootstrap samples that each contain up to 20 gender-balanced subject pairs per age group/year
     # Create a out-of-bag set (~test set)
     for i_n_subject_pairs in range(1, n_max_pair + 1):
         print(i_n_subject_pairs)
@@ -67,8 +67,9 @@ def main():
                     dataset_bootstrap_train = pd.concat(
                         [dataset_bootstrap_train, pd.DataFrame(random_sample_train['Participant_ID'])])
 
+                    # Sample test set with always the same size
                     not_sampled = ~gender_group['Participant_ID'].isin(random_sample_train['Participant_ID'])
-                    random_sample_test = gender_group[not_sampled].sample(n=i_n_subject_pairs, replace=False)
+                    random_sample_test = gender_group[not_sampled].sample(n=n_max_pair, replace=False)
                     dataset_bootstrap_test = pd.concat(
                         [dataset_bootstrap_test, pd.DataFrame(random_sample_test['Participant_ID'])])
 
