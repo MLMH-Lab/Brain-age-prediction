@@ -18,8 +18,8 @@ def main():
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     # ----------------------------------------------------------------------------------------
 
-    # Loop over the 50 bootstrap samples with up to 50 gender-balanced subject pairs per age group/year
-    for i_n_subject_pairs in range(1, 51):
+    # Loop over the 20 bootstrap samples with up to 20 gender-balanced subject pairs per age group/year
+    for i_n_subject_pairs in range(1, 21):
         print(i_n_subject_pairs)
 
         ids_with_n_subject_pairs_dir = experiment_dir / 'bootstrap_analysis' / ('{:02d}'.format(i_n_subject_pairs))
