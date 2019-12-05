@@ -17,6 +17,8 @@ from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
+import nibabel as nib
+from nilearn.masking import apply_mask
 
 from helper_functions import load_demographic_data
 
@@ -32,8 +34,10 @@ def main():
     demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
     id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
     freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'
+    dataset_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1'
 
-    kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel.csv'
+    # TODO: select only subjects in the kernel (for 100 subjects analysis)
+    kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel_100.csv'
 
     # Load demographics
     demographics = load_demographic_data(demographic_path, id_path)
@@ -53,7 +57,6 @@ def main():
     idx_missing = kernel[~kernel.index.isin(demographics['Age'].index)].index
     kernel = kernel[kernel.index.isin(demographics['Age'].index)]
     kernel = kernel.drop(columns=idx_missing)
-    # TODO: select only subjects in the kernel (for 100 subjects analysis)
     demographics = demographics[demographics.index.isin(kernel.index)]
 
     # Compute SVM
@@ -76,12 +79,19 @@ def main():
     cv_rmse = []
     cv_age_error_corr = []
 
+    # Feature important
+    coefs = []
+
     # Create Dataframe to hold actual and predicted ages
     age_predictions = pd.DataFrame(demographics['Age'])
 
     n_repetitions = 10
     n_folds = 10
     n_nested_folds = 5
+
+    # Load the mask image
+    brain_mask = PROJECT_ROOT / 'imaging_preprocessing_ANTs' / 'mni_icbm152_t1_tal_nlin_sym_09c_mask.nii'
+    mask_img = nib.load(str(brain_mask))
 
     for i_repetition in range(n_repetitions):
         # Create new empty column in age_predictions df to save age predictions of this repetition
@@ -125,13 +135,26 @@ def main():
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
             r2_score = best_svm.score(x_test, y_test)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
-            import pdb
-            pdb.set_trace()
+            # TODO: not sure if this will work when we have all subjects
+            # Calculate feature importance
+            training_subj_index = kernel.iloc[train_index, train_index].index
+            # Load subject's data
+            images = []
+            for subject in training_subj_index:
+                img = nib.load(str(dataset_path /
+                                   '{}_ses-bl_T1w_Warped.nii.gz'.format(subject)))
+                img = apply_mask(img, mask_img)
+                img = np.asarray(img, dtype='float64')
+                img = np.nan_to_num(img)
+                images.append(img)
+            images = np.array(images)
+            coef = np.dot(best_svm.dual_coef_, images[best_svm.support_])
 
             cv_r2_scores.append(r2_score)
             cv_mae.append(absolute_error)
             cv_rmse.append(root_squared_error)
             cv_age_error_corr.append(age_error_corr)
+            coefs.append(coef)
 
             # Save scaler, model and model parameters
             model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
@@ -141,7 +164,8 @@ def main():
             dump(best_svm, cv_dir / model_filename)
 
             # Save model scores r2, MAE, RMSE
-            scores_array = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
+            scores_array = np.array([r2_score, absolute_error,
+                                     root_squared_error, age_error_corr, coef])
 
             scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
 
