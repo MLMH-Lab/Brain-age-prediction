@@ -46,23 +46,26 @@ def main():
     testset_age_predictions = pd.DataFrame(testing_dataset[['Participant_ID', 'Age']])
     testset_age_predictions = testset_age_predictions.set_index('Participant_ID')
 
-    # Create list of SVM model names
+    # Create list of SVM model prefixes
     n_repetitions = 10
     n_folds = 10
 
-    regressor_list = []
+    model_prefix_list = []
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
-            regressor_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
-            regressor_list.append(regressor_filename)
+            prefix_name = '{:02d}_{:02d}_'.format(i_repetition, i_fold)
+            model_prefix_list.append(prefix_name)
 
     # Loop over SVM models
-    for i_model in regressor_list:
-        # Load regressor per model
-        regressor = load(svm_cv_dir / i_model)
+    for i_model in model_prefix_list:
+        # Load regressor, scaler and parameters per model
+        regressor_filename = '{}regressor.joblib'.format(i_model)
+        regressor = load(svm_cv_dir / regressor_filename)
+        scaler_filename = '{}scaler.joblib'.format(i_model)
+        scaler = load(svm_cv_dir / scaler_filename)
 
-    # Apply regressors to new data
-    # Save prediction per model in df
+        # Apply regressors to new data
+        # Save prediction per model in df
 
     # Export df as csv
 
