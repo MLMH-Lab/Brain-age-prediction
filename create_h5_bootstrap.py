@@ -39,7 +39,7 @@ def main():
 
             create_dataset(demographic_path, training_id_path, freesurfer_path, dataset_path)
 
-            test_ids_filename = 'homogeneous_bootstrap_{:04d}_n_{:02d}_train.csv'.format(i_bootstrap, i_n_subject_pairs)
+            test_ids_filename = 'homogeneous_bootstrap_{:04d}_n_{:02d}_test.csv'.format(i_bootstrap, i_n_subject_pairs)
             test_id_path = ids_with_n_subject_pairs_dir / 'ids' / test_ids_filename
 
             dataset_filename = 'homogeneous_bootstrap_{:04d}_n_{:02d}_test.h5'.format(i_bootstrap, i_n_subject_pairs)
