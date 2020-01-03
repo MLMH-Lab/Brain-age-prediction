@@ -20,6 +20,7 @@ from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
 import nibabel as nib
 from nilearn.masking import apply_mask
+from tqdm import tqdm
 
 from helper_functions import load_demographic_data
 
@@ -139,7 +140,9 @@ def main(i_repetition):
         training_subj_index = kernel.iloc[train_index, train_index].index
         # Load subject's data
         images = []
-        for subject in training_subj_index:
+        print('')
+        print('Calculating weight matrix...')
+        for subject in tqdm(training_subj_index[best_svm.support_]):
             img = nib.load(str(dataset_path /
                                '{}_ses-bl_T1w_Warped.nii.gz'.format(subject)))
             img = apply_mask(img, mask_img)
@@ -147,7 +150,7 @@ def main(i_repetition):
             img = np.nan_to_num(img)
             images.append(img)
         images = np.array(images)
-        coef = np.dot(best_svm.dual_coef_, images[best_svm.support_])
+        coef = np.dot(best_svm.dual_coef_, images)
 
         cv_r2_scores.append(r2_score)
         cv_mae.append(absolute_error)
