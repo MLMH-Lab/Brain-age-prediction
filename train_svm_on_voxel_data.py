@@ -179,12 +179,11 @@ def main(i_repetition):
               .format(i_repetition, i_fold, r2_score, absolute_error, root_squared_error, age_error_corr))
 
     # Save feature importance for the different repetitions'
-    weights_filename = '{:02d}_{:02d}_weights.npy'.format(i_repetition, i_fold)
+    weights_filename = '{:02d}_weights.npy'.format(i_repetition)
     np.save(cv_dir / weights_filename, coefs)
 
     # Save predictions
-    age_predictions_filename = '{:02d}_{:02d}_age_predictions.csv'.format(i_repetition,
-                                                                          i_fold)
+    age_predictions_filename = '{:02d}_age_predictions.csv'.format(i_repetition)
     age_predictions.to_csv(cv_dir / age_predictions_filename)
 
 if __name__ == "__main__":
