@@ -11,9 +11,8 @@ import numpy as np
 import argparse
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
-from sklearn.svm import LinearSVR
+from sklearn_rvm.em_rvm import EMRVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.model_selection import GridSearchCV
 
 from utils import COLUMNS_NAME
 
@@ -46,7 +45,6 @@ def main(index_min, index_max):
 
     n_repetitions = 10
     n_folds = 10
-    n_nested_folds = 5
 
     # Random permutation loop
     for i_perm in range(index_min, index_max):
@@ -88,29 +86,13 @@ def main(index_min, index_max):
                 x_test = scaling.transform(x_test)
 
                 # Systematic search for best hyperparameters
-                svm = LinearSVR(loss='epsilon_insensitive')
-
-                search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
-
-                nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
-
-                gridsearch = GridSearchCV(svm,
-                                          param_grid=search_space,
-                                          scoring='neg_mean_absolute_error',
-                                          refit=True, cv=nested_skf,
-                                          verbose=1, n_jobs=1)
-
-                gridsearch.fit(x_train, y_train)
-
-                best_svm = gridsearch.best_estimator_
-
-                cv_coef[i_iteration] = best_svm.coef_
-
-                predictions = best_svm.predict(x_test)
+                rvm = EMRVR(kernel='linear')
+                rvm.fit(x_train, y_train)
+                predictions = rvm.predict(x_test)
 
                 absolute_error = mean_absolute_error(y_test, predictions)
                 root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-                r2_score = best_svm.score(x_test, y_test)
+                r2_score = rvm.score(x_test, y_test)
                 age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
                 cv_r2_scores.append(r2_score)
