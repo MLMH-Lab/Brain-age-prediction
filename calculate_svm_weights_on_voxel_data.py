@@ -4,7 +4,6 @@ for voxel data.
 """
 from pathlib import Path
 import random
-import warnings
 
 import numpy as np
 import nibabel as nib
@@ -44,22 +43,26 @@ def main():
 
     n_repetitions = 10
     n_folds = 10
-    svm_list = []
-    train_index_list = []
+    dual_coef_list = []
+    support_index_list = []
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
             # Load model
             model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
             svm = load(cv_dir / model_filename)
-            svm_list.append(svm)
 
             # Load train index
             index_filename = '{:02d}_{:02d}_train_index.npy'.format(i_repetition, i_fold)
             train_index = np.load(cv_dir / index_filename)
-            train_index_list.append(train_index)
 
-    for i, subject_id in tqdm(enumerate(subject_ids['Participant_ID'])):
-        # print(i)
+            dual_coef_list.append(svm.dual_coef_[0])
+            support_index_list.append(train_index[svm.support_])
+
+    # number of voxels in the mask
+    n_voxels = 1886539
+    weights = np.zeros((100, n_voxels))
+
+    for i, subject_id in enumerate(tqdm(subject_ids['Participant_ID'])):
         path = str(dataset_path / '{}_ses-bl_T1w_Warped{}'.format(subject_id, input_data_type))
 
         try:
@@ -72,6 +75,26 @@ def main():
         img = apply_mask(img, mask_img)
         img = np.asarray(img, dtype='float64')
         img = np.nan_to_num(img)
+
+        for j, (dual_coef, support_index) in enumerate(zip(dual_coef_list, support_index_list)):
+            if i in support_index:
+                selected_dual_coef = dual_coef[np.argwhere(support_index == i)]
+                weights[j, :] = weights[j, :] + selected_dual_coef * img
+
+    mask_data = mask_img.get_fdata()
+    coords = np.argwhere(mask_data > 0)
+    i = 0
+    for i_repetition in range(n_repetitions):
+        for i_fold in range(n_folds):
+            importance_map = np.zeros_like(mask_data)
+            for xyz, importance in zip(coords, weights[i, :]):
+                importance_map[tuple(xyz)] = importance
+
+            importance_map_nifti = nib.Nifti1Image(importance_map, np.eye(4))
+            importance_filename = '{:02d}_{:02d}_importance.nii.gz'.format(i_repetition, i_fold)
+            nib.save(importance_map_nifti, str(cv_dir / importance_filename))
+            i = i + 1
+
 
 if __name__ == "__main__":
     main()
