@@ -56,7 +56,7 @@ def main():
     # Create plot
     plt.title("Bootstrap Analysis")
     plt.xlabel("Number of subjects")
-    plt.xticks(i_n_subject_pairs_list, np.multiply(i_n_subject_pairs_list, (73 - 47)))
+    plt.xticks(i_n_subject_pairs_list, np.multiply(i_n_subject_pairs_list, 2 * ((73 - 47) + 1)))
     plt.ylabel("Mean Absolute Error")
     plt.legend(loc="best")
     plt.tight_layout()
