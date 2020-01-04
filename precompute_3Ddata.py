@@ -135,7 +135,7 @@ def main():
 
     gram_matrix = calculate_gram_matrix(subjects_path, mask_img)
 
-    gram_df = pd.DataFrame(columns=subject_ids, data=gram_matrix)
+    gram_df = pd.DataFrame(columns=subject_ids['Participant_ID'].tolist(), data=gram_matrix)
     gram_df['Participant_ID'] = subject_ids
     gram_df = gram_df.set_index('Participant_ID')
 

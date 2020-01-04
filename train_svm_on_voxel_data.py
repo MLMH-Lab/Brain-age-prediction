@@ -46,16 +46,6 @@ def main():
     # Load the Gram matrix
     kernel = pd.read_csv(kernel_path, header=0, index_col=0)
 
-    #  Remove the additional subjects from kernel
-    # TODO: Just a hack to make it run but we should make sure that the ids from
-    # dataset_homogeneous is the same form the cleaned_ids.csv. Or just use the
-    # dataset_homogeneous to create the kernel.
-    kernel.columns = kernel.columns.str.replace('(', '').str.replace(')', '').str.replace('\'', '').str.replace(',', '')
-    idx_missing = kernel[~kernel.index.isin(demographics['Age'].index)].index
-    kernel = kernel[kernel.index.isin(demographics['Age'].index)]
-    kernel = kernel.drop(columns=idx_missing)
-    demographics = demographics[demographics.index.isin(kernel.index)]
-
     # Compute SVM
     # --------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
