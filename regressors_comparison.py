@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Comparing classifiers using a version of the paired Student’s t-test that is
 corrected for the violation of the independence assumption from repeated k-fold cross-validation
 when training the model
@@ -8,6 +9,7 @@ https://machinelearningmastery.com/statistical-significance-tests-for-comparing-
 Bouckaert, Remco R., and Eibe Frank. "Evaluating the replicability of significance tests for comparing learning algorithms." Pacific-Asia Conference on Knowledge Discovery and Data Mining. Springer, Berlin, Heidelberg, 2004.
 https://github.com/BayesianTestsML/tutorial/blob/9fb0bf75b4435d61d42935be4d0bfafcc43e77b9/Python/bayesiantests.py
 """
+import argparse
 from pathlib import Path
 import itertools
 
@@ -52,14 +54,8 @@ def ttest_ind_corrected(performance_a, performance_b, k=10, r=10):
     return t, prob
 
 
-def main():
-    # ----------------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
-
-    list_of_classifiers = ['SVM', 'RVM', 'GPR']
-
-    # ----------------------------------------------------------------------------------------
-    combinations = list(itertools.combinations(list_of_classifiers, 2))
+def main(experiment_name, suffix, model_list):
+    combinations = list(itertools.combinations(model_list, 2))
 
     # Bonferroni correction for multiple comparisons
     corrected_alpha = 0.05 / len(combinations)
@@ -99,8 +95,25 @@ def main():
                                         'stats': statistic},
                                        ignore_index=True)
 
-        results_df.to_csv(PROJECT_ROOT / 'outputs' / experiment_name / 'regressors_comparison.csv', index=False)
+        results_df.to_csv(PROJECT_ROOT / 'outputs' / experiment_name / 'regressors_comparison' + suffix + '.csv',
+                          index=False)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-E', '--experiment_name',
+                        dest='experiment_name',
+                        help='Experiment name where the model predictions are stored.')
+
+    parser.add_argument('-S', '--suffix',
+                        dest='suffix',
+                        help='Suffix to add on the output file regressors_comparison_suffix.csv.')
+
+    parser.add_argument('-M', '--model_list',
+                        dest='model_list',
+                        nargs='+',
+                        help='Names of models to analyse.')
+
+    args = parser.parse_args()
+
+    main(args.experiment_name, args.suffix, args.model_list)
