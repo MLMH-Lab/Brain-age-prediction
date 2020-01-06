@@ -7,6 +7,7 @@ import nibabel as nib
 import numpy as np
 from nilearn import plotting
 from nilearn.image import coord_transform
+from tqdm import tqdm
 
 PROJECT_ROOT = Path.cwd()
 
@@ -23,12 +24,25 @@ def main():
     feat_imp_dir.mkdir(exist_ok=True, parents=True)
     cv_dir = svm_dir / 'cv'
     print(feat_imp_dir)
+
+    # Load anatomical template image
+    template = (PROJECT_ROOT / 'imaging_preprocessing_ANTs' /
+                'mni_icbm152_t1_tal_nlin_sym_09c.nii')
+    template = nib.load(str(template))
+
+    brain_mask = (PROJECT_ROOT / 'imaging_preprocessing_ANTs' /
+                  'mni_icbm152_t1_tal_nlin_sym_09c_mask.nii')
+    mask_img = nib.load(str(brain_mask))
+    bg_img = template.get_fdata() * mask_img.get_fdata()
+    template = nib.Nifti1Image(bg_img, template.affine)
+
     # --------------------------------------------------------------------------
     assessed_model_coefs = []
     n_repetitions = 10
     n_folds = 10
     for i_repetition in range(n_repetitions):
-        for i_fold in range(n_folds):
+        print('Repetition N={}'.format(i_repetition))
+        for i_fold in tqdm(range(n_folds)):
             importance_filename = '{:02d}_{:02d}_importance.nii.gz'.format(i_repetition, i_fold)
             importance_map = nib.load(str(cv_dir / importance_filename))
             data_map = importance_map.get_fdata()
@@ -38,7 +52,8 @@ def main():
     final_coefs = np.mean(assessed_model_coefs, axis=0)
 
     # --------------------------------------------------------------------------
-    importance_map_nifti = nib.Nifti1Image(final_coefs, importance_map.affine)
+    # Create mean importance image
+    importance_map_nifti = nib.Nifti1Image(final_coefs, template.affine)
 
     # Select central slice for the X and Y coordinate
     x = importance_map_nifti.shape[0] / 2
@@ -48,16 +63,15 @@ def main():
     z_min = 28
     z_max = 160
 
-    # Load anatomical template image
-    template = (PROJECT_ROOT / 'imaging_preprocessing_ANTs' /
-                'mni_icbm152_t1_tal_nlin_sym_09c_brain.nii.gz')
-    template = nib.load(str(template))
+    # Define threshold for visualisation purposes
+    thr_mean = np.mean(final_coefs)
+    thr_std = np.std(final_coefs)
 
     # Save multiple slices
-    for i in range(z_min, z_max, 1):
+    print('Saving images with different z-coordinates:')
+    for i in tqdm(range(z_min, z_max, 1)):
         # transform slice into into the image space
         coordinates = coord_transform(x, y, i, importance_map_nifti.affine)
-        print(coordinates)
         plotting.plot_stat_map(importance_map_nifti,
                                bg_img=template,
                                cut_coords=coordinates,
@@ -65,10 +79,11 @@ def main():
                                            'feature_importance_{}.png'.format(i),
                                draw_cross=False,
                                cmap='Reds',
-                               threshold=thr_mean + 2 * thr_std, #TODO: define these values
+                               threshold=thr_mean + 3 * thr_std,
                                black_bg=False,
                                )
     # Make gif
+    print('Create GIF')
     png_list = glob(str(feat_imp_dir / 'feature_importance*.png'))
     png_list.sort()
     gif_file = feat_imp_dir / 'feature_importance.gif'
