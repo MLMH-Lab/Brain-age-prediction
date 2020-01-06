@@ -21,7 +21,6 @@ def main():
     training_experiment_name = 'biobank_scanner1'
     testing_experiment_name = 'biobank_scanner2'
 
-    # TODO: Scanner2 data still need to be cleaned and converted to h5 format
     testing_dataset_path = PROJECT_ROOT / 'outputs' / testing_experiment_name / 'freesurferData.h5'
     # ----------------------------------------------------------------------------------------
     training_experiment_dir = PROJECT_ROOT / 'outputs' / training_experiment_name
@@ -64,10 +63,18 @@ def main():
         scaler_filename = '{}scaler.joblib'.format(i_model)
         scaler = load(svm_cv_dir / scaler_filename)
 
-        # Apply regressors to new data
+        # Use RobustScaler to transform testing data
+        regions_norm_test = scaler.transform(regions_norm)
+
+        # Apply regressors to scaled data
+        test_predictions = regressor.predict(regions_norm_test)
+
         # Save prediction per model in df
+        testset_age_predictions[i_model] = test_predictions
 
     # Export df as csv
+    testset_age_predictions_filename = PROJECT_ROOT / 'outputs' / testing_experiment_name / 'svm_testset_predictions.csv'
+    testset_age_predictions.to_csv(testset_age_predictions_filename)
 
 if __name__ == "__main__":
     main()

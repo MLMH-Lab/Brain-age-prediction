@@ -1,7 +1,5 @@
 """TEMPORARY SCRIPT to clean Biobank scanner 2 data.
-This script may be incorporated into clean_biobank1_data script eventually.
-The main difference is that the participants file seems to be in xls rather than tsv format for some reason.
-Furthermore, not all Scanner2 data seem to be preprocessed yet"""
+This script may be incorporated into clean_biobank1_data script eventually."""
 
 from pathlib import Path
 
@@ -17,8 +15,9 @@ def main():
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner2'
 
+    #TODO: update script to only use tsv file for demographic data
     demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner2' / 'ukb22321.csv'
-    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner2' / 'participants.xls'
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner2' / 'participants.tsv'
     id_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner2' / 'freesurferData.csv'
 
     output_ids_filename = 'cleaned_ids_scanner2_noqc.csv'
@@ -29,7 +28,8 @@ def main():
 
     dataset = load_demographic_data(demographic_path, id_path)
 
-    participants_df = pd.read_excel(participants_path, usecols=['Participant_ID', 'Diagn'])
+    participants_df = pd.read_csv(participants_path, sep='\t', usecols=['participant_id', 'Diagn'])
+    participants_df.columns = ['Participant_ID', 'Diagn']
     participants_df['ID'] = participants_df['Participant_ID'].str.split('-').str[1]
     participants_df['ID'] = pd.to_numeric(participants_df['ID'])
 
@@ -46,6 +46,11 @@ def main():
 
     output_ids_df = pd.DataFrame(dataset['Participant_ID'])
     output_ids_df.to_csv(experiment_dir / output_ids_filename, index=False)
+
+    #Create hdf5 file
+    dataset_path = PROJECT_ROOT / 'outputs' / experiment_name / 'freesurferData.h5'
+    dataset.to_hdf(dataset_path, key='table', mode='w')
+
 
 
 if __name__ == "__main__":
