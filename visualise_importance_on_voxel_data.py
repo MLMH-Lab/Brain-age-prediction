@@ -50,19 +50,8 @@ def main():
 
     # Load anatomical template image
     template = (PROJECT_ROOT / 'imaging_preprocessing_ANTs' /
-                'mni_icbm152_t1_tal_nlin_sym_09c.nii')
+                'mni_icbm152_t1_tal_nlin_sym_09c_brain.nii.gz')
     template = nib.load(str(template))
-
-    brain_mask = PROJECT_ROOT / 'imaging_preprocessing_ANTs' / 'mni_icbm152_t1_tal_nlin_sym_09c_mask.nii'
-    mask_img = nib.load(str(brain_mask))
-    bg_img = template.get_fdata() * mask_img.get_fdata()
-    template = nib.Nifti1Image(bg_img, template.affine)
-    # TODO: Try to make it work with data from the http://nist.mni.mcgill.ca/?p=904 or
-    #  consider add to the repository the mni_icbm152_t1_tal_nlin_sym_09c_brain.nii.gz
-
-    # template = (PROJECT_ROOT / 'imaging_preprocessing_ANTs' /
-    # 'mni_icbm152_t1_tal_nlin_sym_09c_brain.nii.gz')
-    # template = nib.load(str(template))
 
     # Save multiple slices
     for i in range(z_min, z_max, 1):
