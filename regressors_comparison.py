@@ -55,6 +55,38 @@ def ttest_ind_corrected(performance_a, performance_b, k=10, r=10):
 
 
 def main(experiment_name, suffix, model_list):
+    # Create summary of results
+    n_repetitions = 10
+    n_folds = 10
+    for model_name in model_list:
+        model_dir = PROJECT_ROOT / 'outputs' / experiment_name / model_name
+        cv_dir = model_dir / 'cv'
+
+        r2_scores = []
+        absolute_errors = []
+        root_squared_errors = []
+        age_error_corrs = []
+
+        for i_repetition in range(n_repetitions):
+            for i_fold in range(n_folds):
+                scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
+                r2_score, absolute_error, root_squared_error, age_error_corr = np.load(cv_dir / scores_filename)
+                r2_scores.append(r2_score)
+                absolute_errors.append(absolute_error)
+                root_squared_errors.append(root_squared_error)
+                age_error_corrs.append(age_error_corr)
+
+        results = pd.DataFrame(columns=['Measure', 'Value'])
+        results = results.append({'Measure': 'mean_r2', 'Value': np.mean(r2_scores)}, ignore_index=True)
+        results = results.append({'Measure': 'std_r2', 'Value': np.std(r2_scores)}, ignore_index=True)
+        results = results.append({'Measure': 'mean_mae', 'Value': np.mean(absolute_errors)}, ignore_index=True)
+        results = results.append({'Measure': 'std_mae', 'Value': np.std(absolute_errors)}, ignore_index=True)
+        results = results.append({'Measure': 'mean_rmse', 'Value': np.mean(root_squared_errors)}, ignore_index=True)
+        results = results.append({'Measure': 'std_rmse', 'Value': np.std(root_squared_errors)}, ignore_index=True)
+        results = results.append({'Measure': 'mean_age_error_corr', 'Value': np.mean(age_error_corrs)}, ignore_index=True)
+        results = results.append({'Measure': 'std_age_error_corr', 'Value': np.std(age_error_corrs)}, ignore_index=True)
+        results.to_csv(model_dir / '{:}_scores_summary.csv'.format(model_name), index=False)
+
     combinations = list(itertools.combinations(model_list, 2))
 
     # Bonferroni correction for multiple comparisons
@@ -95,7 +127,7 @@ def main(experiment_name, suffix, model_list):
                                         'stats': statistic},
                                        ignore_index=True)
 
-        results_df.to_csv(PROJECT_ROOT / 'outputs' / experiment_name / 'regressors_comparison' + suffix + '.csv',
+        results_df.to_csv(PROJECT_ROOT / 'outputs' / experiment_name / ('regressors_comparison' + suffix + '.csv'),
                           index=False)
 
 
