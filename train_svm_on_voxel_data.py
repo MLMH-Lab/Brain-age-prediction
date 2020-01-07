@@ -34,7 +34,7 @@ def main():
     freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'
 
     # TODO: select only subjects in the kernel (for 100 subjects analysis)
-    kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel_100.csv'
+    kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel.csv'
 
     # Load demographics
     demographics = load_demographic_data(demographic_path, id_path)
