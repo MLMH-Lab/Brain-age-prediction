@@ -39,7 +39,6 @@ def main():
     tiv = testing_dataset.EstimatedTotalIntraCranialVol.values[:, np.newaxis]
 
     regions_norm = np.true_divide(regions, tiv)
-    age = testing_dataset['Age'].values
 
     # Create dataframe to hold actual and predicted ages in testing dataset
     testset_age_predictions = pd.DataFrame(testing_dataset[['Participant_ID', 'Age']])
@@ -49,28 +48,23 @@ def main():
     n_repetitions = 10
     n_folds = 10
 
-    model_prefix_list = []
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
-            prefix_name = '{:02d}_{:02d}_'.format(i_repetition, i_fold)
-            model_prefix_list.append(prefix_name)
+            # Load regressor, scaler and parameters per model
+            regressor_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
+            regressor = load(svm_cv_dir / regressor_filename)
 
-    # Loop over SVM models
-    for i_model in model_prefix_list:
-        # Load regressor, scaler and parameters per model
-        regressor_filename = '{}regressor.joblib'.format(i_model)
-        regressor = load(svm_cv_dir / regressor_filename)
-        scaler_filename = '{}scaler.joblib'.format(i_model)
-        scaler = load(svm_cv_dir / scaler_filename)
+            scaler_filename = '{:02d}_{:02d}_scaler.joblib'.format(i_repetition, i_fold)
+            scaler = load(svm_cv_dir / scaler_filename)
 
-        # Use RobustScaler to transform testing data
-        regions_norm_test = scaler.transform(regions_norm)
+            # Use RobustScaler to transform testing data
+            regions_norm_test = scaler.transform(regions_norm)
 
-        # Apply regressors to scaled data
-        test_predictions = regressor.predict(regions_norm_test)
+            # Apply regressors to scaled data
+            test_predictions = regressor.predict(regions_norm_test)
 
-        # Save prediction per model in df
-        testset_age_predictions[i_model] = test_predictions
+            # Save prediction per model in df
+            testset_age_predictions[('{:02d}_{:02d}'.format(i_repetition, i_fold))] = test_predictions
 
     # Export df as csv
     testset_age_predictions_filename = PROJECT_ROOT / 'outputs' / testing_experiment_name / 'svm_testset_predictions.csv'
