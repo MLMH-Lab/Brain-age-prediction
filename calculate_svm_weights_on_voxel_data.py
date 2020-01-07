@@ -11,19 +11,26 @@ from sklearn.externals.joblib import load
 from nilearn.masking import apply_mask
 import pandas as pd
 from tqdm import tqdm
+import argparse
+import sys
 
 PROJECT_ROOT = Path.cwd()
 
+parser = argparse.ArgumentParser("Type of Vector Machine.")
+parser.add_argument('vm', dest='vm_type', nargs='?', default='svm')
 
-def main():
+def main(vm_type):
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
     dataset_path = Path('/media/kcl_1/SSD2/BIOBANK/')
     input_data_type = '.nii.gz'
 
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
-    svm_dir = experiment_dir / 'voxel_SVM'
-    cv_dir = svm_dir / 'cv'
+    if vm_type == 'svm':
+        vm_dir = experiment_dir / 'voxel_SVM'
+    if vm_type == 'rvm':
+        vm_dir = experiment_dir / 'voxel_RVM'
+    cv_dir = vm_dir / 'cv'
 
     freesurfer_ids_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
 
@@ -43,20 +50,24 @@ def main():
 
     n_repetitions = 10
     n_folds = 10
-    dual_coef_list = []
-    support_index_list = []
+    coef_list = []
+    index_list = []
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
             # Load model
             model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
-            svm = load(cv_dir / model_filename)
+            vm = load(cv_dir / model_filename)
 
             # Load train index
             index_filename = '{:02d}_{:02d}_train_index.npy'.format(i_repetition, i_fold)
             train_index = np.load(cv_dir / index_filename)
 
-            dual_coef_list.append(svm.dual_coef_[0])
-            support_index_list.append(train_index[svm.support_])
+            if vm_type=='svm':
+                coef_list.append(vm.dual_coef_[0])
+                index_list.append(train_index[vm.support_])
+            else: #rvm
+                coef_list.append(vm.mu_)
+                index_list.append(train_index[vm.relevance_])
 
     # number of voxels in the mask
     n_voxels = 1886539
@@ -76,7 +87,7 @@ def main():
         img = np.asarray(img, dtype='float64')
         img = np.nan_to_num(img)
 
-        for j, (dual_coef, support_index) in enumerate(zip(dual_coef_list, support_index_list)):
+        for j, (dual_coef, support_index) in enumerate(zip(coef_list, index_list)):
             if i in support_index:
                 selected_dual_coef = dual_coef[np.argwhere(support_index == i)]
                 weights[j, :] = weights[j, :] + selected_dual_coef * img
@@ -97,4 +108,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = parser.parse_args(sys.argv[1:])
+    main(vm_type=args.vm_type)

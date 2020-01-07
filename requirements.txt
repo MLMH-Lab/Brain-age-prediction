@@ -10,3 +10,5 @@ nibabel==2.5.0
 nilearn==0.5.2
 tqdm==4.41.1
 imageio==2.6.1
+sklearn-rvm==0.0.2
+argparse=1.4.0
