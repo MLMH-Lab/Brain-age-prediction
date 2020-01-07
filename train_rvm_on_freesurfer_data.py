@@ -12,7 +12,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
-from skrvm import RVR
+from sklearn_rvm import EMRVR
 
 from utils import COLUMNS_NAME
 
@@ -80,7 +80,7 @@ def main():
             x_test = scaler.transform(x_test)
 
             # Systematic search for best hyperparameters
-            rvm = RVR(kernel='linear')
+            rvm = EMRVR(kernel='linear')
 
             rvm.fit(x_train, y_train)
 
