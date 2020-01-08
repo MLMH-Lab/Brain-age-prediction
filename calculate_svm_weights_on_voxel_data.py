@@ -13,6 +13,7 @@ import pandas as pd
 from tqdm import tqdm
 import argparse
 import sys
+from sklearn_rvm import EMRVR
 
 PROJECT_ROOT = Path.cwd()
 
@@ -35,10 +36,6 @@ def main(vm_type):
     freesurfer_ids_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
 
     subject_ids = pd.read_csv(freesurfer_ids_path)
-
-    # Get list of subjects for which we have data
-    subjects_path = [str(dataset_path / '{}_ses-bl_T1w_Warped{}'.format(subject_id, input_data_type)) for subject_id in
-                     subject_ids['Participant_ID']]
 
     # Load the mask image
     brain_mask = PROJECT_ROOT / 'imaging_preprocessing_ANTs' / 'mni_icbm152_t1_tal_nlin_sym_09c_mask.nii'
