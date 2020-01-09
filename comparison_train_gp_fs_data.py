@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Script to implement GPR in BIOBANK Scanner1 freesurfer data to predict brain age.
+"""Script to train Gaussian Processes on freesurfer data.
+
+We trained the Gaussian Processes (GP) in a 10 repetitions
+10 stratified k-fold cross-validation (stratified by age).
 """
 from math import sqrt
 from pathlib import Path
@@ -16,7 +19,7 @@ from sklearn.externals.joblib import dump
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import DotProduct
 
-from utils import COLUMNS_NAME
+from utils import COLUMNS_NAME, load_freesurfer_dataset
 
 PROJECT_ROOT = Path.cwd()
 
@@ -26,8 +29,19 @@ warnings.filterwarnings('ignore')
 def main():
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
+    scanner_name = 'Scanner1'
 
-    dataset_path = PROJECT_ROOT / 'outputs' / experiment_name / 'freesurferData.h5'
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
+    freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
+    ids_path = PROJECT_ROOT / 'outputs' / experiment_name / 'homogenized_ids.csv'
+
+    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
+    svm_dir = experiment_dir / 'SVM'
+    svm_dir.mkdir(exist_ok=True)
+    cv_dir = svm_dir / 'cv'
+    cv_dir.mkdir(exist_ok=True)
+
+    dataset = load_freesurfer_dataset(participants_path, ids_path, freesurfer_path)
     # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     gpr_dir = experiment_dir / 'GPR'
@@ -38,9 +52,6 @@ def main():
     # Initialise random seed
     np.random.seed(42)
     random.seed(42)
-
-    # Load hdf5 file
-    dataset = pd.read_hdf(dataset_path, key='table')
 
     # Normalise regional volumes by total intracranial volume (tiv)
     regions = dataset[COLUMNS_NAME].values

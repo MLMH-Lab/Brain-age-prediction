@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
-"""Script to implement SVM in BIOBANK Scanner1 freesurfer data to predict brain age.
+"""Script to train Support Vector Machines on freesurfer data.
 
-Step 1: Set global random seed
-Step 2: Normalise by TiV
-Step 3: Prepare CV variables
-Step 4: Create loops for repetitions and folds
-Step 5: Split into training and test sets
-Step 6: Scaling
-Step 7: Declare search space
-Step 8: Perform search with nested CV
-Step 9: Retrain best model with whole training set
-Step 10: Predict test set
-Step 11: Print R_squared, mean absolute error (MAE), root mean squared error (RMSE)
-Step 12: Save model file, scaler file, predictions file
-Step 13: Print CV results
+We trained the Support Vector Machines (SVMs) [1] in a 10 repetitions
+10 stratified k-fold cross-validation (stratified by age).
+The hyperparameter tuning was performed in an automatic way using
+ a nested cross-validation.
+
+References
+----------
+[1] - Cortes, Corinna, and Vladimir Vapnik. "Support-vector networks."
+Machine learning 20.3 (1995): 273-297.
 """
 from math import sqrt
 from pathlib import Path
@@ -30,7 +26,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
 
-from utils import COLUMNS_NAME
+from utils import COLUMNS_NAME, load_freesurfer_dataset
 
 PROJECT_ROOT = Path.cwd()
 
@@ -40,21 +36,24 @@ warnings.filterwarnings('ignore')
 def main():
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
+    scanner_name = 'Scanner1'
 
-    dataset_path = PROJECT_ROOT / 'outputs' / experiment_name / 'freesurferData.h5'
-    # ----------------------------------------------------------------------------------------
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
+    freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
+    ids_path = PROJECT_ROOT / 'outputs' / experiment_name / 'homogenized_ids.csv'
+
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     svm_dir = experiment_dir / 'SVM'
     svm_dir.mkdir(exist_ok=True)
     cv_dir = svm_dir / 'cv'
     cv_dir.mkdir(exist_ok=True)
 
+    dataset = load_freesurfer_dataset(participants_path, ids_path, freesurfer_path)
+
+    # ----------------------------------------------------------------------------------------
     # Initialise random seed
     np.random.seed(42)
     random.seed(42)
-
-    # Load hdf5 file
-    dataset = pd.read_hdf(dataset_path, key='table')
 
     # Normalise regional volumes by total intracranial volume (tiv)
     regions = dataset[COLUMNS_NAME].values
@@ -70,7 +69,7 @@ def main():
     cv_rmse = []
     cv_age_error_corr = []
 
-    # Create dataframe to hold actual and predicted ages
+    # Create DataFrame to hold actual and predicted ages
     age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
     age_predictions = age_predictions.set_index('Participant_ID')
 
@@ -137,7 +136,7 @@ def main():
             dump(params_results, cv_dir / params_filename)
             dump(best_svm, cv_dir / model_filename)
 
-            # Save model scores r2, MAE, RMSE
+            # Save model scores r2, MAE, RMSE, correlation between error and age
             scores_array = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
 
             scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
