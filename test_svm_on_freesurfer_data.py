@@ -13,7 +13,6 @@ import pandas as pd
 import random
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-
 from utils import COLUMNS_NAME
 
 PROJECT_ROOT = Path.cwd()
@@ -24,10 +23,13 @@ def main():
     training_experiment_name = 'biobank_scanner1'
     testing_experiment_name = 'biobank_scanner2'
 
+    model_name = 'RVM'
     testing_dataset_path = PROJECT_ROOT / 'outputs' / testing_experiment_name / 'freesurferData.h5'
     # ----------------------------------------------------------------------------------------
     training_experiment_dir = PROJECT_ROOT / 'outputs' / training_experiment_name
-    svm_cv_dir = training_experiment_dir / 'SVM' / 'cv'
+    svm_cv_dir = training_experiment_dir / model_name / 'cv'
+    test_cv_dir = PROJECT_ROOT / 'outputs' / testing_experiment_name / model_name / 'cv'
+    test_cv_dir.mkdir(parents=True)
 
     # Initialise random seed
     np.random.seed(42)
@@ -78,11 +80,12 @@ def main():
             # Save model scores r2, MAE, RMSE
             scores_array = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
             scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
-            np.save(cv_dir / scores_filename, scores_array)
+            np.save(test_cv_dir / scores_filename, scores_array)
 
     # Export df as csv
     testset_age_predictions_filename = PROJECT_ROOT / 'outputs' / testing_experiment_name / 'svm_testset_predictions.csv'
     age_predictions.to_csv(testset_age_predictions_filename)
+
 
 if __name__ == "__main__":
     main()
