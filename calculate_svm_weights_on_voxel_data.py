@@ -63,7 +63,7 @@ def main(vm_type):
                 coef_list.append(vm.dual_coef_[0])
                 index_list.append(train_index[vm.support_])
             else: #rvm
-                coef_list.append(vm.mu_)
+                coef_list.append(vm.mu_[1:])
                 index_list.append(train_index[vm.relevance_])
 
     # number of voxels in the mask
