@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""
-Script to run SVM (linear SVR) on bootstrap datasets of UK BIOBANK Scanner1
-IMPORTANT NOTE: This script is adapted from svm.py but uses KFold instead of StratifiedKFold
-to account for the bootstrap samples with few participants
+"""Script to perform the sample size analysis using Gaussian Processes
+
+NOTE: This script is adapted from comparison_train_gp_fs_data.py but
+it uses KFold instead of StratifiedKFold to account for the bootstrap
+samples with few participants
 """
 from math import sqrt
 from pathlib import Path
@@ -13,7 +14,8 @@ from scipy import stats
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import RobustScaler
-from sklearn.svm import LinearSVR
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import DotProduct
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import GridSearchCV, KFold
 
@@ -78,29 +80,17 @@ def main():
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
 
-            # Systematic search for best hyperparameters
-            n_nested_folds = 5
-            svm = LinearSVR(loss='epsilon_insensitive')
+            kernel = DotProduct()
 
-            search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
+            gpr = GaussianProcessRegressor(kernel=kernel, random_state=0)
 
-            nested_kf = KFold(n_splits=n_nested_folds, shuffle=True, random_state=i_bootstrap)
+            gpr.fit(x_train, y_train)
 
-            gridsearch = GridSearchCV(svm,
-                                      param_grid=search_space,
-                                      scoring='neg_mean_absolute_error',
-                                      refit=True, cv=nested_kf,
-                                      verbose=0, n_jobs=1)
-
-            gridsearch.fit(x_train, y_train)
-
-            best_svm = gridsearch.best_estimator_
-
-            predictions = best_svm.predict(x_test)
+            predictions = gpr.predict(x_test)
 
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = best_svm.score(x_test, y_test)
+            r2_score = gpr.score(x_test, y_test)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
             print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, CORR: {:0.3f}'.format(r2_score,
@@ -111,7 +101,7 @@ def main():
             mean_scores = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
 
             # Save arrays with permutation coefs and scores as np files
-            filepath_scores = scores_dir / ('boot_scores_{:04d}_svm.npy'.format(i_bootstrap))
+            filepath_scores = scores_dir / ('boot_scores_{:04d}_gpr.npy'.format(i_bootstrap))
             np.save(str(filepath_scores), mean_scores)
 
 

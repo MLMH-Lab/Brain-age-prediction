@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""
-Script to create gender-homogeneous bootstraped datasets to feed into create_h5_bootstrap script;
+"""Script to create files with subjects' ids to perform sample size analysis
+
+This script creates gender-homogeneous bootstraped datasets.
 Creates 20 bootstrap samples with increasing size
 """
 from pathlib import Path
@@ -8,7 +9,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-from helper_functions import load_demographic_data
+from utils import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
 

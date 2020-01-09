@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""
-Script to run SVM (linear SVR) on bootstrap datasets of UK BIOBANK Scanner1
-IMPORTANT NOTE: This script is adapted from svm.py but uses KFold instead of StratifiedKFold
-to account for the bootstrap samples with few participants
+"""Script to perform the sample size analysis using Relevant Vector Machine
+
+NOTE: This script is adapted from comparison_train_gp_fs_data.py but
+it uses KFold instead of StratifiedKFold to account for the bootstrap
+samples with few participants
 """
 from math import sqrt
 from pathlib import Path
@@ -13,10 +14,8 @@ from scipy import stats
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import RobustScaler
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import DotProduct
+from sklearn_rvm import EMRVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.model_selection import GridSearchCV, KFold
 
 from utils import COLUMNS_NAME
 
@@ -79,17 +78,14 @@ def main():
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
 
-            kernel = DotProduct()
-
-            gpr = GaussianProcessRegressor(kernel=kernel, random_state=0)
-
-            gpr.fit(x_train, y_train)
-
-            predictions = gpr.predict(x_test)
+            # Systematic search for best hyperparameters
+            rvm = EMRVR(kernel='linear')
+            rvm.fit(x_train, y_train)
+            predictions = rvm.predict(x_test)
 
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = gpr.score(x_test, y_test)
+            r2_score = rvm.score(x_test, y_test)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
             print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, CORR: {:0.3f}'.format(r2_score,
@@ -100,7 +96,7 @@ def main():
             mean_scores = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
 
             # Save arrays with permutation coefs and scores as np files
-            filepath_scores = scores_dir / ('boot_scores_{:04d}_gpr.npy'.format(i_bootstrap))
+            filepath_scores = scores_dir / ('boot_scores_{:04d}_rvm.npy'.format(i_bootstrap))
             np.save(str(filepath_scores), mean_scores)
 
 

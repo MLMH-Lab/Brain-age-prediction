@@ -26,7 +26,7 @@
 # Create kernel matrix for voxel-based analysis
 ./preprocessing_compute_kernel_matrix.py
 
-# ----------------------------- Regressors Comparison ------------------------------------
+# ----------------------------- Regressors comparison ------------------------------------
 ./comparison_train_svm_fs_data.py
 ./comparison_train_rvm_fs_data.py
 ./comparison_train_gpr_fs_data.py
@@ -35,8 +35,15 @@
 
 ./comparison_statistical_analsysis.py -E "biobank_scanner1" -S "fs" -M "SVM" "RVM" "GPR"
 
-## ...
 ## ----------------------------- Generalization comparison -----------------------
-## ...
+./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "generalization" -M "SVM" "RVM" "GPR"
 
-./regressors_comparison.py -E "biobank_scanner2" -S "generalization" -M "SVM" "RVM" "GPR"
+
+# ----------------------------- Sample size analysis ------------------------------------
+./sample_size_create_ids.py
+
+./sample_size_gp_fs_analysis.py
+./sample_size_rvm_fs_analysis.py
+./sample_size_svm_fs_analysis.py
+
+./sample_size_create_figures.py
