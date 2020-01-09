@@ -17,7 +17,7 @@ def main():
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     # ----------------------------------------------------------------------------------------
 
-    i_n_subject_pairs_list = range(1, 51)
+    i_n_subject_pairs_list = range(1, 21)
     n_bootstrap = 1000
 
     scores_i_n_subject_pairs = []
@@ -28,7 +28,7 @@ def main():
         scores_bootstrap = []
         for i_bootstrap in range(n_bootstrap):
             # Save arrays with permutation coefs and scores as np files
-            filepath_scores = scores_dir / ('boot_scores_{:04d}.npy'.format(i_bootstrap))
+            filepath_scores = scores_dir / ('boot_scores_{:04d}_svm.npy'.format(i_bootstrap))
             scores_bootstrap.append(np.load(str(filepath_scores))[1])
 
         scores_i_n_subject_pairs.append(scores_bootstrap)
@@ -56,11 +56,11 @@ def main():
     # Create plot
     plt.title("Bootstrap Analysis")
     plt.xlabel("Number of subjects")
-    plt.xticks(i_n_subject_pairs_list, np.multiply(i_n_subject_pairs_list, (73 - 47)))
+    plt.xticks(i_n_subject_pairs_list, np.multiply(i_n_subject_pairs_list, 2 * ((73 - 47) + 1)))
     plt.ylabel("Mean Absolute Error")
     plt.legend(loc="best")
     plt.tight_layout()
-    plt.savefig(str(experiment_dir / 'bootstrap_analysis' / 'bootstrap_analysis.png'))
+    plt.savefig(str(experiment_dir / 'bootstrap_analysis' / 'bootstrap_analysis_svm.png'))
 
 
 if __name__ == "__main__":
