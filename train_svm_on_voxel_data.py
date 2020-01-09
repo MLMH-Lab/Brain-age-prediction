@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Script to implement SVM and RVM in BIOBANK Scanner1 using voxel data to predict brain age.
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Script to assess sample homogeneity: gender and ethnicity
 

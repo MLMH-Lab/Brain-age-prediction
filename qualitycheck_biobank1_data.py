@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Remove bad quality data.
 
 This script removes UK Biobank Scanner 1 participants that did not pass the quality check of raw MRI data and Freesurfer segmentation

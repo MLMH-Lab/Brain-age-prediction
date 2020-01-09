@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Script to compare the CORR score (correlation between the prediction error and the subject age) from a
 classifier and from a regressor (using an uniform sample with 50 pairs)."""
 from pathlib import Path

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Script to assess correlations between BrainAGE/BrainAGER and demographic variables in UK Biobank
 (dataset created in variables_biobank.py)"""
 

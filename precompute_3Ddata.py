@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Script to create the Kernel matrix (Gram matrix) that will be used on the analysis with
 voxel data.

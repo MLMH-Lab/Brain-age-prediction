@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Significance testing of SVM permutations for BIOBANK Scanner1
 
 Ref:

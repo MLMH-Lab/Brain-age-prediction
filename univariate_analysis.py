@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Script to implement univariate analysis based on [1], regression for age and volume per region
 Step 1: normalise each brain region

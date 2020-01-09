@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Clean UK Biobank scanner 2 data."""
 from pathlib import Path
 

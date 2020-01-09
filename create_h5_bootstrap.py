@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Script to create bootstrap datasets of UK BIOBANK Scanner1 in hdf5 format using create_h5_dataset script;
 Uses ids from create_bootstrap_ids
 """

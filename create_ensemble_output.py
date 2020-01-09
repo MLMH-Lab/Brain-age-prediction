@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Create variables for average age predictions and prediction errors,
 incl. Brain Age Gap Estimate (BrainAGE), Brain Age Gap Estimate Residualised (BrainAGER) [1]
 

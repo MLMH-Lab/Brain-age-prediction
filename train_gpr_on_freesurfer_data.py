@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Script to implement GPR in BIOBANK Scanner1 freesurfer data to predict brain age.
 """
 from math import sqrt

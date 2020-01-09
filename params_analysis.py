@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Compares performance of SVM models with different hyperparameters C.
 """

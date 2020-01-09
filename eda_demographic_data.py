@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Exploratory data analysis.
 
 This script records the frequency of different demographic features, the age histogram for both genders, and the

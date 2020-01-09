@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """ Script to calculate the primal weights of the SVM approach
 for voxel data.
 

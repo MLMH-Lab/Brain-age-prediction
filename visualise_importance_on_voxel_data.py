@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """ Script to save images of the importance of the voxels. """
 from pathlib import Path
 from glob import glob

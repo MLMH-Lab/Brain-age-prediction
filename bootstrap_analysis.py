@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Plot results of bootstrap analysis
 
 Ref:

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Permutation of SVM for BIOBANK Scanner1"""
 from math import sqrt
 from pathlib import Path

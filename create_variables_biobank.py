@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Create dataset with demographic variables from UK Biobank for correlation analysis;
 
 The following UK Biobank variables are assessed [variable data field - variable name]:

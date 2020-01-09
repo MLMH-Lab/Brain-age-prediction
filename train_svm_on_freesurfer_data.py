@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Script to implement SVM in BIOBANK Scanner1 freesurfer data to predict brain age.
 
 Step 1: Set global random seed

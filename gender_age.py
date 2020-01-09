@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Script to explore distribution of gender with regards to age in UK BIOBANK dataset from scanner1
 Aim is to plot a line graph of age vs number of subjects for male/female

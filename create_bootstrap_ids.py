@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Script to create gender-homogeneous bootstraped datasets to feed into create_h5_bootstrap script;
 Creates 20 bootstrap samples with increasing size

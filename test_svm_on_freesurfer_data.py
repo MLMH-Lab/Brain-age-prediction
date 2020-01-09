@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Script to test SVM models developed using FreeSurfer data from Biobank Scanner1
 on previously unseen data from Biobank Scanner2 to predict brain age.
 

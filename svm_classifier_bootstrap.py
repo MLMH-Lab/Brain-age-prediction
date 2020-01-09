@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Script to run SVM classifier (linear SVC) on bootstrap dataset (with i_n_subject_pairs = 50) of UK BIOBANK Scanner1.
 The obtained scores will be compared with the scores from the regressor (with i_n_subject_pairs = 50).

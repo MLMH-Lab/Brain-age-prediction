@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Script to implement RVM in freesurfer data to predict brain age.
 """
 from math import sqrt

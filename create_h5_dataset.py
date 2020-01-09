@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Script to create dataset of UK BIOBANK Scanner1 in hdf5 format"""
 
 from pathlib import Path

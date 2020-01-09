@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Script to plots distribution of education with regards to age in UK Biobank Scanner1 dataset"""
 
 from pathlib import Path
