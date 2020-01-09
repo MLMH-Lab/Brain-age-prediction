@@ -26,12 +26,14 @@
 # Create kernel matrix for voxel-based analysis
 ./preprocessing_compute_kernel_matrix.py
 
+# ----------------------------- Regressors Comparison ------------------------------------
+./comparison_train_svm_fs_data.py
+./comparison_train_rvm_fs_data.py
+./comparison_train_gpr_fs_data.py
 
-## ...
-## ----------------------------- Regressor Comparison ----------------------------
-## ...
+./comparison_train_voxel_data.py
 
-./regressors_comparison.py -E "biobank_scanner1" -S "fs" -M "SVM" "RVM" "GPR"
+./comparison_statistical_analsysis.py -E "biobank_scanner1" -S "fs" -M "SVM" "RVM" "GPR"
 
 ## ...
 ## ----------------------------- Generalization comparison -----------------------
