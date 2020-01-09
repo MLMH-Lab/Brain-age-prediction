@@ -15,6 +15,9 @@
 ./preprocessing_clean_data.py -E "biobank_scanner1" -S "Scanner1"
 ./preprocessing_clean_data.py -E "biobank_scanner2" -S "Scanner2"
 
+# Perform quality control.
+./preprocessing_quality_control.py -E "biobank_scanner1" -S "Scanner1"
+./preprocessing_quality_control.py -E "biobank_scanner2" -S "Scanner2"
 
 ## ...
 ## ----------------------------- Regressor Comparison ----------------------------
