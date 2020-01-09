@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
-"""Clean UK Biobank scanner 1 (Cheadle) data.
+"""Clean UK Biobank data.
 
-Subjects from the Assessment Centre from Cheadle (code 11025) are majority white.
-Besides, some ages have very low number of subjects (<100). The ethnics minorities
-and age with low number are remove from further analysis as well subjects with any
-mental or brain disorder.
-
+Most of the subjects are white and some ages have very low number of subjects (<100).
+The ethnics minorities and age with low number are removed from further analysis
+as well subjects with any mental or brain disorder.
 """
 import argparse
 from pathlib import Path
 
-from helper_functions import load_demographic_data
+from utils import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
 
@@ -49,10 +47,10 @@ def main(experiment_name, scanner_name):
 
     output_ids_df = dataset[['Image_ID']]
 
-    assert sum(output_ids_df.duplicated()) == 0
+    assert sum(output_ids_df.duplicated(subset='Image_ID')) == 0
 
     output_ids_df.to_csv(experiment_dir / output_ids_filename, index=False)
 
 
 if __name__ == "__main__":
-    main()
+    main(args.experiment_name, args.scanner_name)

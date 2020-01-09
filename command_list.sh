@@ -12,7 +12,8 @@
 
 # ----------------------------- Preprocessing ------------------------------------
 # Clean UK Biobank data.
-./preprocessing_clean_data.py
+./preprocessing_clean_data.py -E "biobank_scanner1" -S "Scanner1"
+./preprocessing_clean_data.py -E "biobank_scanner2" -S "Scanner2"
 
 
 ## ...
