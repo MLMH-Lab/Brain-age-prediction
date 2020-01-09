@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""
-Script to create the Kernel matrix (Gram matrix) that will be used on the analysis with
-voxel data.
+"""Script to create the Kernel matrix (Gram matrix).
+
+The Kernel matrix will be used on the analysis with voxel data.
 """
 from pathlib import Path
 
@@ -97,14 +97,9 @@ def calculate_gram_matrix(subjects_path, mask_img, step_size=1000):
     return gram_matrix
 
 
-def main():
-    # ------------------------------------------------------------------------------
-    # CHANGE HERE
-    # ------------------------------------------------------------------------------
-    # dataset_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1'
-    dataset_path = Path('/media/kcl_1/SSD2/BIOBANK/')
+def main(dataset_path_str, input_data_type='.nii.gz'):
+    dataset_path = Path(dataset_path_str)
     kernel_path = PROJECT_ROOT / 'outputs' / 'kernels'
-    input_data_type = '.nii.gz'
 
     # ------------------------------------------------------------------------------
     # Create output folder if it does not exist

@@ -23,6 +23,9 @@
 # because we were concerned in not create a biased regressor).
 ./preprocessing_homogenize_gender.py -E "biobank_scanner1"
 
+# Create kernel matrix for voxel-based analysis
+./preprocessing_compute_kernel_matrix.py
+
 
 ## ...
 ## ----------------------------- Regressor Comparison ----------------------------
