@@ -10,6 +10,11 @@
 ./download_fs_data.py -P "/run/user/1000/gvfs/smb-share:server=kc-deeplab.local,share=deeplearning/"
 ./download_ants_data.py
 
+# ----------------------------- Preprocessing ------------------------------------
+# Clean UK Biobank data.
+./preprocessing_clean_data.py
+
+
 ## ...
 ## ----------------------------- Regressor Comparison ----------------------------
 ## ...

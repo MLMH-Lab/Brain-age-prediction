@@ -7,23 +7,28 @@ and age with low number are remove from further analysis as well subjects with a
 mental or brain disorder.
 
 """
+import argparse
 from pathlib import Path
-
-import pandas as pd
 
 from helper_functions import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+parser.add_argument('-S', '--scanner_name',
+                    dest='scanner_name',
+                    help='Name of the scanner.')
+args = parser.parse_args()
 
-def main():
-    """Clean UK Biobank scanner 1 data."""
+
+def main(experiment_name, scanner_name):
+    """Clean UK Biobank data."""
     # ----------------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
-
-    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'ukb22321.csv'
-    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
-    id_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
+    id_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
 
     output_ids_filename = 'cleaned_ids_noqc.csv'
     # ----------------------------------------------------------------------------------------
@@ -31,16 +36,10 @@ def main():
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     experiment_dir.mkdir(exist_ok=True)
 
-    dataset = load_demographic_data(demographic_path, id_path)
+    dataset = load_demographic_data(participants_path, id_path)
 
-    participants_df = pd.read_csv(participants_path, sep='\t', usecols=['Participant_ID', 'Diagn'])
-    participants_df['ID'] = participants_df['Participant_ID'].str.split('-').str[1]
-    participants_df['ID'] = pd.to_numeric(participants_df['ID'])
-
-    dataset = pd.merge(dataset, participants_df, on='ID')
-
-    # Exclude ages with <100 participants,
-    dataset = dataset[dataset['Age'] > 46]
+    # Exclude subjects outside [47, 73] interval (ages with <100 participants).
+    dataset = dataset.loc[(dataset['Age'] >= 47) & (dataset['Age'] <= 73)]
 
     # Exclude non-white ethnicities due to small subgroups
     dataset = dataset[dataset['Ethnicity'] == 'White']
@@ -48,7 +47,10 @@ def main():
     # Exclude patients
     dataset = dataset[dataset['Diagn'] == 1]
 
-    output_ids_df = pd.DataFrame(dataset['Participant_ID'])
+    output_ids_df = dataset[['Image_ID']]
+
+    assert sum(output_ids_df.duplicated()) == 0
+
     output_ids_df.to_csv(experiment_dir / output_ids_filename, index=False)
 
 
