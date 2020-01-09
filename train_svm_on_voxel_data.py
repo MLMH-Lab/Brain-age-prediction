@@ -1,5 +1,5 @@
 """
-Script to implement SVM in BIOBANK Scanner1 using voxel data to predict brain age.
+Script to implement SVM and RVM in BIOBANK Scanner1 using voxel data to predict brain age.
 
 This script assumes that a kernel has been already pre-computed. To compute the
 kernel use the script `precompute_3Ddata.py`
@@ -8,22 +8,27 @@ from math import sqrt
 from pathlib import Path
 import random
 import warnings
+import sys
 
 from scipy import stats
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from sklearn.svm import SVR
+from sklearn_rvm import EMRVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
+import argparse
 
 PROJECT_ROOT = Path.cwd()
 
 warnings.filterwarnings('ignore')
 
+parser = argparse.ArgumentParser("Type of Vector Machine.")
+parser.add_argument('vm', dest='vm_type', nargs='?', default='svm')
 
-def main():
+def main(vm_type):
     # --------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
 
@@ -40,9 +45,15 @@ def main():
     # Compute SVM
     # --------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
-    svm_dir = experiment_dir / 'voxel_SVM'
-    svm_dir.mkdir(exist_ok=True, parents=True)
-    cv_dir = svm_dir / 'cv'
+    if vm_type == 'svm':
+        vm_dir = experiment_dir / 'voxel_SVM'
+    if vm_type == 'rvm':
+        vm_dir = experiment_dir / 'voxel_RVM'
+    else:
+        print('Only rvm and vm are acceptable as inputs for the model')
+        return
+    vm_dir.mkdir(exist_ok=True, parents=True)
+    cv_dir = vm_dir / 'cv'
     cv_dir.mkdir(exist_ok=True, parents=True)
 
     # Initialise random seed
@@ -79,28 +90,36 @@ def main():
             y_train, y_test = age[train_index], age[test_index]
 
             # Systematic search for best hyperparameters
-            svm = SVR(kernel='precomputed')
+            if vm_type == 'svm':
+                vm = SVR(kernel='precomputed')
 
-            search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0,
-                                  2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
+                search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0,
+                                      2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
 
-            nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True,
-                                         random_state=i_repetition)
+                nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True,
+                                             random_state=i_repetition)
 
-            gridsearch = GridSearchCV(svm,
-                                      param_grid=search_space,
-                                      scoring='neg_mean_absolute_error',
-                                      refit=True, cv=nested_skf,
-                                      verbose=3, n_jobs=1)
+                gridsearch = GridSearchCV(vm,
+                                          param_grid=search_space,
+                                          scoring='neg_mean_absolute_error',
+                                          refit=True, cv=nested_skf,
+                                          verbose=3, n_jobs=1)
 
-            gridsearch.fit(x_train, y_train)
+                gridsearch.fit(x_train, y_train)
 
-            best_svm = gridsearch.best_estimator_
+                best_svm = gridsearch.best_estimator_
 
-            params_results = {'means': gridsearch.cv_results_['mean_test_score'],
-                              'params': gridsearch.cv_results_['params']}
+                params_results = {'means': gridsearch.cv_results_['mean_test_score'],
+                                  'params': gridsearch.cv_results_['params']}
 
-            predictions = best_svm.predict(x_test)
+                predictions = best_svm.predict(x_test)
+
+            else: #rvm
+                vm = EMRVR(kernel='precomputed', verbose=True)
+
+                vm.fit(x_train, y_train)
+
+                predictions = vm.predict(x_test)
 
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
@@ -135,7 +154,7 @@ def main():
                   .format(i_repetition, i_fold, r2_score, absolute_error, root_squared_error, age_error_corr))
 
     # Save predictions
-    age_predictions.to_csv(svm_dir / 'age_predictions.csv')
+    age_predictions.to_csv(vm_dir / 'age_predictions.csv')
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
@@ -149,4 +168,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = parser.parse_args(sys.argv[1:])
+    main(vm_type=args.vm_type)
