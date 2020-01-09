@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""
-Script to assess sample homogeneity: gender and ethnicity
+"""Homogenize dataset.
 
-
+We homogenize the dataset scanner_1 to not have a significant difference
+between the proportion of men and women along the age. We used the
+chi square test for homogeneity to verify if there is a difference.
 """
+import argparse
 import itertools
 from pathlib import Path
 
@@ -11,9 +13,15 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 
-from helper_functions import load_demographic_data
+from utils import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+args = parser.parse_args()
 
 
 def check_balance_across_groups(crosstab_df):
@@ -71,15 +79,10 @@ def get_balanced_dataset(dataset):
     return dataset
 
 
-def main():
+def main(experiment_name):
     """Perform the exploratory data analysis."""
-    # ----------------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
-    suffix_analysis_phase = '_homogeneous'
-
-    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'ukb22321.csv'
     id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'cleaned_ids.csv'
-    # ----------------------------------------------------------------------------------------
+
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
     # Define random seed for sampling methods
@@ -89,9 +92,9 @@ def main():
 
     dataset_balanced = get_balanced_dataset(dataset)
 
-    homogeneous_ids = pd.DataFrame(dataset_balanced['Participant_ID'])
-    homogeneous_ids.to_csv(experiment_dir / ('dataset' + suffix_analysis_phase + '.csv'), index=False)
+    homogeneous_ids = dataset_balanced[['Participant_ID']]
+    homogeneous_ids.to_csv(experiment_dir / 'homogenized_ids.csv', index=False)
 
 
 if __name__ == "__main__":
-    main()
+    main(args.experiment_name)

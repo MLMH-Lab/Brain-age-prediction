@@ -19,6 +19,11 @@
 ./preprocessing_quality_control.py -E "biobank_scanner1" -S "Scanner1"
 ./preprocessing_quality_control.py -E "biobank_scanner2" -S "Scanner2"
 
+# Make gender homogeneous along age range (performed only in the scanner1
+# because we were concerned in not create a biased regressor).
+./preprocessing_homogenize_gender.py -E "biobank_scanner1"
+
+
 ## ...
 ## ----------------------------- Regressor Comparison ----------------------------
 ## ...
