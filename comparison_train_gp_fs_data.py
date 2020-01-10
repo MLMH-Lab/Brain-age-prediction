@@ -10,6 +10,7 @@ References
  "Gaussian processes for regression." Advances in neural
  information processing systems. 1996.
 """
+import argparse
 from math import sqrt
 from pathlib import Path
 import random
@@ -31,30 +32,36 @@ PROJECT_ROOT = Path.cwd()
 
 warnings.filterwarnings('ignore')
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+parser.add_argument('-S', '--scanner_name',
+                    dest='scanner_name',
+                    help='Name of the scanner.')
+parser.add_argument('-I', '--input_ids_file',
+                    dest='input_ids_file',
+                    default='homogenized_ids.csv',
+                    help='Filename indicating the ids to be used.')
+args = parser.parse_args()
 
-def main():
+
+def main(experiment_name, scanner_name, input_ids_file):
     # ----------------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
-    scanner_name = 'Scanner1'
-
+    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
     freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
-    ids_path = PROJECT_ROOT / 'outputs' / experiment_name / 'homogenized_ids.csv'
+    ids_path = experiment_dir / input_ids_file
 
-    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
-    svm_dir = experiment_dir / 'SVM'
-    svm_dir.mkdir(exist_ok=True)
-    cv_dir = svm_dir / 'cv'
+    model_dir = experiment_dir / 'GPR'
+    model_dir.mkdir(exist_ok=True)
+    cv_dir = model_dir / 'cv'
     cv_dir.mkdir(exist_ok=True)
 
     dataset = load_freesurfer_dataset(participants_path, ids_path, freesurfer_path)
-    # ----------------------------------------------------------------------------------------
-    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
-    gpr_dir = experiment_dir / 'GPR'
-    gpr_dir.mkdir(exist_ok=True)
-    cv_dir = gpr_dir / 'cv'
-    cv_dir.mkdir(exist_ok=True)
+    dataset = dataset[:1000] #TODO: remove
 
+    # ----------------------------------------------------------------------------------------
     # Initialise random seed
     np.random.seed(42)
     random.seed(42)
@@ -140,7 +147,7 @@ def main():
                   .format(i_repetition, i_fold, r2_score, absolute_error, root_squared_error, age_error_corr))
 
     # Save predictions
-    age_predictions.to_csv(gpr_dir / 'age_predictions.csv')
+    age_predictions.to_csv(model_dir / 'age_predictions.csv')
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
@@ -154,4 +161,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(args.experiment_name, args.scanner_name,
+         args.input_ids_file)

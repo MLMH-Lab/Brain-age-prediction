@@ -27,9 +27,9 @@
 ./preprocessing_compute_kernel_matrix.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1"
 
 # ----------------------------- Regressors comparison ------------------------------------
-./comparison_train_svm_fs_data.py
-./comparison_train_rvm_fs_data.py
-./comparison_train_gpr_fs_data.py
+./comparison_train_svm_fs_data.py -E "biobank_scanner1" -S "SCANNER01"
+./comparison_train_rvm_fs_data.py -E "biobank_scanner1" -S "SCANNER01"
+./comparison_train_gpr_fs_data.py -E "biobank_scanner1" -S "SCANNER01"
 
 ./comparison_train_voxel_data.py
 
