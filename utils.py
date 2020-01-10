@@ -2,9 +2,9 @@
 import pandas as pd
 
 
-def load_dataset(demographic_path, ids_path, freesurfer_path):
+def load_freesurfer_dataset(participants_path, ids_path, freesurfer_path):
     """Load dataset."""
-    demographic_data = load_demographic_data(demographic_path, ids_path)
+    demographic_data = load_demographic_data(participants_path, ids_path)
 
     freesurfer_df = pd.read_csv(freesurfer_path)
 
@@ -13,16 +13,16 @@ def load_dataset(demographic_path, ids_path, freesurfer_path):
     return dataset_df
 
 
-def load_demographic_data(demographic_path, ids_path):
+def load_demographic_data(participants_path, ids_path):
     """Load dataset using selected ids."""
-    demographic_df = pd.read_csv(demographic_path, sep='\t')
-    demographic_df = demographic_df.dropna()
+    participants_df = pd.read_csv(participants_path, sep='\t')
+    participants_df = participants_df.dropna()
 
     ids_df = pd.read_csv(ids_path, usecols=['Image_ID'])
 
     ids_df['participant_id'] = ids_df['Image_ID'].str.split('_').str[0]
 
-    dataset_df = pd.merge(ids_df, demographic_df, on='participant_id')
+    dataset_df = pd.merge(ids_df, participants_df, on='participant_id')
 
     return dataset_df
 

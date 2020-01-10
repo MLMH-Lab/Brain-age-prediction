@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 """Script to train Gaussian Processes on freesurfer data.
 
-We trained the Gaussian Processes (GP) in a 10 repetitions
+We trained the Gaussian Processes (GP) [1] in a 10 repetitions
 10 stratified k-fold cross-validation (stratified by age).
+
+References
+----------
+[1] - Williams, Christopher KI, and Carl Edward Rasmussen.
+ "Gaussian processes for regression." Advances in neural
+ information processing systems. 1996.
 """
 from math import sqrt
 from pathlib import Path

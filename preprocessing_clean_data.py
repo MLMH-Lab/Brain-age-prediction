@@ -26,7 +26,7 @@ def main(experiment_name, scanner_name):
     """Clean UK Biobank data."""
     # ----------------------------------------------------------------------------------------
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
-    id_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
+    ids_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
 
     output_ids_filename = 'cleaned_ids_noqc.csv'
     # ----------------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ def main(experiment_name, scanner_name):
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     experiment_dir.mkdir(exist_ok=True)
 
-    dataset = load_demographic_data(participants_path, id_path)
+    dataset = load_demographic_data(participants_path, ids_path)
 
     # Exclude subjects outside [47, 73] interval (ages with <100 participants).
     dataset = dataset.loc[(dataset['Age'] >= 47) & (dataset['Age'] <= 73)]

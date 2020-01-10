@@ -35,7 +35,12 @@
 
 ./comparison_statistical_analsysis.py -E "biobank_scanner1" -S "fs" -M "SVM" "RVM" "GPR"
 
+./comparison_feature_importance_visualisation.py
+./comparison_feature_importance_voxel_data.py
+
 ## ----------------------------- Generalization comparison -----------------------
+./generalisation_test_svm_fs_data.py
+
 ./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "generalization" -M "SVM" "RVM" "GPR"
 
 # ----------------------------- Sample size analysis ------------------------------------
@@ -51,3 +56,25 @@
 #./permutation_lauch_subprocesses.py
 ./permutation_train_models.py
 ./permutation_significance_test.py
+
+# ----------------------------- Covariates analysis ------------------------------------
+./covariates_create_variables_biobank.py
+./covariates_create_variables_indices_of_deprivation.py
+./covariates_ensemble_output.py
+./covariates_lsoa_corr.py
+./covariates_statistical_analysis.py
+
+# ----------------------------- Miscelanious ------------------------------------
+# Univariate analysis on freesurfer data
+./misc_univariate_analysis.py
+
+./misc_classifier_train_svm.py
+./misc_classifier_regressor_comparison.py
+
+# Performance of different values of the SVM hyperparameter (C)
+./misc_svm_hyperparameters_analysis.py
+
+# ----------------------------- Exploratory Data Analysis ------------------------------------
+./eda_demographic_data.py
+./eda_education_age.py
+./eda_gender_age.py

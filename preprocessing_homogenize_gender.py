@@ -73,26 +73,28 @@ def get_balanced_dataset(dataset):
                                  (dataset['Gender'] == condition_unbalanced)
 
         list_to_drop = list(dataset[problematic_group_mask].sample(1).index)
-        print('Dropping {:}'.format(dataset['ID'].iloc[list_to_drop].values[0]))
+        print('Dropping {:}'.format(dataset['Image_ID'].iloc[list_to_drop].values[0]))
         dataset = dataset.drop(list_to_drop, axis=0)
 
     return dataset
 
 
-def main(experiment_name):
+def main(experiment_name, scanner_name):
     """Perform the exploratory data analysis."""
-    id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'cleaned_ids.csv'
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
+    # ids_path = PROJECT_ROOT / 'outputs' / experiment_name / 'cleaned_ids.csv' #TODO: Use this one
+    ids_path = PROJECT_ROOT / 'outputs' / experiment_name / 'cleaned_ids_noqc.csv'
 
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
     # Define random seed for sampling methods
     np.random.seed(42)
 
-    dataset = load_demographic_data(demographic_path, id_path)
+    dataset = load_demographic_data(participants_path, ids_path)
 
     dataset_balanced = get_balanced_dataset(dataset)
 
-    homogeneous_ids = dataset_balanced[['Participant_ID']]
+    homogeneous_ids = dataset_balanced[['participant_id']]
     homogeneous_ids.to_csv(experiment_dir / 'homogenized_ids.csv', index=False)
 
 
