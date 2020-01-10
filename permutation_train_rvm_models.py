@@ -1,40 +1,60 @@
 #!/usr/bin/env python3
 """Permutation of SVM for BIOBANK Scanner1"""
-from math import sqrt
-from pathlib import Path
+import argparse
 import random
 import time
 import warnings
+from math import sqrt
+from pathlib import Path
 
-from scipy import stats
-import pandas as pd
 import numpy as np
-import argparse
+from scipy import stats
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
 from sklearn_rvm.em_rvm import EMRVR
-from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-from utils import COLUMNS_NAME
+from utils import COLUMNS_NAME, load_freesurfer_dataset
 
 PROJECT_ROOT = Path.cwd()
 
 warnings.filterwarnings('ignore')
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+parser.add_argument('-S', '--scanner_name',
+                    dest='scanner_name',
+                    help='Name of the scanner.')
+parser.add_argument('-I', '--input_ids_file',
+                    dest='input_ids_file',
+                    default='homogenized_ids.csv',
+                    help='Filename indicating the ids to be used.')
+parser.add_argument('-K', '--index_min',
+                    dest='index_min',
+                    type=int,
+                    help='index of first subject to run')
+parser.add_argument('-L', '--index_max',
+                    dest='index_max',
+                    type=int,
+                    help='index of last subject to run', )
+args = parser.parse_args()
 
-def main(index_min, index_max):
+
+def main(experiment_name, scanner_name, input_ids_file, index_min, index_max):
     """"""
     # ----------------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
-
-    dataset_path = PROJECT_ROOT / 'outputs' / experiment_name / 'freesurferData.h5'
-    # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
+    freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
+    ids_path = experiment_dir / input_ids_file
+
+    # ----------------------------------------------------------------------------------------
     permutations_dir = experiment_dir / 'permutations'
     permutations_dir.mkdir(exist_ok=True)
 
-    # Load hdf5 file
-    dataset = pd.read_hdf(dataset_path, key='table')
+    dataset = load_freesurfer_dataset(participants_path, ids_path, freesurfer_path)
 
     # Normalise regional volumes by total intracranial volume (tiv)
     regions = dataset[COLUMNS_NAME].values
@@ -130,9 +150,6 @@ def main(index_min, index_max):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('index_min', help='index of first subject to run', type=int)
-    parser.add_argument('index_max', help='index of last subject to run', type=int)
-    args = parser.parse_args()
-
-    main(args.index_min, args.index_max)
+    main(args.experiment_name, args.scanner_name,
+         args.input_ids_file,
+         args.index_min, args.index_max)
