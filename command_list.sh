@@ -39,9 +39,11 @@
 ./comparison_statistical_analsysis.py -E "biobank_scanner1" -S "_all" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM"
 
 ## ----------------------------- Generalization comparison -----------------------
-./generalisation_test_svm_fs_data.py
+./generalisation_test_svm_fs_data.py -M "SVM"
+./generalisation_test_svm_fs_data.py -M "RVM"
+./generalisation_test_svm_fs_data.py -M "GPR"
 
-./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "generalization" -M "SVM" "RVM" "GPR"
+./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR"
 
 # ----------------------------- Sample size analysis ------------------------------------
 ./sample_size_create_ids.py

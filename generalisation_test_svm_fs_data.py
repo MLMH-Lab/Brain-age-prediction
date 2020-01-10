@@ -4,28 +4,41 @@ on previously unseen data from Biobank Scanner2 to predict brain age.
 
 The script loops over the 100 SVM models created in train_svm_on_freesurfer_data.py, loads their regressors,
 applies them to the Scanner2 data and saves all predictions per subjects in a csv file"""
+import argparse
 from math import sqrt
 from pathlib import Path
-from sklearn.externals.joblib import load
 
+from joblib import load
 from scipy import stats
 import numpy as np
 import pandas as pd
 import random
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-from utils import COLUMNS_NAME
+from utils import COLUMNS_NAME, load_freesurfer_dataset
 
 PROJECT_ROOT = Path.cwd()
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-M', '--model_name',
+                    dest='model_name',
+                    help='Name of the model.')
+args = parser.parse_args()
 
-def main():
+
+def main(model_name):
     # ----------------------------------------------------------------------------------------
     training_experiment_name = 'biobank_scanner1'
     testing_experiment_name = 'biobank_scanner2'
+    scanner_name = 'Scanner2'
 
-    model_name = 'RVM'
-    testing_dataset_path = PROJECT_ROOT / 'outputs' / testing_experiment_name / 'freesurferData.h5'
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
+    freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
+    # ids_path = PROJECT_ROOT / 'outputs' / testing_experiment_name / 'cleaned_ids.csv' #TODO: use this one
+    ids_path = PROJECT_ROOT / 'outputs' / testing_experiment_name / 'cleaned_ids_noqc.csv'
+
+    dataset = load_freesurfer_dataset(participants_path, ids_path, freesurfer_path)
+
     # ----------------------------------------------------------------------------------------
     training_experiment_dir = PROJECT_ROOT / 'outputs' / training_experiment_name
     svm_cv_dir = training_experiment_dir / model_name / 'cv'
@@ -36,9 +49,6 @@ def main():
     np.random.seed(42)
     random.seed(42)
 
-    # Load hdf5 file with testing data
-    dataset = pd.read_hdf(testing_dataset_path, key='table')
-
     # Normalise regional volumes in testing dataset by total intracranial volume (tiv)
     regions = dataset[COLUMNS_NAME].values
 
@@ -48,8 +58,8 @@ def main():
     age = dataset['Age'].values
 
     # Create dataframe to hold actual and predicted ages
-    age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
-    age_predictions = age_predictions.set_index('Participant_ID')
+    age_predictions = pd.DataFrame(dataset[['Image_ID', 'Age']])
+    age_predictions = age_predictions.set_index('Image_ID')
 
     # Create list of SVM model prefixes
     n_repetitions = 10
@@ -89,4 +99,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(args.model_name)
