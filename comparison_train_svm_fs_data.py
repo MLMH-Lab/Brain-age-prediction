@@ -16,6 +16,7 @@ from pathlib import Path
 import random
 import warnings
 
+from joblib import dump
 from scipy import stats
 import pandas as pd
 import numpy as np
@@ -23,7 +24,6 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
 from sklearn.svm import LinearSVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
 
 from utils import COLUMNS_NAME, load_freesurfer_dataset

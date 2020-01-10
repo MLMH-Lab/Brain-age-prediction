@@ -15,13 +15,13 @@ from pathlib import Path
 import random
 import warnings
 
+from joblib import dump
 import pandas as pd
 import numpy as np
 from scipy import stats
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.externals.joblib import dump
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import DotProduct
 
