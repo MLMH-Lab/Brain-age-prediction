@@ -18,7 +18,6 @@ from math import sqrt
 from pathlib import Path
 import random
 import warnings
-import sys
 
 from scipy import stats
 import pandas as pd
@@ -115,9 +114,9 @@ def main(experiment_name, scanner_name, input_ids_file):
             cv_rmse.append(root_squared_error)
             cv_age_error_corr.append(age_error_corr)
 
-            # Save scaler, model and model parameters
+            # Save model
             model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
-            params_filename = '{:02d}_{:02d}_params.joblib'.format(i_repetition, i_fold)
+            dump(model, cv_dir / model_filename)
 
             # Save model scores r2, MAE, RMSE
             scores_array = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])

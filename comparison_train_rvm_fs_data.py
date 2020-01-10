@@ -16,7 +16,6 @@ import random
 import warnings
 
 from joblib import dump
-import pandas as pd
 import numpy as np
 from scipy import stats
 from sklearn.model_selection import StratifiedKFold

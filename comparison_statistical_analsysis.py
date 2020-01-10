@@ -19,6 +19,22 @@ from scipy import stats
 
 PROJECT_ROOT = Path.cwd()
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Experiment name where the model predictions are stored.')
+
+parser.add_argument('-S', '--suffix',
+                    dest='suffix',
+                    help='Suffix to add on the output file regressors_comparison_suffix.csv.')
+
+parser.add_argument('-M', '--model_list',
+                    dest='model_list',
+                    nargs='+',
+                    help='Names of models to analyse.')
+
+args = parser.parse_args()
+
 
 def ttest_ind_corrected(performance_a, performance_b, k=10, r=10):
     """Corrected repeated k-fold cv test.
@@ -132,20 +148,4 @@ def main(experiment_name, suffix, model_list):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-E', '--experiment_name',
-                        dest='experiment_name',
-                        help='Experiment name where the model predictions are stored.')
-
-    parser.add_argument('-S', '--suffix',
-                        dest='suffix',
-                        help='Suffix to add on the output file regressors_comparison_suffix.csv.')
-
-    parser.add_argument('-M', '--model_list',
-                        dest='model_list',
-                        nargs='+',
-                        help='Names of models to analyse.')
-
-    args = parser.parse_args()
-
     main(args.experiment_name, args.suffix, args.model_list)
