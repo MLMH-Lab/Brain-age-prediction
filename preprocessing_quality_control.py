@@ -55,7 +55,7 @@ def main(experiment_name, scanner_name, input_ids_file, mriqc_threshold, qoala_t
     # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
-    ids_df = pd.read_csv(ids_path, sep='\t')
+    ids_df = pd.read_csv(ids_path)
     prob_mriqc_df = pd.read_csv(mriqc_prob_path)
     prob_qoala_df = pd.read_csv(qoala_prob_path)
 
