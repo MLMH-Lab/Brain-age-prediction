@@ -21,10 +21,10 @@
 
 # Make gender homogeneous along age range (performed only in the scanner1
 # because we were concerned in not create a biased regressor).
-./preprocessing_homogenize_gender.py -E "biobank_scanner1"
+./preprocessing_homogenize_gender.py -E "biobank_scanner1" -S "SCANNER01"
 
 # Create kernel matrix for voxel-based analysis
-./preprocessing_compute_kernel_matrix.py
+./preprocessing_compute_kernel_matrix.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1"
 
 # ----------------------------- Regressors comparison ------------------------------------
 ./comparison_train_svm_fs_data.py

@@ -3,6 +3,7 @@
 
 The Kernel matrix will be used on the analysis with voxel data.
 """
+import argparse
 from pathlib import Path
 
 import numpy as np
@@ -11,6 +12,33 @@ from nilearn.masking import apply_mask
 import pandas as pd
 
 PROJECT_ROOT = Path.cwd()
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-P', '--input_path',
+                    dest='input_path_str',
+                    help='Path to the local folder with preprocessed images.')
+
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+
+parser.add_argument('-I', '--input_ids_file',
+                    dest='input_ids_file',
+                    default='homogenized_ids.csv',
+                    help='Filename indicating the ids to be used.')
+
+parser.add_argument('-D', '--input_data_type',
+                    dest='input_data_type',
+                    default='.nii.gz',
+                    help='Input data type')
+
+parser.add_argument('-M', '--mask_filename',
+                    dest='mask_filename',
+                    default='mni_icbm152_t1_tal_nlin_sym_09c_mask.nii',
+                    help='Input data type')
+
+args = parser.parse_args()
 
 
 def calculate_gram_matrix(subjects_path, mask_img, step_size=1000):
@@ -97,50 +125,37 @@ def calculate_gram_matrix(subjects_path, mask_img, step_size=1000):
     return gram_matrix
 
 
-def main(dataset_path_str, input_data_type='.nii.gz'):
-    dataset_path = Path(dataset_path_str)
-    kernel_path = PROJECT_ROOT / 'outputs' / 'kernels'
+def main(input_path_str, experiment_name, input_ids_file, input_data_type, mask_filename):
+    """"""
+    dataset_path = Path(input_path_str)
 
-    # ------------------------------------------------------------------------------
-    # Create output folder if it does not exist
-    kernel_path.mkdir(exist_ok=True, parents=True)
+    output_path = PROJECT_ROOT / 'outputs' / 'kernels'
+    output_path.mkdir(exist_ok=True, parents=True)
 
-    # ------------------------------------------------------------------------------
-    # Get the same subject's IDs for those used on the FreeSurfer analysis and make
-    # sure that we have IDs for which we have age and images
-    # ------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
-    freesurfer_ids_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
+    ids_path = PROJECT_ROOT / 'outputs' / experiment_name / input_ids_file
+    ids_df = pd.read_csv(ids_path)
 
-    try:
-        subject_ids = pd.read_csv(freesurfer_ids_path)
-    except IOError:
-        print('No file {}. Run the clean_biobank1_data.py script to generate'
-              ' it.'.format(freesurfer_ids_path))
-        raise
+    # Get list of subjects included in the analysis
+    subjects_path = [str(dataset_path / '{}_Warped{}'.format(subject_id, input_data_type)) for subject_id in
+                     ids_df['Image_ID'].str.rstrip('/')]
 
-    # Get list of subjects for which we have data
-    subjects_path = [str(dataset_path / '{}_ses-bl_T1w_Warped{}'.format(subject_id, input_data_type)) for subject_id in
-                     subject_ids['Participant_ID']]
+    print('Total number of images: {}'.format(len(ids_df)))
 
-    print('Total number of images: {}'.format(len(subject_ids)))
-
+    # ----------------------------------------------------------------------------------------
     # Load the mask image
-    brain_mask = PROJECT_ROOT / 'imaging_preprocessing_ANTs' / 'mni_icbm152_t1_tal_nlin_sym_09c_mask.nii'
+    brain_mask = PROJECT_ROOT / 'imaging_preprocessing_ANTs' / mask_filename
     mask_img = nib.load(str(brain_mask))
 
     gram_matrix = calculate_gram_matrix(subjects_path, mask_img)
 
-    gram_df = pd.DataFrame(columns=subject_ids['Participant_ID'].tolist(), data=gram_matrix)
-    gram_df['Participant_ID'] = subject_ids
-    gram_df = gram_df.set_index('Participant_ID')
+    gram_df = pd.DataFrame(columns=ids_df['Image_ID'].tolist(), data=gram_matrix)
+    gram_df['Image_ID'] = ids_df['Image_ID']
+    gram_df = gram_df.set_index('Image_ID')
 
-    print('')
-    print('Saving kernel for this dataset')
-    print('   Kernel Path: {}'.format(str(kernel_path)))
-    gram_df.to_csv((kernel_path / 'kernel.csv'))
-    print('Done')
+    gram_df.to_csv(output_path / 'kernel.csv')
 
 
 if __name__ == "__main__":
-    main()
+    main(args.input_path_str, args.experiment_name,
+         args.input_ids_file,
+         args.input_data_type, args.mask_filename)
