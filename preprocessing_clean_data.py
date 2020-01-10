@@ -19,14 +19,18 @@ parser.add_argument('-E', '--experiment_name',
 parser.add_argument('-S', '--scanner_name',
                     dest='scanner_name',
                     help='Name of the scanner.')
+parser.add_argument('-I', '--input_ids_file',
+                    dest='input_ids_file',
+                    default='freesurferData.csv',
+                    help='Filename indicating the ids to be used.')
 args = parser.parse_args()
 
 
-def main(experiment_name, scanner_name):
+def main(experiment_name, scanner_name, input_ids_file):
     """Clean UK Biobank data."""
     # ----------------------------------------------------------------------------------------
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
-    ids_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
+    ids_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / input_ids_file
 
     output_ids_filename = 'cleaned_ids_noqc.csv'
     # ----------------------------------------------------------------------------------------
@@ -53,4 +57,5 @@ def main(experiment_name, scanner_name):
 
 
 if __name__ == "__main__":
-    main(args.experiment_name, args.scanner_name)
+    main(args.experiment_name, args.scanner_name,
+         args.input_ids_file)

@@ -26,6 +26,7 @@ parser.add_argument('-S', '--scanner_name',
                     help='Name of the scanner.')
 parser.add_argument('-I', '--input_ids_file',
                     dest='input_ids_file',
+                    default='cleaned_ids.csv',
                     help='Filename indicating the ids to be used.')
 args = parser.parse_args()
 
@@ -87,7 +88,7 @@ def get_balanced_dataset(dataset_df):
 def main(experiment_name, scanner_name, input_ids_file):
     """Perform the exploratory data analysis."""
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
-    ids_path = PROJECT_ROOT / 'outputs' / experiment_name / 'cleaned_ids.csv'
+    ids_path = PROJECT_ROOT / 'outputs' / experiment_name / input_ids_file
 
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 

@@ -26,6 +26,10 @@ parser.add_argument('-E', '--experiment_name',
 parser.add_argument('-S', '--scanner_name',
                     dest='scanner_name',
                     help='Name of the scanner.')
+parser.add_argument('-I', '--input_ids_file',
+                    dest='input_ids_file',
+                    default='cleaned_ids_noqc.csv',
+                    help='Filename indicating the ids to be used.')
 parser.add_argument('-M', '--mriqc_threshold',
                     dest='mriqc_threshold',
                     nargs='?',
@@ -39,10 +43,10 @@ parser.add_argument('-Q', '--qoala_threshold',
 args = parser.parse_args()
 
 
-def main(experiment_name, scanner_name, mriqc_threshold, qoala_threshold):
+def main(experiment_name, scanner_name, input_ids_file, mriqc_threshold, qoala_threshold):
     """Remove UK Biobank participants that did not pass quality checks."""
     # ----------------------------------------------------------------------------------------
-    ids_path = PROJECT_ROOT / 'outputs' / experiment_name / 'cleaned_ids_noqc.csv'
+    ids_path = PROJECT_ROOT / 'outputs' / experiment_name / input_ids_file
     mriqc_prob_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'mriqc_prob.csv'
     qoala_prob_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'qoala_prob.csv'
 
@@ -73,4 +77,5 @@ def main(experiment_name, scanner_name, mriqc_threshold, qoala_threshold):
 
 if __name__ == "__main__":
     main(args.experiment_name, args.scanner_name,
+         args.input_ids_file,
          args.mriqc_threshold, args.qoala_threshold)
