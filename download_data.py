@@ -25,6 +25,8 @@ def download_files(data_dir, selected_path, dataset_prefix_path, path_nas):
     These files include:
         - participants.tsv: Demographic data
         - freesurferData.csv: Neuroimaging data
+        - group_T1w.tsv and mriqc_prob.csv: Raw data quality metrics
+        - qoala_prob.csv: Freesurfer data quality metrics
 
     Parameters
     ----------
@@ -41,12 +43,31 @@ def download_files(data_dir, selected_path, dataset_prefix_path, path_nas):
     dataset_path = data_dir / dataset_prefix_path
     dataset_path.mkdir(exist_ok=True, parents=True)
 
+    copyfile(str(selected_path / 'participants.tsv'), str(dataset_path / 'participants.tsv'))
+
     try:
-        copyfile(str(selected_path / 'participants.tsv'), str(dataset_path / 'participants.tsv'))
         copyfile(str(path_nas / 'FreeSurfer_preprocessed' / dataset_prefix_path / 'freesurferData.csv'),
                  str(dataset_path / 'freesurferData.csv'))
     except:
         print('{} does not have freesurferData.csv'.format(dataset_prefix_path))
+
+    try:
+        copyfile(str(path_nas / 'MRIQC' / dataset_prefix_path / 'group_T1w.tsv'),
+                 str(dataset_path / 'group_T1w.tsv'))
+    except:
+        print('{} does not have group_T1w.tsv'.format(dataset_prefix_path))
+
+    try:
+        mriqc_prob_path = next((path_nas / 'MRIQC' / dataset_prefix_path).glob('*unseen_pred.csv'))
+        copyfile(str(mriqc_prob_path), str(dataset_path / 'mriqc_prob.csv'))
+    except:
+        print('{} does not have *unseen_pred.csv'.format(dataset_prefix_path))
+
+    try:
+        mriqc_prob_path = next((path_nas / 'Qoala' / dataset_prefix_path).glob('Qoala*'))
+        copyfile(str(mriqc_prob_path), str(dataset_path / 'qoala_prob.csv'))
+    except:
+        print('{} does not have Qoala*'.format(dataset_prefix_path))
 
 
 def main(path_nas):

@@ -7,7 +7,7 @@
 ## Run python scripts
 ## ----------------------------- Getting data -------------------------------------
 ## Download data from network-attached storage (MLMH lab use only)
-./download_fs_data.py -P "/run/user/1000/gvfs/smb-share:server=kc-deeplab.local,share=deeplearning/"
+./download_data.py -P "/run/user/1000/gvfs/smb-share:server=kc-deeplab.local,share=deeplearning/"
 ./download_ants_data.py
 
 # ----------------------------- Preprocessing ------------------------------------
