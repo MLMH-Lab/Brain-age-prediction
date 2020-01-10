@@ -1,62 +1,71 @@
 #!/usr/bin/env python3
-"""
-Script to implement SVM and RVM in BIOBANK Scanner1 using voxel data to predict brain age.
+"""Script to train Support Vector Machines on voxel data.
 
-This script assumes that a kernel has been already pre-computed. To compute the
-kernel use the script `precompute_3Ddata.py`
+We trained the Support Vector Machines (SVMs) [1] in a 10 repetitions
+10 stratified k-fold cross-validation (stratified by age).
+The hyperparameter tuning was performed in an automatic way using
+ a nested cross-validation.
+This script assumes that a kernel has been already pre-computed.
+To compute the kernel use the script `precompute_3Ddata.py`
+
+References
+----------
+[1] - Cortes, Corinna, and Vladimir Vapnik. "Support-vector networks."
+Machine learning 20.3 (1995): 273-297.
 """
+import argparse
 from math import sqrt
 from pathlib import Path
 import random
 import warnings
-import sys
 
 from scipy import stats
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from sklearn.svm import SVR
-from sklearn_rvm import EMRVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.externals.joblib import dump
 from sklearn.model_selection import GridSearchCV
-import argparse
+
+from utils import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
 
 warnings.filterwarnings('ignore')
 
-parser = argparse.ArgumentParser("Type of Vector Machine.")
-parser.add_argument('vm', dest='vm_type', nargs='?', default='svm')
+parser = argparse.ArgumentParser()
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+parser.add_argument('-S', '--scanner_name',
+                    dest='scanner_name',
+                    help='Name of the scanner.')
+parser.add_argument('-I', '--input_ids_file',
+                    dest='input_ids_file',
+                    default='homogenized_ids.csv',
+                    help='Filename indicating the ids to be used.')
+args = parser.parse_args()
 
-def main(vm_type):
-    # --------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
 
-    dataset_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1'
-    kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel.csv'
+def main(experiment_name, scanner_name, input_ids_file):
+    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
+    ids_path = experiment_dir / input_ids_file
+
+    model_dir = experiment_dir / 'voxel_SVM'
+    model_dir.mkdir(exist_ok=True)
+    cv_dir = model_dir / 'cv'
+    cv_dir.mkdir(exist_ok=True)
 
     # Load demographics
-    demographics = pd.read_csv((dataset_path / 'participants.tsv'), sep='\t')
-    demographics.set_index('Participant_ID', inplace=True)
+    demographics = load_demographic_data(participants_path, ids_path)
 
     # Load the Gram matrix
+    kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel.csv'
     kernel = pd.read_csv(kernel_path, header=0, index_col=0)
 
-    # Compute SVM
-    # --------------------------------------------------------------------------
-    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
-    if vm_type == 'svm':
-        vm_dir = experiment_dir / 'voxel_SVM'
-    if vm_type == 'rvm':
-        vm_dir = experiment_dir / 'voxel_RVM'
-    else:
-        print('Only rvm and vm are acceptable as inputs for the model')
-        return
-    vm_dir.mkdir(exist_ok=True, parents=True)
-    cv_dir = vm_dir / 'cv'
-    cv_dir.mkdir(exist_ok=True, parents=True)
-
+    # ----------------------------------------------------------------------------------------
     # Initialise random seed
     np.random.seed(42)
     random.seed(42)
@@ -70,7 +79,8 @@ def main(vm_type):
     cv_age_error_corr = []
 
     # Create Dataframe to hold actual and predicted ages
-    age_predictions = pd.DataFrame(demographics['Age'])
+    age_predictions = demographics[['Image_ID', 'Age']]
+    age_predictions = age_predictions.set_index('Image_ID')
 
     n_repetitions = 10
     n_folds = 10
@@ -83,7 +93,7 @@ def main(vm_type):
 
         # Create 10-fold cross-validation scheme stratified by age
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
-        for i_fold, (train_index, test_index) in enumerate(skf.split(kernel, age)):
+        for i_fold, (train_index, test_index) in enumerate(skf.split(age, age)):
             print('Running repetition {:02d}, fold {:02d}'.format(i_repetition, i_fold))
 
             x_train = kernel.iloc[train_index, train_index].values
@@ -91,40 +101,31 @@ def main(vm_type):
             y_train, y_test = age[train_index], age[test_index]
 
             # Systematic search for best hyperparameters
-            if vm_type == 'svm':
-                vm = SVR(kernel='precomputed')
+            model = SVR(kernel='precomputed')
 
-                search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0,
-                                      2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
+            search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
 
-                nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True,
-                                             random_state=i_repetition)
+            nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True,
+                                         random_state=i_repetition)
 
-                gridsearch = GridSearchCV(vm,
-                                          param_grid=search_space,
-                                          scoring='neg_mean_absolute_error',
-                                          refit=True, cv=nested_skf,
-                                          verbose=3, n_jobs=1)
+            gridsearch = GridSearchCV(model,
+                                      param_grid=search_space,
+                                      scoring='neg_mean_absolute_error',
+                                      refit=True, cv=nested_skf,
+                                      verbose=3, n_jobs=1)
 
-                gridsearch.fit(x_train, y_train)
+            gridsearch.fit(x_train, y_train)
 
-                best_svm = gridsearch.best_estimator_
+            best_model = gridsearch.best_estimator_
 
-                params_results = {'means': gridsearch.cv_results_['mean_test_score'],
-                                  'params': gridsearch.cv_results_['params']}
+            params_results = {'means': gridsearch.cv_results_['mean_test_score'],
+                              'params': gridsearch.cv_results_['params']}
 
-                predictions = best_svm.predict(x_test)
-
-            else: #rvm
-                vm = EMRVR(kernel='precomputed', verbose=True)
-
-                vm.fit(x_train, y_train)
-
-                predictions = vm.predict(x_test)
+            predictions = best_model.predict(x_test)
 
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = best_svm.score(x_test, y_test)
+            r2_score = best_model.score(x_test, y_test)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
             cv_r2_scores.append(r2_score)
@@ -137,7 +138,7 @@ def main(vm_type):
             params_filename = '{:02d}_{:02d}_params.joblib'.format(i_repetition, i_fold)
 
             dump(params_results, cv_dir / params_filename)
-            dump(best_svm, cv_dir / model_filename)
+            dump(best_model, cv_dir / model_filename)
 
             # Save model scores r2, MAE, RMSE
             scores_array = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
@@ -155,7 +156,7 @@ def main(vm_type):
                   .format(i_repetition, i_fold, r2_score, absolute_error, root_squared_error, age_error_corr))
 
     # Save predictions
-    age_predictions.to_csv(vm_dir / 'age_predictions.csv')
+    age_predictions.to_csv(model_dir / 'age_predictions.csv')
 
     # Variables for CV means across all repetitions
     cv_r2_mean = np.mean(cv_r2_scores)
@@ -169,5 +170,5 @@ def main(vm_type):
 
 
 if __name__ == "__main__":
-    args = parser.parse_args(sys.argv[1:])
-    main(vm_type=args.vm_type)
+    main(args.experiment_name, args.scanner_name,
+         args.input_ids_file)

@@ -1,32 +1,34 @@
 #!/usr/bin/env python3
-"""Script to train Support Vector Machines on freesurfer data.
+"""Script to train Relevant Vector Machines on voxel data.
 
-We trained the Support Vector Machines (SVMs) [1] in a 10 repetitions
+We trained the Relevant Vector Machines (RVMs) [1] in a 10 repetitions
 10 stratified k-fold cross-validation (stratified by age).
 The hyperparameter tuning was performed in an automatic way using
  a nested cross-validation.
+This script assumes that a kernel has been already pre-computed.
+To compute the kernel use the script `precompute_3Ddata.py`
 
 References
 ----------
-[1] - Cortes, Corinna, and Vladimir Vapnik. "Support-vector networks."
-Machine learning 20.3 (1995): 273-297.
+[1] - Tipping, Michael E. "The relevance vector machine."
+Advances in neural information processing systems. 2000.
 """
 import argparse
 from math import sqrt
 from pathlib import Path
 import random
 import warnings
+import sys
 
-from joblib import dump
 from scipy import stats
+import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import RobustScaler
-from sklearn.svm import LinearSVR
+from sklearn_rvm import EMRVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.model_selection import GridSearchCV
+from sklearn.externals.joblib import dump
 
-from utils import COLUMNS_NAME, load_freesurfer_dataset
+from utils import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
 
@@ -47,32 +49,28 @@ args = parser.parse_args()
 
 
 def main(experiment_name, scanner_name, input_ids_file):
-    # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
-    freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
     ids_path = experiment_dir / input_ids_file
 
-    model_dir = experiment_dir / 'SVM'
+    model_dir = experiment_dir / 'voxel_RVM'
     model_dir.mkdir(exist_ok=True)
     cv_dir = model_dir / 'cv'
     cv_dir.mkdir(exist_ok=True)
 
-    dataset = load_freesurfer_dataset(participants_path, ids_path, freesurfer_path)
-    dataset = dataset[:1000] #TODO: remove
+    # Load demographics
+    demographics = load_demographic_data(participants_path, ids_path)
+
+    # Load the Gram matrix
+    kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel.csv'
+    kernel = pd.read_csv(kernel_path, header=0, index_col=0)
 
     # ----------------------------------------------------------------------------------------
     # Initialise random seed
     np.random.seed(42)
     random.seed(42)
 
-    # Normalise regional volumes by total intracranial volume (tiv)
-    regions = dataset[COLUMNS_NAME].values
-
-    tiv = dataset.EstimatedTotalIntraCranialVol.values[:, np.newaxis]
-
-    regions_norm = np.true_divide(regions, tiv)
-    age = dataset['Age'].values
+    age = demographics['Age'].values
 
     # Cross validation variables
     cv_r2_scores = []
@@ -80,13 +78,12 @@ def main(experiment_name, scanner_name, input_ids_file):
     cv_rmse = []
     cv_age_error_corr = []
 
-    # Create DataFrame to hold actual and predicted ages
-    age_predictions = dataset[['Image_ID', 'Age']]
+    # Create Dataframe to hold actual and predicted ages
+    age_predictions = demographics[['Image_ID', 'Age']]
     age_predictions = age_predictions.set_index('Image_ID')
 
     n_repetitions = 10
     n_folds = 10
-    n_nested_folds = 5
 
     for i_repetition in range(n_repetitions):
         # Create new empty column in age_predictions df to save age predictions of this repetition
@@ -95,42 +92,22 @@ def main(experiment_name, scanner_name, input_ids_file):
 
         # Create 10-fold cross-validation scheme stratified by age
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
-        for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
+        for i_fold, (train_index, test_index) in enumerate(skf.split(kernel, age)):
             print('Running repetition {:02d}, fold {:02d}'.format(i_repetition, i_fold))
 
-            x_train, x_test = regions_norm[train_index], regions_norm[test_index]
+            x_train = kernel.iloc[train_index, train_index].values
+            x_test = kernel.iloc[test_index, train_index].values
             y_train, y_test = age[train_index], age[test_index]
 
-            # Scaling using inter-quartile
-            scaler = RobustScaler()
-            x_train = scaler.fit_transform(x_train)
-            x_test = scaler.transform(x_test)
+            model = EMRVR(kernel='precomputed')
 
-            # Systematic search for best hyperparameters
-            svm = LinearSVR(loss='epsilon_insensitive')
+            model.fit(x_train, y_train)
 
-            search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
-
-            nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
-
-            gridsearch = GridSearchCV(svm,
-                                      param_grid=search_space,
-                                      scoring='neg_mean_absolute_error',
-                                      refit=True, cv=nested_skf,
-                                      verbose=3, n_jobs=1)
-
-            gridsearch.fit(x_train, y_train)
-
-            best_model = gridsearch.best_estimator_
-
-            params_results = {'means': gridsearch.cv_results_['mean_test_score'],
-                              'params': gridsearch.cv_results_['params']}
-
-            predictions = best_model.predict(x_test)
+            predictions = model.predict(x_test)
 
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = best_model.score(x_test, y_test)
+            r2_score = model.score(x_test, y_test)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
             cv_r2_scores.append(r2_score)
@@ -139,15 +116,10 @@ def main(experiment_name, scanner_name, input_ids_file):
             cv_age_error_corr.append(age_error_corr)
 
             # Save scaler, model and model parameters
-            scaler_filename = '{:02d}_{:02d}_scaler.joblib'.format(i_repetition, i_fold)
             model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
             params_filename = '{:02d}_{:02d}_params.joblib'.format(i_repetition, i_fold)
 
-            dump(scaler, cv_dir / scaler_filename)
-            dump(params_results, cv_dir / params_filename)
-            dump(best_model, cv_dir / model_filename)
-
-            # Save model scores r2, MAE, RMSE, correlation between error and age
+            # Save model scores r2, MAE, RMSE
             scores_array = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
 
             scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)

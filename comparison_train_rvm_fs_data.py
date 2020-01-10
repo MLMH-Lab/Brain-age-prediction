@@ -78,7 +78,7 @@ def main(experiment_name, scanner_name, input_ids_file):
     cv_age_error_corr = []
 
     # Create DataFrame to hold actual and predicted ages
-    age_predictions = pd.DataFrame(dataset[['Image_ID', 'Age']])
+    age_predictions = dataset[['Image_ID', 'Age']]
     age_predictions = age_predictions.set_index('Image_ID')
 
     n_repetitions = 10
