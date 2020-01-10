@@ -64,6 +64,8 @@ def main(experiment_name, scanner_name, input_ids_file, mriqc_threshold, qoala_t
     prob_mriqc_df = prob_mriqc_df[['Image_ID', 'mriqc_prob']]
 
     prob_qoala_df = prob_qoala_df.rename(columns={'image_id': 'Image_ID', 'prob_qoala': 'qoala_prob'})
+    prob_qoala_df['Image_ID'] = prob_qoala_df['Image_ID'].str.lstrip('./')
+    prob_qoala_df['Image_ID'] = prob_qoala_df['Image_ID'] + '/'
     prob_qoala_df = prob_qoala_df[['Image_ID', 'qoala_prob']]
 
     qc_df = pd.merge(prob_mriqc_df, prob_qoala_df, on='Image_ID')
