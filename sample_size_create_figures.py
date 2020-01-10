@@ -12,24 +12,24 @@ import numpy as np
 PROJECT_ROOT = Path.cwd()
 
 
-def main():
+def main(suffix,model_name):
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     # ----------------------------------------------------------------------------------------
-
-    i_n_subject_pairs_list = range(1, 21)
+    n_max_pair = 20
+    i_n_subject_pairs_list = range(1, n_max_pair+1)
     n_bootstrap = 1000
 
     scores_i_n_subject_pairs = []
 
     for i_n_subject_pairs in i_n_subject_pairs_list:
-        ids_with_n_subject_pairs_dir = experiment_dir / 'bootstrap_analysis' / ('{:02d}'.format(i_n_subject_pairs))
+        ids_with_n_subject_pairs_dir = experiment_dir / 'sample_size' / ('{:02d}'.format(i_n_subject_pairs))
         scores_dir = ids_with_n_subject_pairs_dir / 'scores'
         scores_bootstrap = []
         for i_bootstrap in range(n_bootstrap):
             # Save arrays with permutation coefs and scores as np files
-            filepath_scores = scores_dir / ('boot_scores_{:04d}_svm.npy'.format(i_bootstrap))
+            filepath_scores = scores_dir / ('scores_{:04d}{:}.npy'.format(i_bootstrap, suffix))
             scores_bootstrap.append(np.load(str(filepath_scores))[1])
 
         scores_i_n_subject_pairs.append(scores_bootstrap)
@@ -43,7 +43,7 @@ def main():
     # Draw lines
     plt.plot(i_n_subject_pairs_list,
              np.mean(scores_i_n_subject_pairs, axis=1),
-             color="#111111", label="SVM performance")
+             color="#111111", label=model_name+" performance")
 
     plt.plot(i_n_subject_pairs_list, std_uniform_dist * np.ones_like(i_n_subject_pairs_list), '--',
              color="#111111", label="Chance line")
@@ -61,7 +61,7 @@ def main():
     plt.ylabel("Mean Absolute Error")
     plt.legend(loc="best")
     plt.tight_layout()
-    plt.savefig(str(experiment_dir / 'bootstrap_analysis' / 'bootstrap_analysis_svm.png'))
+    plt.savefig(str(experiment_dir / 'sample_size' / 'bootstrap_analysis{:}.png'.format(suffix)))
 
 
 if __name__ == "__main__":

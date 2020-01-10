@@ -19,7 +19,7 @@ from sklearn.gaussian_process.kernels import DotProduct
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import GridSearchCV, KFold
 
-from utils import COLUMNS_NAME
+from utils import COLUMNS_NAME, load_freesurfer_dataset
 
 PROJECT_ROOT = Path.cwd()
 
@@ -30,15 +30,19 @@ def main():
     # ----------------------------------------------------------------------------------------
     experiment_name = 'biobank_scanner1'
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
+    scanner_name = 'Scanner1'
+
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
+    freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
+
     # ----------------------------------------------------------------------------------------
 
     # Loop over the 20 bootstrap samples with up to 20 gender-balanced subject pairs per age group/year
     n_max_pair = 20
     for i_n_subject_pairs in range(1, n_max_pair+1):
         print('Bootstrap number of subject pairs: ', i_n_subject_pairs)
-        ids_with_n_subject_pairs_dir = experiment_dir / 'sample_size' / ('{:02d}'.format(i_n_subject_pairs))
+        ids_with_n_subject_pairs_dir = experiment_dir / 'sample_size' / ('{:02d}'.format(i_n_subject_pairs)) / 'ids'
 
-        dataset_dir = ids_with_n_subject_pairs_dir / 'datasets'
         scores_dir = ids_with_n_subject_pairs_dir / 'scores'
         scores_dir.mkdir(exist_ok=True)
 
@@ -46,17 +50,15 @@ def main():
         n_bootstrap = 1000
         for i_bootstrap in range(n_bootstrap):
             print('Sample number within bootstrap: ', i_bootstrap)
-            training_dataset_filename = 'sample_size_{:04d}_n_{:02d}_train.h5'.format(i_bootstrap,
-                                                                                                i_n_subject_pairs)
-            test_dataset_filename = 'sample_size_{:04d}_n_{:02d}_test.h5'.format(i_bootstrap,
-                                                                                           i_n_subject_pairs)
+            training_ids = 'sample_size_{:04d}_n_{:02d}_train.csv'.format(i_bootstrap, i_n_subject_pairs)
+            train_dataset = load_freesurfer_dataset(participants_path,
+                                                    ids_with_n_subject_pairs_dir / training_ids,
+                                                    freesurfer_path)
 
-            # Load hdf5 dataset for that bootstrap sample
-            train_dataset_path = dataset_dir / training_dataset_filename
-            train_dataset = pd.read_hdf(train_dataset_path, key='table')
-
-            test_dataset_path = dataset_dir / test_dataset_filename
-            test_dataset = pd.read_hdf(test_dataset_path, key='table')
+            test_ids = 'sample_size_{:04d}_n_{:02d}_test.csv'.format(i_bootstrap, i_n_subject_pairs)
+            test_dataset = load_freesurfer_dataset(participants_path,
+                                                   ids_with_n_subject_pairs_dir / test_ids,
+                                                   freesurfer_path)
 
             # Initialise random seed
             np.random.seed(42)
@@ -102,7 +104,7 @@ def main():
             mean_scores = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
 
             # Save arrays with permutation coefs and scores as np files
-            filepath_scores = scores_dir / ('boot_scores_{:04d}_gpr.npy'.format(i_bootstrap))
+            filepath_scores = scores_dir / ('scores_{:04d}_gpr.npy'.format(i_bootstrap))
             np.save(str(filepath_scores), mean_scores)
 
 
