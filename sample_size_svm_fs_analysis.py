@@ -30,9 +30,10 @@ def main():
     # ----------------------------------------------------------------------------------------
 
     # Loop over the 20 bootstrap samples with up to 20 gender-balanced subject pairs per age group/year
-    for i_n_subject_pairs in range(1, 21):
+    n_max_pair = 20
+    for i_n_subject_pairs in range(1, n_max_pair+1):
         print('Bootstrap number of subject pairs: ', i_n_subject_pairs)
-        ids_with_n_subject_pairs_dir = experiment_dir / 'bootstrap_analysis' / ('{:02d}'.format(i_n_subject_pairs))
+        ids_with_n_subject_pairs_dir = experiment_dir / 'sample_size' / ('{:02d}'.format(i_n_subject_pairs))
 
         dataset_dir = ids_with_n_subject_pairs_dir / 'datasets'
         scores_dir = ids_with_n_subject_pairs_dir / 'scores'
@@ -42,9 +43,9 @@ def main():
         n_bootstrap = 1000
         for i_bootstrap in range(n_bootstrap):
             print('Sample number within bootstrap: ', i_bootstrap)
-            training_dataset_filename = 'homogeneous_bootstrap_{:04d}_n_{:02d}_train.h5'.format(i_bootstrap,
+            training_dataset_filename = 'sample_size_{:04d}_n_{:02d}_train.h5'.format(i_bootstrap,
                                                                                                 i_n_subject_pairs)
-            test_dataset_filename = 'homogeneous_bootstrap_{:04d}_n_{:02d}_test.h5'.format(i_bootstrap,
+            test_dataset_filename = 'sample_size_{:04d}_n_{:02d}_test.h5'.format(i_bootstrap,
                                                                                            i_n_subject_pairs)
 
             # Load hdf5 dataset for that bootstrap sample
