@@ -38,8 +38,7 @@ parser.add_argument('-M', '--model_name',
 
 parser.add_argument('-I', '--input_ids_file',
                     dest='input_ids_file',
-                    # default='cleaned_ids.csv',
-                    default='cleaned_ids_noqc.csv',
+                    default='cleaned_ids.csv',
                     help='Filename indicating the ids to be used.')
 
 args = parser.parse_args()
