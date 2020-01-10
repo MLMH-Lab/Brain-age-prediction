@@ -27,11 +27,12 @@
 ./preprocessing_compute_kernel_matrix.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1"
 
 # ----------------------------- Regressors comparison ------------------------------------
-./comparison_train_svm_fs_data.py -E "biobank_scanner1" -S "SCANNER01"
-./comparison_train_rvm_fs_data.py -E "biobank_scanner1" -S "SCANNER01"
-./comparison_train_gpr_fs_data.py -E "biobank_scanner1" -S "SCANNER01"
+./comparison_fs_data_train_svm.py -E "biobank_scanner1" -S "SCANNER01"
+./comparison_fs_data_train_rvm.py -E "biobank_scanner1" -S "SCANNER01"
+./comparison_fs_data_train_gp.py -E "biobank_scanner1" -S "SCANNER01"
 
-./comparison_train_voxel_data.py
+./comparison_voxel_data_train_svm.py -E "biobank_scanner1" -S "SCANNER01"
+./comparison_voxel_data_train_rvm.py -E "biobank_scanner1" -S "SCANNER01"
 
 ./comparison_feature_importance_visualisation.py
 ./comparison_feature_importance_voxel_data.py
@@ -39,9 +40,9 @@
 ./comparison_statistical_analsysis.py -E "biobank_scanner1" -S "_all" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM"
 
 ## ----------------------------- Generalization comparison -----------------------
-./generalisation_test_svm_fs_data.py -M "SVM"
-./generalisation_test_svm_fs_data.py -M "RVM"
-./generalisation_test_svm_fs_data.py -M "GPR"
+./generalisation_test_fs_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "SCANNER02" -M "SVM" -I 'cleaned_ids_noqc.csv'
+./generalisation_test_fs_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "SCANNER02" -M "RVM" -I 'cleaned_ids_noqc.csv'
+./generalisation_test_fs_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "SCANNER02" -M "GPR" -I 'cleaned_ids_noqc.csv'
 
 ./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR"
 
