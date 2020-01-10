@@ -5,16 +5,17 @@ NOTE: This script is adapted from comparison_train_gp_fs_data.py but
 it uses KFold instead of StratifiedKFold to account for the bootstrap
 samples with few participants
 """
-from math import sqrt
-from pathlib import Path
+import argparse
 import random
 import warnings
+from math import sqrt
+from pathlib import Path
 
-from scipy import stats
 import numpy as np
+from scipy import stats
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import RobustScaler
 from sklearn_rvm import EMRVR
-from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 from utils import COLUMNS_NAME, load_freesurfer_dataset
 
@@ -22,37 +23,55 @@ PROJECT_ROOT = Path.cwd()
 
 warnings.filterwarnings('ignore')
 
+parser = argparse.ArgumentParser()
 
-def main():
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+
+parser.add_argument('-S', '--scanner_name',
+                    dest='scanner_name',
+                    help='Name of the scanner.')
+
+parser.add_argument('-N', '--n_bootstrap',
+                    dest='n_bootstrap',
+                    type=int, default=1000,
+                    help='Number of bootstrap iterations.')
+
+parser.add_argument('-R', '--n_max_pair',
+                    dest='n_max_pair',
+                    type=int, default=20,
+                    help='Number maximum of pairs.')
+
+args = parser.parse_args()
+
+
+def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
     # ----------------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
-    scanner_name = 'Scanner1'
-
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
     freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
 
     # ----------------------------------------------------------------------------------------
 
     # Loop over the 20 bootstrap samples with up to 20 gender-balanced subject pairs per age group/year
-    n_max_pair = 20
     for i_n_subject_pairs in range(1, n_max_pair+1):
         print('Bootstrap number of subject pairs: ', i_n_subject_pairs)
         ids_with_n_subject_pairs_dir = experiment_dir / 'sample_size' / ('{:02d}'.format(i_n_subject_pairs)) / 'ids'
 
-        scores_dir = ids_with_n_subject_pairs_dir / 'scores'
+        scores_dir = experiment_dir / 'sample_size' / ('{:02d}'.format(i_n_subject_pairs)) / 'scores'
         scores_dir.mkdir(exist_ok=True)
 
         # Loop over the 1000 random subject samples per bootstrap
-        n_bootstrap = 1000
         for i_bootstrap in range(n_bootstrap):
             print('Sample number within bootstrap: ', i_bootstrap)
-            training_ids = 'sample_size_{:04d}_n_{:02d}_train.csv'.format(i_bootstrap, i_n_subject_pairs)
+
+            training_ids = 'sample_size_{:04d}_{:02d}_train.csv'.format(i_bootstrap, i_n_subject_pairs)
+            test_ids = 'sample_size_{:04d}_{:02d}_test.csv'.format(i_bootstrap, i_n_subject_pairs)
+
             train_dataset = load_freesurfer_dataset(participants_path,
                                                     ids_with_n_subject_pairs_dir / training_ids,
                                                     freesurfer_path)
-
-            test_ids = 'sample_size_{:04d}_n_{:02d}_test.csv'.format(i_bootstrap, i_n_subject_pairs)
             test_dataset = load_freesurfer_dataset(participants_path,
                                                    ids_with_n_subject_pairs_dir / test_ids,
                                                    freesurfer_path)
@@ -98,9 +117,10 @@ def main():
             mean_scores = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
 
             # Save arrays with permutation coefs and scores as np files
-            filepath_scores = scores_dir / ('scores_{:04d}_rvm.npy'.format(i_bootstrap))
+            filepath_scores = scores_dir / ('scores_{:04d}_RVM.npy'.format(i_bootstrap))
             np.save(str(filepath_scores), mean_scores)
 
 
 if __name__ == "__main__":
-    main()
+    main(args.experiment_name, args.scanner_name,
+         args.n_bootstrap, args.n_max_pair)

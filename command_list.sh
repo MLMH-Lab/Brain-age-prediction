@@ -47,13 +47,16 @@
 ./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR"
 
 # ----------------------------- Sample size analysis ------------------------------------
-./sample_size_create_ids.py
+#./sample_size_create_ids.py -E "biobank_scanner1" -S "SCANNER01" # TODO: Use this one
+./sample_size_create_ids.py -E "biobank_scanner1" -S "SCANNER01" -N 10 -R 4
 
-./sample_size_gp_fs_analysis.py
-./sample_size_rvm_fs_analysis.py
-./sample_size_svm_fs_analysis.py
+./sample_size_svm_fs_analysis.py -E "biobank_scanner1" -S "SCANNER01" -N 10 -R 4
+./sample_size_gp_fs_analysis.py -E "biobank_scanner1" -S "SCANNER01" -N 10 -R 4
+./sample_size_rvm_fs_analysis.py -E "biobank_scanner1" -S "SCANNER01" -N 10 -R 4
 
-./sample_size_create_figures.py
+./sample_size_create_figures.py -E "biobank_scanner1" -M "SVM" -N 10 -R 4
+./sample_size_create_figures.py -E "biobank_scanner1" -M "RVM" -N 10 -R 4
+./sample_size_create_figures.py -E "biobank_scanner1" -M "GPR" -N 10 -R 4
 
 # ----------------------------- Permutation ------------------------------------
 #./permutation_lauch_subprocesses.py
