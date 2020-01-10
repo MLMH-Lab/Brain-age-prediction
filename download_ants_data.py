@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Script used to download the study data from the storage server.
+"""Script used to download the ANTs data from the storage server.
 
-Script to download all the participants.tsv and freesurferData.csv into the data folder.
+Script to download all the UK BIOBANK files preprocessed using the
+scripts available at the imaging_preprocessing_ANTs folder.
 
 NOTE: Only for internal use at the Machine Learning in Mental Health Lab.
 """
@@ -12,62 +13,32 @@ from pathlib import Path
 PROJECT_ROOT = Path.cwd()
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-P', '--path_nas',
-                    dest='path_nas',
+parser.add_argument('-N', '--nas_path',
+                    dest='nas_path_str',
                     help='Path to the Network Attached Storage system.')
+parser.add_argument('-O', '--output_path',
+                    dest='output_path_str',
+                    help='Path to the local output folder.')
 args = parser.parse_args()
 
 
-def download_files(data_dir, selected_path, dataset_prefix_path, path_nas):
-    """Download the files necessary for the study.
-
-    Function download files from network-attached storage.
-    These files include:
-        - participants.tsv: Demographic data
-        - freesurferData.csv: Neuroimaging data
-
-    Parameters
-    ----------
-    data_dir: PosixPath
-        Path indicating local path to store the data.
-    selected_path: PosixPath
-        Path indicating external path with the data.
-    dataset_prefix_path: str
-        Datasets prefix.
-    path_nas: PosixPath
-        Path indicating NAS system.
-    """
-
-    dataset_path = data_dir / dataset_prefix_path
-    dataset_path.mkdir(exist_ok=True, parents=True)
-
-    try:
-        copyfile(str(selected_path / 'participants.tsv'), str(dataset_path / 'participants.tsv'))
-        copyfile(str(path_nas / 'FreeSurfer_preprocessed' / dataset_prefix_path / 'freesurferData.csv'),
-                 str(dataset_path / 'freesurferData.csv'))
-    except:
-        print('{} does not have freesurferData.csv'.format(dataset_prefix_path))
-
-
-def main(path_nas):
+def main(nas_path_str, output_path_str):
     """Perform download of selected datasets from the network-attached storage."""
-    path_nas = Path(path_nas)
-    data_dir = PROJECT_ROOT / 'data'
-    data_dir.mkdir(exist_ok=True)
+    nas_path = Path(nas_path_str)
+    output_path = Path(output_path_str)
 
     dataset_name = 'BIOBANK'
-    selected_path = path_nas / 'BIDS_data' / dataset_name
+    scanner_name = 'SCANNER01'
 
-    for subdirectory_selected_path in selected_path.iterdir():
-        if not subdirectory_selected_path.is_dir():
-            continue
+    dataset_output_path = output_path / dataset_name
+    dataset_output_path.mkdir(exist_ok=True)
 
-        print(subdirectory_selected_path)
+    selected_path = nas_path / 'ANTS_NonLinear_preprocessed' / dataset_name / scanner_name
 
-        scanner_name = subdirectory_selected_path.stem
-        if (subdirectory_selected_path / 'participants.tsv').is_file():
-            download_files(data_dir, subdirectory_selected_path, dataset_name + '/' + scanner_name, path_nas)
+    for file_path in selected_path.glob('*.nii.gz'):
+        print(file_path)
+        copyfile(str(file_path), str(dataset_output_path / file_path.name))
 
 
 if __name__ == "__main__":
-    main(args.path_nas)
+    main(args.nas_path_str, args.output_path_str)
