@@ -17,9 +17,6 @@ from pathlib import Path
 
 import pandas as pd
 
-from utils import load_demographic_data
-
-
 PROJECT_ROOT = Path.cwd()
 
 parser = argparse.ArgumentParser()
@@ -29,28 +26,51 @@ parser.add_argument('-E', '--experiment_name',
 parser.add_argument('-S', '--scanner_name',
                     dest='scanner_name',
                     help='Name of the scanner.')
+parser.add_argument('-M', '--mriqc_threshold',
+                    dest='mriqc_threshold',
+                    nargs='?',
+                    type=float, default=0.5,
+                    help='Threshold value for MRIQC.')
+parser.add_argument('-Q', '--qoala_threshold',
+                    dest='qoala_threshold',
+                    nargs='?',
+                    type=float, default=0.5,
+                    help='Threshold value for Qoala.')
 args = parser.parse_args()
 
 
-def main(experiment_name, scanner_name, mriqc_threshold=0.5, qoala_threshold=0.5):
+def main(experiment_name, scanner_name, mriqc_threshold, qoala_threshold):
     """Remove UK Biobank participants that did not pass quality checks."""
     # ----------------------------------------------------------------------------------------
-    id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'cleaned_ids_noqc.csv'
-    qc_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'BIOBANK_QC.csv'
+    ids_path = PROJECT_ROOT / 'outputs' / experiment_name / 'cleaned_ids_noqc.csv'
+    mriqc_prob_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'mriqc_prob.csv'
+    qoala_prob_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'qoala_prob.csv'
 
-    qc_output_ids_filename = 'cleaned_ids.csv'
+    qc_output_filename = 'cleaned_ids.csv'
+
     # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
-    dataset_clean = load_demographic_data(demographic_path, id_path)
-    dataset_qc = load_demographic_data(demographic_path, qc_path)
-    dataset_qc_include = dataset_qc[dataset_qc['my_suggestion_exclude'] == False]
+    ids_df = pd.read_csv(ids_path, sep='\t')
+    prob_mriqc_df = pd.read_csv(mriqc_prob_path)
+    prob_qoala_df = pd.read_csv(qoala_prob_path)
 
-    dataset_clean_qc = pd.merge(dataset_clean, dataset_qc_include, on='participant_id')
+    prob_mriqc_df = prob_mriqc_df.rename(columns={'prob_y': 'mriqc_prob'})
+    prob_mriqc_df['Image_ID'] = prob_mriqc_df['subject_id'] + '_ses-bl_T1w/'
+    prob_mriqc_df = prob_mriqc_df[['Image_ID', 'mriqc_prob']]
 
-    qc_output_ids_df = pd.DataFrame(dataset_clean_qc['participant_id'])
-    qc_output_ids_df.to_csv(experiment_dir / qc_output_ids_filename, index=False)
+    prob_qoala_df = prob_qoala_df.rename(columns={'image_id': 'Image_ID', 'prob_qoala': 'qoala_prob'})
+    prob_qoala_df = prob_qoala_df[['Image_ID', 'qoala_prob']]
+
+    qc_df = pd.merge(prob_mriqc_df, prob_qoala_df, on='Image_ID')
+
+    selected_subjects = qc_df[(qc_df['mriqc_prob'] < mriqc_threshold) | (qc_df['qoala_prob'] < qoala_threshold)]
+
+    ids_qc_df = pd.merge(ids_df, selected_subjects[['Image_ID']], on='Image_ID')
+
+    ids_qc_df.to_csv(experiment_dir / qc_output_filename, index=False)
 
 
 if __name__ == "__main__":
-    main(args.experiment_name, args.scanner_name)
+    main(args.experiment_name, args.scanner_name,
+         args.mriqc_threshold, args.qoala_threshold)

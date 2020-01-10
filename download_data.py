@@ -26,7 +26,7 @@ def download_files(data_dir, selected_path, dataset_prefix_path, nas_path):
     These files include:
         - participants.tsv: Demographic data
         - freesurferData.csv: Neuroimaging data
-        - group_T1w.tsv and mriqc_prob.csv: Raw data quality metrics
+        - mriqc_prob.csv: Raw data quality metrics
         - qoala_prob.csv: Freesurfer data quality metrics
 
     Parameters
@@ -51,12 +51,6 @@ def download_files(data_dir, selected_path, dataset_prefix_path, nas_path):
                  str(dataset_path / 'freesurferData.csv'))
     except:
         print('{} does not have freesurferData.csv'.format(dataset_prefix_path))
-
-    try:
-        copyfile(str(nas_path / 'MRIQC' / dataset_prefix_path / 'group_T1w.tsv'),
-                 str(dataset_path / 'group_T1w.tsv'))
-    except:
-        print('{} does not have group_T1w.tsv'.format(dataset_prefix_path))
 
     try:
         mriqc_prob_path = next((nas_path / 'MRIQC' / dataset_prefix_path).glob('*unseen_pred.csv'))
