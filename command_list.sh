@@ -33,10 +33,10 @@
 
 ./comparison_train_voxel_data.py
 
-./comparison_statistical_analsysis.py -E "biobank_scanner1" -S "fs" -M "SVM" "RVM" "GPR"
-
 ./comparison_feature_importance_visualisation.py
 ./comparison_feature_importance_voxel_data.py
+
+./comparison_statistical_analsysis.py -E "biobank_scanner1" -S "_all" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM"
 
 ## ----------------------------- Generalization comparison -----------------------
 ./generalisation_test_svm_fs_data.py
