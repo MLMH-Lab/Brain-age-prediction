@@ -72,9 +72,9 @@ def main():
     cv_rmse = []
     cv_age_error_corr = []
 
-    # Create dataframe to hold actual and predicted ages
-    age_predictions = pd.DataFrame(dataset[['Participant_ID', 'Age']])
-    age_predictions = age_predictions.set_index('Participant_ID')
+    # Create DataFrame to hold actual and predicted ages
+    age_predictions = pd.DataFrame(dataset[['Image_ID', 'Age']])
+    age_predictions = age_predictions.set_index('Image_ID')
 
     n_repetitions = 10
     n_folds = 10
