@@ -25,7 +25,7 @@ import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from sklearn_rvm import EMRVR
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.externals.joblib import dump
+from joblib import dump
 
 from utils import load_demographic_data
 
