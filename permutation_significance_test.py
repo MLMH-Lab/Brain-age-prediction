@@ -11,7 +11,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.externals.joblib import load
+from joblib import load
 
 from utils import COLUMNS_NAME
 
