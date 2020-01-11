@@ -80,6 +80,6 @@
 ./misc_svm_hyperparameters_analysis.py -E "biobank_scanner1"
 
 # ----------------------------- Exploratory Data Analysis ------------------------------------
-./eda_demographic_data.py
+./eda_demographic_data.py -E "biobank_scanner1" -S "SCANNER01" -U "_homogenized" -I 'homogenized_ids.csv'
+./eda_demographic_data.py -E "biobank_scanner2" -S "SCANNER02" -U "_cleaned" -I 'cleaned_ids.csv'
 ./eda_education_age.py
-./eda_gender_age.py

@@ -5,6 +5,7 @@ This script records the frequency of different demographic features, the age his
 description of the whole dataset and the genders groups.
 
 """
+import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -14,28 +15,67 @@ from utils import load_demographic_data
 plt.style.use('seaborn-whitegrid')
 PROJECT_ROOT = Path.cwd()
 
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+
+parser.add_argument('-S', '--scanner_name',
+                    dest='scanner_name',
+                    help='Name of the scanner.')
+
+parser.add_argument('-I', '--input_ids_file',
+                    dest='input_ids_file',
+                    default='homogenized_ids.csv',
+                    help='Filename indicating the ids to be used.')
+
+parser.add_argument('-U', '--suffix',
+                    dest='suffix',
+                    help='Name of the suffix.')
+
+args = parser.parse_args()
+
 
 def save_frequency_table(output_dir, input_df, col_name, suffix):
     """Export frequency table of column as csv."""
     freq_table = input_df[col_name].value_counts()
     print(col_name)
     print(freq_table)
-    file_name = col_name + suffix + '_freq.csv'
-    freq_table.to_csv(output_dir / file_name)
+    freq_table.to_csv(output_dir / f'{col_name}{suffix}_freq.csv')
+
+
+def create_histogram(output_dir, input_df, suffix):
+    """Save histogram of age distribution by gender in experiment directory as png."""
+    plt.figure(figsize=(10, 7))
+
+    plt.hist(input_df.Age, color='blue', histtype='step', lw=2, bins=range(45, 75, 1))
+
+    plt.title('Age distribution in UK BIOBANK', fontsize=17)
+    plt.xlabel('Age at MRI scan [years]', fontsize=15)
+    plt.ylabel('Number of subjects', fontsize=15)
+    plt.xticks(range(45, 75, 5))
+    plt.yticks(range(0, 401, 50))
+    plt.tick_params(labelsize=13)
+    plt.axis('tight')
+
+    plt.savefig(output_dir / f'age_dist{suffix}.eps', format='eps')
 
 
 def create_gender_histogram(output_dir, input_df, suffix):
     """Save histogram of age distribution by gender in experiment directory as png."""
+    male_code = 1
+    female_code = 0
 
-    male_ages = input_df.groupby('Gender').get_group('Male').Age
-    female_ages = input_df.groupby('Gender').get_group('Female').Age
+    male_ages = input_df.groupby('Gender').get_group(male_code).Age
+    female_ages = input_df.groupby('Gender').get_group(female_code).Age
 
     plt.figure(figsize=(10, 7))
 
     plt.hist(male_ages, color='blue', histtype='step', lw=2, bins=range(45, 75, 1), label='male')
     plt.hist(female_ages, color='red', histtype='step', lw=2, bins=range(45, 75, 1), label='female')
 
-    plt.title('Age distribution by gender', fontsize=17)
+    plt.title('Age distribution in UK BIOBANK by gender', fontsize=17)
     plt.xlabel('Age at MRI scan [years]', fontsize=15)
     plt.ylabel('Number of subjects', fontsize=15)
     plt.xticks(range(45, 75, 5))
@@ -44,44 +84,40 @@ def create_gender_histogram(output_dir, input_df, suffix):
     plt.tick_params(labelsize=13)
     plt.axis('tight')
 
-    file_name = 'gender_age_dist' + suffix + '.png'
-
-    plt.savefig(str(output_dir / file_name))
+    plt.savefig(output_dir / f'gender_age_dist{suffix}.eps', format='eps')
 
 
-def main():
+def main(experiment_name, scanner_name, input_ids_file, suffix):
     """Perform the exploratory data analysis."""
     # ----------------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
-    suffix_analysis_phase = '_initial_analysis'
-
-    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'ukb22321.csv'
-    id_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'
-    # ----------------------------------------------------------------------------------------
-
-    # Create experiment's output directory
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
-    experiment_dir.mkdir(exist_ok=True)
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
+    ids_path = experiment_dir / input_ids_file
+
+    # ----------------------------------------------------------------------------------------
+    # Create experiment's output directory
     eda_dir = experiment_dir / 'EDA'
     eda_dir.mkdir(exist_ok=True)
 
-    dataset = load_demographic_data(demographic_path, id_path)
+    dataset = load_demographic_data(participants_path, ids_path)
 
     # Export ethnicity and age distribution for future reference
-    save_frequency_table(eda_dir, dataset, 'Ethnicity', suffix_analysis_phase)
-    save_frequency_table(eda_dir, dataset, 'Age', suffix_analysis_phase)
-    save_frequency_table(eda_dir, dataset, 'Gender', suffix_analysis_phase)
+    save_frequency_table(eda_dir, dataset, 'Ethnicity', suffix)
+    save_frequency_table(eda_dir, dataset, 'Age', suffix)
+    save_frequency_table(eda_dir, dataset, 'Gender', suffix)
 
-    create_gender_histogram(eda_dir, dataset, suffix_analysis_phase)
+    create_gender_histogram(eda_dir, dataset, suffix)
+    create_histogram(eda_dir, dataset, suffix)
 
     print('Whole dataset')
     print(dataset.Age.describe())
-    dataset.Age.describe().to_csv(eda_dir / f'whole_dataset_dem{suffix_analysis_phase}.csv')
+    dataset.Age.describe().to_csv(eda_dir / f'whole_dataset_dem{suffix}.csv')
 
     print('Grouped dataset')
     print(dataset.groupby('Gender').Age.describe())
-    dataset.groupby('Gender').Age.describe().to_csv(eda_dir / f'grouped_dem{suffix_analysis_phase}.csv')
+    dataset.groupby('Gender').Age.describe().to_csv(eda_dir / f'grouped_dem{suffix}.csv')
 
 
 if __name__ == '__main__':
-    main()
+    main(args.experiment_name, args.scanner_name,
+         args.input_ids_file, args.suffix)
