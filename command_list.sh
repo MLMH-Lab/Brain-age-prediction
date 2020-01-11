@@ -77,7 +77,7 @@
 ./misc_classifier_regressor_comparison.py
 
 # Performance of different values of the SVM hyperparameter (C)
-./misc_svm_hyperparameters_analysis.py
+./misc_svm_hyperparameters_analysis.py -E "biobank_scanner1"
 
 # ----------------------------- Exploratory Data Analysis ------------------------------------
 ./eda_demographic_data.py
