@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-"""Script to perform the sample size analysis using Relevant Vector Machine
-
-NOTE: This script is adapted from comparison_train_gp_fs_data.py but
-it uses KFold instead of StratifiedKFold to account for the bootstrap
-samples with few participants
+"""Perform sample size Script to run SVM (linear SVR) on bootstrap datasets of UK BIOBANK Scanner1
+IMPORTANT NOTE: This script is adapted from svm.py but uses KFold instead of StratifiedKFold
+to account for the bootstrap samples with few participants
 """
 import argparse
 import random
@@ -12,12 +10,13 @@ from math import sqrt
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from scipy import stats
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.preprocessing import RobustScaler
-from sklearn_rvm import EMRVR
+from sklearn.model_selection import GridSearchCV, KFold
+from sklearn.svm import SVR
 
-from utils import COLUMNS_NAME, load_freesurfer_dataset
+from utils import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
 
@@ -48,12 +47,16 @@ args = parser.parse_args()
 
 def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
     # ----------------------------------------------------------------------------------------
+    model_name = 'voxel_SVM'
+
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
-    freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
+
+    # Load the Gram matrix
+    kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel_100.csv'
+    kernel = pd.read_csv(kernel_path, header=0, index_col=0)
 
     # ----------------------------------------------------------------------------------------
-
     # Loop over the 20 bootstrap samples with up to 20 gender-balanced subject pairs per age group/year
     for i_n_subject_pairs in range(1, n_max_pair+1):
         print('Bootstrap number of subject pairs: ', i_n_subject_pairs)
@@ -69,44 +72,45 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
             training_ids = 'sample_size_{:04d}_{:02d}_train.csv'.format(i_bootstrap, i_n_subject_pairs)
             test_ids = 'sample_size_{:04d}_{:02d}_test.csv'.format(i_bootstrap, i_n_subject_pairs)
 
-            train_dataset = load_freesurfer_dataset(participants_path,
-                                                    ids_with_n_subject_pairs_dir / training_ids,
-                                                    freesurfer_path)
-            test_dataset = load_freesurfer_dataset(participants_path,
-                                                   ids_with_n_subject_pairs_dir / test_ids,
-                                                   freesurfer_path)
+            train_dataset = load_demographic_data(participants_path, ids_with_n_subject_pairs_dir / training_ids)
+            test_dataset = load_demographic_data(participants_path, ids_with_n_subject_pairs_dir / test_ids)
 
             # Initialise random seed
             np.random.seed(42)
             random.seed(42)
 
-            # Normalise regional volumes by total intracranial volume (tiv)
-            regions = train_dataset[COLUMNS_NAME].values
+            train_index = train_dataset['Image_ID']
+            test_index = test_dataset['Image_ID']
 
-            tiv = train_dataset.EstimatedTotalIntraCranialVol.values[:, np.newaxis]
+            x_train = kernel.loc[train_index, train_index].values
+            x_test = kernel.loc[test_index, train_index].values
 
-            x_train = np.true_divide(regions, tiv)
             y_train = train_dataset['Age'].values
-
-            test_tiv = test_dataset.EstimatedTotalIntraCranialVol.values[:, np.newaxis]
-            test_regions = test_dataset[COLUMNS_NAME].values
-
-            x_test = np.true_divide(test_regions, test_tiv)
             y_test = test_dataset['Age'].values
 
-            # Scaling in range [-1, 1]
-            scaler = RobustScaler()
-            x_train = scaler.fit_transform(x_train)
-            x_test = scaler.transform(x_test)
-
             # Systematic search for best hyperparameters
-            rvm = EMRVR(kernel='linear')
-            rvm.fit(x_train, y_train)
-            predictions = rvm.predict(x_test)
+            model = SVR(kernel='precomputed')
+
+            search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
+
+            n_nested_folds = 5
+            nested_kf = KFold(n_splits=n_nested_folds, shuffle=True, random_state=i_bootstrap)
+
+            gridsearch = GridSearchCV(model,
+                                      param_grid=search_space,
+                                      scoring='neg_mean_absolute_error',
+                                      refit=True, cv=nested_kf,
+                                      verbose=0, n_jobs=1)
+
+            gridsearch.fit(x_train, y_train)
+
+            best_model = gridsearch.best_estimator_
+
+            predictions = best_model.predict(x_test)
 
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = rvm.score(x_test, y_test)
+            r2_score = best_model.score(x_test, y_test)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
             print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, CORR: {:0.3f}'.format(r2_score,
@@ -117,7 +121,7 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
             mean_scores = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
 
             # Save arrays with permutation coefs and scores as np files
-            filepath_scores = scores_dir / ('scores_{:04d}_RVM.npy'.format(i_bootstrap))
+            filepath_scores = scores_dir / ('scores_{:04d}_{}.npy'.format(i_bootstrap, model_name))
             np.save(str(filepath_scores), mean_scores)
 
 

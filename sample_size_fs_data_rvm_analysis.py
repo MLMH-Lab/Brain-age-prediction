@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Script to perform the sample size analysis using Gaussian Processes
+"""Script to perform the sample size analysis using Relevant Vector Machine
 
 NOTE: This script is adapted from comparison_train_gp_fs_data.py but
 it uses KFold instead of StratifiedKFold to account for the bootstrap
@@ -13,17 +13,15 @@ from pathlib import Path
 
 import numpy as np
 from scipy import stats
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import DotProduct
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import RobustScaler
+from sklearn_rvm import EMRVR
 
 from utils import COLUMNS_NAME, load_freesurfer_dataset
 
 PROJECT_ROOT = Path.cwd()
 
 warnings.filterwarnings('ignore')
-
 
 parser = argparse.ArgumentParser()
 
@@ -50,6 +48,8 @@ args = parser.parse_args()
 
 def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
     # ----------------------------------------------------------------------------------------
+    model_name = 'RVM'
+
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
     freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
@@ -101,17 +101,14 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
 
-            kernel = DotProduct()
-
-            gpr = GaussianProcessRegressor(kernel=kernel, random_state=0)
-
-            gpr.fit(x_train, y_train)
-
-            predictions = gpr.predict(x_test)
+            # Systematic search for best hyperparameters
+            rvm = EMRVR(kernel='linear')
+            rvm.fit(x_train, y_train)
+            predictions = rvm.predict(x_test)
 
             absolute_error = mean_absolute_error(y_test, predictions)
             root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = gpr.score(x_test, y_test)
+            r2_score = rvm.score(x_test, y_test)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
             print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, CORR: {:0.3f}'.format(r2_score,
@@ -122,7 +119,7 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
             mean_scores = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
 
             # Save arrays with permutation coefs and scores as np files
-            filepath_scores = scores_dir / ('scores_{:04d}_GPR.npy'.format(i_bootstrap))
+            filepath_scores = scores_dir / ('scores_{:04d}_{}.npy'.format(i_bootstrap, model_name))
             np.save(str(filepath_scores), mean_scores)
 
 
