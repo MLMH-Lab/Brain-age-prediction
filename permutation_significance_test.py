@@ -6,7 +6,9 @@ Gaonkar, B., & Davatzikos, C. (2012, October). Deriving statistical significance
  classification and group comparisons. In International Conference on Medical Image Computing and Computer-Assisted
  Intervention (pp. 723-730). Springer, Berlin, Heidelberg.
 """
+import argparse
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from sklearn.externals.joblib import load
@@ -14,6 +16,15 @@ from sklearn.externals.joblib import load
 from utils import COLUMNS_NAME
 
 PROJECT_ROOT = Path.cwd()
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+parser.add_argument('-M', '--model_name',
+                    dest='model_name',
+                    help='Name of the scanner.')
+args = parser.parse_args()
 
 
 def get_assessed_model_mean_scores(cv_dir, n_repetitions=10, n_folds=10):
@@ -82,14 +93,11 @@ def get_permutation_mean_relative_coefs(perm_dir, n_perm=1000):
     return np.asarray(perm_relative_coefs, dtype='float32')
 
 
-def main():
-    # ----------------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
-
+def main(experiment_name, model_name):
     # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
-    svm_dir = experiment_dir / 'SVM'
-    cv_dir = svm_dir / 'cv'
+
+    cv_dir = experiment_dir / model_name / 'cv'
     perm_dir = experiment_dir / 'permutations'
 
     assessed_model_scores = get_assessed_model_mean_scores(cv_dir)
@@ -99,7 +107,7 @@ def main():
     score_names = ['R2', 'MAE', 'RMSE', 'CORR']
     p_value_scores = []
     for i_score, score_name in enumerate(score_names):
-        if score_name in ['MAE','RMSE']:
+        if score_name in ['MAE', 'RMSE']:
             p_value = get_permutation_p_value(np.mean(assessed_model_scores[:, i_score]),
                                               perm_scores[:, i_score],
                                               greater_is_better=False)
@@ -120,7 +128,7 @@ def main():
     # Assess significance of SVM model coefficients
     assessed_model_coefs = get_assessed_model_coefs(cv_dir)
     assessed_mean_relative_coefs = np.divide(np.abs(assessed_model_coefs),
-                                             np.sum(np.abs(assessed_model_coefs), axis=1)[:,np.newaxis])
+                                             np.sum(np.abs(assessed_model_coefs), axis=1)[:, np.newaxis])
     perm_mean_relative_coefs = get_permutation_mean_relative_coefs(perm_dir)
 
     p_value_coefs = []
@@ -138,4 +146,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(args.experiment_name, args.model_name)
