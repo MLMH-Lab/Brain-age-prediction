@@ -59,7 +59,6 @@ def main(experiment_name, scanner_name, input_ids_file):
     cv_dir.mkdir(exist_ok=True)
 
     dataset = load_freesurfer_dataset(participants_path, ids_path, freesurfer_path)
-    dataset = dataset[:1000] #TODO: remove
 
     # ----------------------------------------------------------------------------------------
     # Initialise random seed
