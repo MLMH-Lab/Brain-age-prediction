@@ -9,15 +9,33 @@ References
 [1] - Zhao, Lu, et al. "Age-Related Differences in Brain Morphology and the Modifiers in Middle-Aged and Older Adults."
 Cerebral Cortex (2018).
 """
+import argparse
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-from utils import load_demographic_data
+from utils import COLUMNS_NAME, load_freesurfer_dataset
 
 PROJECT_ROOT = Path.cwd()
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+
+parser.add_argument('-S', '--scanner_name',
+                    dest='scanner_name',
+                    help='Name of the scanner.')
+
+parser.add_argument('-I', '--input_ids_file',
+                    dest='input_ids_file',
+                    default='homogenized_ids.csv',
+                    help='Filename indicating the ids to be used.')
+
+args = parser.parse_args()
 
 
 def normalise_region_df(df, region_name):
@@ -38,34 +56,21 @@ def linear_regression(df, region_name):
     return OLS_results.params, OLS_results.bse, OLS_results.tvalues, OLS_results.pvalues
 
 
-def main():
-    """Perform the exploratory data analysis."""
+def main(experiment_name, scanner_name, input_ids_file):
     # ----------------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
-
-    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'participants.tsv'
-    id_path = PROJECT_ROOT / 'outputs' / experiment_name / 'dataset_homogeneous.csv'
-    freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'freesurferData.csv'
-    # ----------------------------------------------------------------------------------------
+    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
+    freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
+    ids_path = experiment_dir / input_ids_file
 
     # Create experiment's output directory
-    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     univariate_dir = experiment_dir / 'univariate_analysis'
     univariate_dir.mkdir(exist_ok=True)
 
-    dataset = load_demographic_data(demographic_path, id_path)
-
-    # Loading Freesurfer data
-    freesurfer = pd.read_csv(freesurfer_path)
-
-    # Create a new col in FS dataset to contain Participant_ID
-    freesurfer['Participant_ID'] = freesurfer['Image_ID'].str.split('_', expand=True)[0]
-
-    # Merge FS dataset and demographic dataset to access age
-    dataset = pd.merge(freesurfer, dataset, on='Participant_ID')
+    dataset = load_freesurfer_dataset(participants_path, ids_path, freesurfer_path)
 
     # Create new df to add normalised regional volumes to
-    normalised_df = pd.DataFrame(dataset[['Participant_ID', 'Diagn', 'Gender', 'Age']])
+    normalised_df = dataset[['participant_id', 'Diagn', 'Gender', 'Age']]
     normalised_df['Age^2'] = normalised_df['Age'] ** 2
     normalised_df['Age^3'] = normalised_df['Age'] ** 3
 
@@ -82,12 +87,7 @@ def main():
 
     regression_output.set_index('Row_labels_stat', 'Row_labels_exog')
 
-    # Update normalised_df to contain normalised regions for all regions
-    cols_to_ignore = ['Image_ID', 'Participant_ID', 'Dataset', 'Age', 'Gender', 'Diagn',
-                      'EstimatedTotalIntraCranialVol']
-    region_cols = list(dataset.columns.difference(cols_to_ignore))
-
-    for region_name in region_cols:
+    for region_name in COLUMNS_NAME:
         print(region_name)
         normalised_df['Norm_vol_' + region_name] = normalise_region_df(dataset, region_name)
 
@@ -101,4 +101,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(args.experiment_name, args.scanner_name,
+         args.input_ids_file)

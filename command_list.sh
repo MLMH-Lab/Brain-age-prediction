@@ -71,7 +71,7 @@
 
 # ----------------------------- Miscelanious ------------------------------------
 # Univariate analysis on freesurfer data
-./misc_univariate_analysis.py
+./misc_univariate_analysis.py -E "biobank_scanner1" -S "SCANNER01"
 
 ./misc_classifier_train_svm.py
 ./misc_classifier_regressor_comparison.py
