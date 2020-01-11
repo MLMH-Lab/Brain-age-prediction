@@ -9,3 +9,4 @@ scikit-learn==0.22.1
 scipy==1.4.1
 sklearn-rvm==0.0.3
 tqdm==4.41.1
+statsmodels==0.10.2
