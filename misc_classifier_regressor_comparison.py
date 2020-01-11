@@ -4,9 +4,8 @@ classifier and from a regressor (using an uniform sample with 50 pairs)."""
 from pathlib import Path
 
 import numpy as np
-from scipy import stats
 
-from regressors_comparison import ttest_ind_corrected
+from utils import ttest_ind_corrected
 
 PROJECT_ROOT = Path.cwd()
 
@@ -19,7 +18,7 @@ def main():
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
     i_n_subjects = 50
-    ids_with_n_subjects_dir = experiment_dir / 'bootstrap_analysis' / ('{:02d}'.format(i_n_subjects))
+    ids_with_n_subjects_dir = experiment_dir / 'bootstrap_analysis' / f'{i_n_subjects:02d}'
 
     scores_classifier_dir = ids_with_n_subjects_dir / 'scores_classifier'
     scores_regressor_dir = ids_with_n_subjects_dir / 'scores'
@@ -29,8 +28,7 @@ def main():
     regressor_corr_list = []
     classifier_corr_list = []
     for i_bootstrap in range(n_bootstrap):
-        scores_filename = ('boot_scores_{:04d}.npy'.format(i_bootstrap))
-
+        scores_filename = f'boot_scores_{i_bootstrap:04d}.npy'
         regressor_scores = np.load(str(scores_regressor_dir / scores_filename))
         classifier_scores = np.load(str(scores_classifier_dir / scores_filename))
 
@@ -39,9 +37,9 @@ def main():
         classifier_corr_list.append(classifier_scores[3])
 
     # Check if CORR score is significantly different between regressor and classifier.
-    stat, pvalue = ttest_ind_corrected(np.array(regressor_corr_list), np.array(classifier_corr_list))
-    print('CORR from classifier vs. CORR from regressor - pvalue: {:6.3}'.format(pvalue))
+    _, pvalue = ttest_ind_corrected(np.array(regressor_corr_list), np.array(classifier_corr_list))
+    print(f'CORR from classifier vs. CORR from regressor - pvalue: {pvalue:6.3}')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

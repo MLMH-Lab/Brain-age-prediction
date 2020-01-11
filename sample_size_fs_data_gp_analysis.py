@@ -24,7 +24,6 @@ PROJECT_ROOT = Path.cwd()
 
 warnings.filterwarnings('ignore')
 
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-E', '--experiment_name',
@@ -59,25 +58,23 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
     # ----------------------------------------------------------------------------------------
 
     # Loop over the 20 bootstrap samples with up to 20 gender-balanced subject pairs per age group/year
-    for i_n_subject_pairs in range(1, n_max_pair+1):
-        print('Bootstrap number of subject pairs: ', i_n_subject_pairs)
-        ids_with_n_subject_pairs_dir = experiment_dir / 'sample_size' / ('{:02d}'.format(i_n_subject_pairs)) / 'ids'
+    for i_n_subject_pairs in range(1, n_max_pair + 1):
+        print(f'Bootstrap number of subject pairs: {i_n_subject_pairs}')
+        ids_with_n_subject_pairs_dir = experiment_dir / 'sample_size' / f'{i_n_subject_pairs:02d}' / 'ids'
 
-        scores_dir = experiment_dir / 'sample_size' / ('{:02d}'.format(i_n_subject_pairs)) / 'scores'
+        scores_dir = experiment_dir / 'sample_size' / f'{i_n_subject_pairs:02d}' / 'scores'
         scores_dir.mkdir(exist_ok=True)
 
         # Loop over the 1000 random subject samples per bootstrap
         for i_bootstrap in range(n_bootstrap):
-            print('Sample number within bootstrap: ', i_bootstrap)
+            print(f'Sample number within bootstrap: {i_bootstrap}')
 
-            training_ids = 'sample_size_{:04d}_{:02d}_train.csv'.format(i_bootstrap, i_n_subject_pairs)
-            test_ids = 'sample_size_{:04d}_{:02d}_test.csv'.format(i_bootstrap, i_n_subject_pairs)
-
+            prefix = f'{i_bootstrap:04d}_{i_n_subject_pairs:02d}'
             train_dataset = load_freesurfer_dataset(participants_path,
-                                                    ids_with_n_subject_pairs_dir / training_ids,
+                                                    ids_with_n_subject_pairs_dir / f'{prefix}_train.csv',
                                                     freesurfer_path)
             test_dataset = load_freesurfer_dataset(participants_path,
-                                                   ids_with_n_subject_pairs_dir / test_ids,
+                                                   ids_with_n_subject_pairs_dir / f'{prefix}_test.csv',
                                                    freesurfer_path)
 
             # Initialise random seed
@@ -111,23 +108,18 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
 
             predictions = gpr.predict(x_test)
 
-            absolute_error = mean_absolute_error(y_test, predictions)
-            root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = gpr.score(x_test, y_test)
+            mae = mean_absolute_error(y_test, predictions)
+            rmse = sqrt(mean_squared_error(y_test, predictions))
+            r2 = gpr.score(x_test, y_test)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
-            print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, CORR: {:0.3f}'.format(r2_score,
-                                                                                        absolute_error,
-                                                                                        root_squared_error,
-                                                                                        age_error_corr))
-
-            mean_scores = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
+            print(f'R2: {r2:0.3f} MAE: {mae:0.3f} RMSE: {rmse:0.3f} CORR: {age_error_corr:0.3f}')
 
             # Save arrays with permutation coefs and scores as np files
-            filepath_scores = scores_dir / ('scores_{:04d}_{}.npy'.format(i_bootstrap, model_name))
-            np.save(str(filepath_scores), mean_scores)
+            mean_scores = np.array([r2, mae, rmse, age_error_corr])
+            np.save(str(scores_dir / f'scores_{i_bootstrap:04d}_{model_name}.npy'), mean_scores)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(args.experiment_name, args.scanner_name,
          args.n_bootstrap, args.n_max_pair)

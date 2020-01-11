@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-from helper_functions import load_demographic_data
+from utils import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
 
@@ -70,12 +70,12 @@ def main():
     normalised_df['Age^3'] = normalised_df['Age'] ** 3
 
     # Create empty df for regression output; regions to be added
-    regression_output = pd.DataFrame({"Row_labels_stat": ['Coeff', 'Coeff', 'Coeff', 'Coeff',
+    regression_output = pd.DataFrame({'Row_labels_stat': ['Coeff', 'Coeff', 'Coeff', 'Coeff',
                                                           'std_err', 'std_err', 'std_err', 'std_err',
                                                           't_stats', 't_stats', 't_stats', 't_stats',
                                                           'p_val', 'p_val', 'p_val', 'p_val'],
 
-                                      "Row_labels_exog": ['Constant', 'Age', 'Age2', 'Age3',
+                                      'Row_labels_exog': ['Constant', 'Age', 'Age2', 'Age3',
                                                           'Constant', 'Age', 'Age2', 'Age3',
                                                           'Constant', 'Age', 'Age2', 'Age3',
                                                           'Constant', 'Age', 'Age2', 'Age3']})
@@ -89,7 +89,7 @@ def main():
 
     for region_name in region_cols:
         print(region_name)
-        normalised_df["Norm_vol_" + region_name] = normalise_region_df(dataset, region_name)
+        normalised_df['Norm_vol_' + region_name] = normalise_region_df(dataset, region_name)
 
         # Linear regression - ordinary least squares (OLS)
         coeff, std_err, t_value, p_value = linear_regression(normalised_df, region_name)
@@ -100,5 +100,5 @@ def main():
     regression_output.to_csv(univariate_dir / 'OLS_result.csv', index=False)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

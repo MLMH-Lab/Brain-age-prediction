@@ -63,5 +63,5 @@ def main():
     ensemble_df.to_csv(correlation_dir / 'ensemble_output.csv', index=False)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -13,16 +13,20 @@ from utils import load_demographic_data
 PROJECT_ROOT = Path.cwd()
 
 parser = argparse.ArgumentParser()
+
 parser.add_argument('-E', '--experiment_name',
                     dest='experiment_name',
                     help='Name of the experiment.')
+
 parser.add_argument('-S', '--scanner_name',
                     dest='scanner_name',
                     help='Name of the scanner.')
+
 parser.add_argument('-I', '--input_ids_file',
                     dest='input_ids_file',
                     default='freesurferData.csv',
                     help='Filename indicating the ids to be used.')
+
 args = parser.parse_args()
 
 
@@ -56,6 +60,6 @@ def main(experiment_name, scanner_name, input_ids_file):
     output_ids_df.to_csv(experiment_dir / output_ids_filename, index=False)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(args.experiment_name, args.scanner_name,
          args.input_ids_file)

@@ -44,12 +44,12 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
     scores_i_n_subject_pairs = []
 
     for i_n_subject_pairs in i_n_subject_pairs_list:
-        ids_with_n_subject_pairs_dir = experiment_dir / 'sample_size' / ('{:02d}'.format(i_n_subject_pairs))
+        ids_with_n_subject_pairs_dir = experiment_dir / 'sample_size' / f'{i_n_subject_pairs:02d}'
         scores_dir = ids_with_n_subject_pairs_dir / 'scores'
         scores_bootstrap = []
         for i_bootstrap in range(n_bootstrap):
             # Save arrays with permutation coefs and scores as np files
-            filepath_scores = scores_dir / ('scores_{:04d}_{:}.npy'.format(i_bootstrap, model_name))
+            filepath_scores = scores_dir / f'scores_{i_bootstrap:04d}_{model_name}.npy'
             scores_bootstrap.append(np.load(str(filepath_scores))[1])
 
         scores_i_n_subject_pairs.append(scores_bootstrap)
@@ -63,27 +63,27 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
     # Draw lines
     plt.plot(i_n_subject_pairs_list,
              np.mean(scores_i_n_subject_pairs, axis=1),
-             color="#111111", label=model_name+" performance")
+             color='#111111', label=model_name+' performance')
 
     plt.plot(i_n_subject_pairs_list, std_uniform_dist * np.ones_like(i_n_subject_pairs_list), '--',
-             color="#111111", label="Chance line")
+             color='#111111', label='Chance line')
 
     # Draw bands
     plt.fill_between(i_n_subject_pairs_list,
                      np.percentile(scores_i_n_subject_pairs, 2.5, axis=1),
                      np.percentile(scores_i_n_subject_pairs, 97.5, axis=1),
-                     color="#DDDDDD")
+                     color='#DDDDDD')
 
     # Create plot
-    plt.title("Bootstrap Analysis")
-    plt.xlabel("Number of subjects")
+    plt.title('Bootstrap Analysis')
+    plt.xlabel('Number of subjects')
     plt.xticks(i_n_subject_pairs_list, np.multiply(i_n_subject_pairs_list, 2 * ((73 - 47) + 1)))
-    plt.ylabel("Mean Absolute Error")
-    plt.legend(loc="best")
+    plt.ylabel('Mean Absolute Error')
+    plt.legend(loc='best')
     plt.tight_layout()
-    plt.savefig(str(experiment_dir / 'sample_size' / 'sample_size_{:}.png'.format(model_name)))
+    plt.savefig(str(experiment_dir / 'sample_size' / f'sample_size_{model_name}.png'))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(args.experiment_name, args.model_name,
          args.n_bootstrap, args.n_max_pair)

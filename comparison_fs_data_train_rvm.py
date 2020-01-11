@@ -10,17 +10,17 @@ References
 Advances in neural information processing systems. 2000.
 """
 import argparse
-from math import sqrt
-from pathlib import Path
 import random
 import warnings
+from math import sqrt
+from pathlib import Path
 
-from joblib import dump
 import numpy as np
+from joblib import dump
 from scipy import stats
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
-from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn_rvm import EMRVR
 
 from utils import COLUMNS_NAME, load_freesurfer_dataset
@@ -30,16 +30,20 @@ PROJECT_ROOT = Path.cwd()
 warnings.filterwarnings('ignore')
 
 parser = argparse.ArgumentParser()
+
 parser.add_argument('-E', '--experiment_name',
                     dest='experiment_name',
                     help='Name of the experiment.')
+
 parser.add_argument('-S', '--scanner_name',
                     dest='scanner_name',
                     help='Name of the scanner.')
+
 parser.add_argument('-I', '--input_ids_file',
                     dest='input_ids_file',
                     default='homogenized_ids.csv',
                     help='Filename indicating the ids to be used.')
+
 args = parser.parse_args()
 
 
@@ -70,7 +74,7 @@ def main(experiment_name, scanner_name, input_ids_file):
     age = dataset['Age'].values
 
     # Cross validation variables
-    cv_r2_scores = []
+    cv_r2 = []
     cv_mae = []
     cv_rmse = []
     cv_age_error_corr = []
@@ -84,13 +88,13 @@ def main(experiment_name, scanner_name, input_ids_file):
 
     for i_repetition in range(n_repetitions):
         # Create new empty column in age_predictions df to save age predictions of this repetition
-        repetition_column_name = 'Prediction repetition {:02d}'.format(i_repetition)
+        repetition_column_name = f'Prediction repetition {i_repetition:02d}'
         age_predictions[repetition_column_name] = np.nan
 
         # Create 10-fold cross-validation scheme stratified by age
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
         for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
-            print('Running repetition {:02d}, fold {:02d}'.format(i_repetition, i_fold))
+            print(f'Running repetition {i_repetition:02d}, fold {i_fold:02d}')
 
             x_train, x_test = regions_norm[train_index], regions_norm[test_index]
             y_train, y_test = age[train_index], age[test_index]
@@ -100,59 +104,53 @@ def main(experiment_name, scanner_name, input_ids_file):
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
 
-            # Systematic search for best hyperparameters
-            rvm = EMRVR(kernel='linear')
+            model = EMRVR(kernel='linear')
 
-            rvm.fit(x_train, y_train)
+            model.fit(x_train, y_train)
 
-            predictions = rvm.predict(x_test)
+            predictions = model.predict(x_test)
 
-            absolute_error = mean_absolute_error(y_test, predictions)
-            root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = rvm.score(x_test, y_test)
+            mae = mean_absolute_error(y_test, predictions)
+            rmse = sqrt(mean_squared_error(y_test, predictions))
+            r2 = model.score(x_test, y_test)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
-            cv_r2_scores.append(r2_score)
-            cv_mae.append(absolute_error)
-            cv_rmse.append(root_squared_error)
+            cv_r2.append(r2)
+            cv_mae.append(mae)
+            cv_rmse.append(rmse)
             cv_age_error_corr.append(age_error_corr)
 
-            # Save scaler, model and model parameters
-            scaler_filename = '{:02d}_{:02d}_scaler.joblib'.format(i_repetition, i_fold)
-            model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
+            # ----------------------------------------------------------------------------------------
+            # Save output files
+            output_prefix = f'{i_repetition:02d}_{i_fold:02d}'
 
-            dump(scaler, cv_dir / scaler_filename)
-            dump(rvm, cv_dir / model_filename)
+            # Save scaler and model
+            dump(scaler, cv_dir / f'{output_prefix}_scaler.joblib')
+            dump(model, cv_dir / f'{output_prefix}_regressor.joblib')
 
-            # Save model scores r2, MAE, RMSE
-            scores_array = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
+            # Save model scores
+            scores_array = np.array([r2, mae, rmse, age_error_corr])
+            np.save(cv_dir / f'{output_prefix}_scores.npy', scores_array)
 
-            scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
-
-            np.save(cv_dir / scores_filename, scores_array)
-
+            # ----------------------------------------------------------------------------------------
             # Add predictions per test_index to age_predictions
             for row, value in zip(test_index, predictions):
                 age_predictions.iloc[row, age_predictions.columns.get_loc(repetition_column_name)] = value
 
             # Print results of the CV fold
-            print('Repetition {:02d}, Fold {:02d}, R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, CORR: {:0.3f}'
-                  .format(i_repetition, i_fold, r2_score, absolute_error, root_squared_error, age_error_corr))
+            print(f'Repetition {i_repetition:02d} Fold {r2:02d} R2: {r2:0.3f}, '
+                  f'MAE: {mae:0.3f} RMSE: {rmse:0.3f} CORR: {age_error_corr:0.3f}')
 
     # Save predictions
     age_predictions.to_csv(model_dir / 'age_predictions.csv')
 
     # Variables for CV means across all repetitions
-    cv_r2_mean = np.mean(cv_r2_scores)
-    cv_mae_mean = np.mean(cv_mae)
-    cv_rmse_mean = np.mean(cv_rmse)
-    cv_age_error_corr_mean = np.mean(np.abs(cv_age_error_corr))
-    print('Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, CORR: {:0.3f}'.format(cv_r2_mean,
-                                                                                cv_mae_mean,
-                                                                                cv_rmse_mean,
-                                                                                cv_age_error_corr_mean))
+    print('')
+    print('Mean values:')
+    print(f'R2: {np.mean(cv_r2):0.3f} MAE: {np.mean(cv_mae):0.3f} '
+          f'RMSE: {np.mean(cv_rmse):0.3f} CORR: {np.mean(np.abs(cv_age_error_corr)):0.3f}')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(args.experiment_name, args.scanner_name,
          args.input_ids_file)

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-from helper_functions import load_demographic_data
+from utils import load_demographic_data
 
 plt.style.use('seaborn-whitegrid')
 PROJECT_ROOT = Path.cwd()
@@ -35,9 +35,9 @@ def create_gender_histogram(output_dir, input_df, suffix):
     plt.hist(male_ages, color='blue', histtype='step', lw=2, bins=range(45, 75, 1), label='male')
     plt.hist(female_ages, color='red', histtype='step', lw=2, bins=range(45, 75, 1), label='female')
 
-    plt.title("Age distribution by gender", fontsize=17)
-    plt.xlabel("Age at MRI scan [years]", fontsize=15)
-    plt.ylabel("Number of subjects", fontsize=15)
+    plt.title('Age distribution by gender', fontsize=17)
+    plt.xlabel('Age at MRI scan [years]', fontsize=15)
+    plt.ylabel('Number of subjects', fontsize=15)
     plt.xticks(range(45, 75, 5))
     plt.yticks(range(0, 401, 50))
     plt.legend(loc='upper right', fontsize=13)
@@ -76,12 +76,12 @@ def main():
 
     print('Whole dataset')
     print(dataset.Age.describe())
-    dataset.Age.describe().to_csv(eda_dir / ('whole_dataset_dem' + suffix_analysis_phase + '.csv'))
+    dataset.Age.describe().to_csv(eda_dir / f'whole_dataset_dem{suffix_analysis_phase}.csv')
 
     print('Grouped dataset')
     print(dataset.groupby('Gender').Age.describe())
-    dataset.groupby('Gender').Age.describe().to_csv(eda_dir / ('grouped_dem' + suffix_analysis_phase + '.csv'))
+    dataset.groupby('Gender').Age.describe().to_csv(eda_dir / f'grouped_dem{suffix_analysis_phase}.csv')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -90,5 +90,5 @@ def main():
     indices_output.to_csv(correlation_dir / 'indices_deprivation_ols_output.csv')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -18,12 +18,15 @@ from utils import COLUMNS_NAME
 PROJECT_ROOT = Path.cwd()
 
 parser = argparse.ArgumentParser()
+
 parser.add_argument('-E', '--experiment_name',
                     dest='experiment_name',
                     help='Name of the experiment.')
+
 parser.add_argument('-M', '--model_name',
                     dest='model_name',
                     help='Name of the scanner.')
+
 args = parser.parse_args()
 
 
@@ -33,7 +36,7 @@ def get_assessed_model_mean_scores(cv_dir, n_repetitions=10, n_folds=10):
 
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
-            scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
+            scores_filename = f'{i_repetition:02d}_{i_fold:02d}_scores.npy'
             assessed_model_scores.append(np.load(cv_dir / scores_filename))
 
     return np.asarray(assessed_model_scores)
@@ -45,12 +48,12 @@ def get_permutation_mean_scores(perm_dir, n_perm=1000):
 
     for i_perm in range(n_perm):
 
-        filepath_scores = perm_dir / ('perm_scores_{:04d}.npy'.format(i_perm))
+        filepath_scores = perm_dir / f'perm_scores_{i_perm:04d}.npy'
 
         try:
             perm_scores.append(np.load(filepath_scores))
         except FileNotFoundError:
-            print('File not found: {:}'.format(filepath_scores))
+            print(f'File not found: {filepath_scores}')
 
     return np.asarray(perm_scores, dtype='float32')
 
@@ -70,7 +73,7 @@ def get_assessed_model_coefs(experiment_dir, n_repetitions=10, n_folds=10):
 
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
-            model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
+            model_filename = f'{i_repetition:02d}_{i_fold:02d}_regressor.joblib'
             model = load(experiment_dir / model_filename)
             assessed_model_coefs.append(model.coef_)
 
@@ -83,12 +86,12 @@ def get_permutation_mean_relative_coefs(perm_dir, n_perm=1000):
 
     for i_perm in range(n_perm):
 
-        filepath_scores = perm_dir / ('perm_coef_{:04d}.npy'.format(i_perm))
+        filepath_scores = perm_dir / f'perm_coef_{i_perm:04d}.npy'
 
         try:
             perm_relative_coefs.append(np.load(filepath_scores))
         except FileNotFoundError:
-            print('File not found: {:}'.format(filepath_scores))
+            print(f'File not found: {filepath_scores}')
 
     return np.asarray(perm_relative_coefs, dtype='float32')
 
@@ -116,7 +119,7 @@ def main(experiment_name, model_name):
                                               perm_scores[:, i_score])
         p_value_scores.append(p_value)
 
-        print('{:} : {:4.3f}'.format(score_name, p_value))
+        print(f'{score_name} : {p_value:4.3f}')
 
     # Save SVM model performance p values as csv
     scores_csv = pd.DataFrame([np.mean(assessed_model_scores, axis=0), p_value_scores],
@@ -145,5 +148,5 @@ def main(experiment_name, model_name):
     coef_csv.to_csv(perm_dir / 'coefs_sig.csv')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(args.experiment_name, args.model_name)

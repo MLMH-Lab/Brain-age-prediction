@@ -5,14 +5,13 @@ on previously unseen data from Biobank Scanner2 to predict brain age.
 The script loops over the 100 SVM models created in train_svm_on_freesurfer_data.py, loads their regressors,
 applies them to the Scanner2 data and saves all predictions per subjects in a csv file"""
 import argparse
+import random
 from math import sqrt
 from pathlib import Path
 
+import numpy as np
 from joblib import load
 from scipy import stats
-import numpy as np
-import pandas as pd
-import random
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 from utils import COLUMNS_NAME, load_freesurfer_dataset
@@ -20,6 +19,7 @@ from utils import COLUMNS_NAME, load_freesurfer_dataset
 PROJECT_ROOT = Path.cwd()
 
 parser = argparse.ArgumentParser()
+
 parser.add_argument('-T', '--training_experiment_name',
                     dest='training_experiment_name',
                     help='Name of the experiment.')
@@ -76,21 +76,19 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
     age = dataset['Age'].values
 
     # Create dataframe to hold actual and predicted ages
-    age_predictions = pd.DataFrame(dataset[['Image_ID', 'Age']])
+    age_predictions = dataset[['Image_ID', 'Age']]
     age_predictions = age_predictions.set_index('Image_ID')
 
-    # Create list of model prefixes
     n_repetitions = 10
     n_folds = 10
 
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
-            # Load model, scaler and parameters per model
-            model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
-            model = load(training_cv_dir / model_filename)
+            # Load model and scaler
+            prefix = f'{i_repetition:02d}_{i_fold:02d}'
 
-            scaler_filename = '{:02d}_{:02d}_scaler.joblib'.format(i_repetition, i_fold)
-            scaler = load(training_cv_dir / scaler_filename)
+            model = load(training_cv_dir / f'{prefix}_regressor.joblib')
+            scaler = load(training_cv_dir / f'{prefix}_scaler.joblib')
 
             # Use RobustScaler to transform testing data
             x_test = scaler.transform(regions_norm)
@@ -104,18 +102,17 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
             age_error_corr, _ = stats.spearmanr(np.abs(age - predictions), age)
 
             # Save prediction per model in df
-            age_predictions[('{:02d}_{:02d}'.format(i_repetition, i_fold))] = predictions
+            age_predictions[f'Prediction {i_repetition:02d}_{i_fold:02d}'] = predictions
 
-            # Save model scores r2, MAE, RMSE
+            # Save model scores
             scores_array = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
-            scores_filename = '{:02d}_{:02d}_scores.npy'.format(i_repetition, i_fold)
-            np.save(test_cv_dir / scores_filename, scores_array)
+            np.save(test_cv_dir / f'{prefix}_scores.npy', scores_array)
 
     # Save predictions
     age_predictions.to_csv(test_model_dir / 'age_predictions_test.csv')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(args.training_experiment_name, args.test_experiment_name,
          args.scanner_name, args.model_name,
          args.input_ids_file)

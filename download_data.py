@@ -7,15 +7,17 @@ Script to download all the participants.tsv, freesurferData.csv,
 NOTE: Only for internal use at the Machine Learning in Mental Health Lab.
 """
 import argparse
-from shutil import copyfile
 from pathlib import Path
+from shutil import copyfile
 
 PROJECT_ROOT = Path.cwd()
 
 parser = argparse.ArgumentParser()
+
 parser.add_argument('-N', '--nas_path',
                     dest='nas_path_str',
                     help='Path to the Network Attached Storage system.')
+
 args = parser.parse_args()
 
 
@@ -50,19 +52,19 @@ def download_files(data_dir, selected_path, dataset_prefix_path, nas_path):
         copyfile(str(nas_path / 'FreeSurfer_preprocessed' / dataset_prefix_path / 'freesurferData.csv'),
                  str(dataset_path / 'freesurferData.csv'))
     except:
-        print('{} does not have freesurferData.csv'.format(dataset_prefix_path))
+        print(f'{dataset_prefix_path} does not have freesurferData.csv')
 
     try:
         mriqc_prob_path = next((nas_path / 'MRIQC' / dataset_prefix_path).glob('*unseen_pred.csv'))
         copyfile(str(mriqc_prob_path), str(dataset_path / 'mriqc_prob.csv'))
     except:
-        print('{} does not have *unseen_pred.csv'.format(dataset_prefix_path))
+        print(f'{dataset_prefix_path} does not have *unseen_pred.csv')
 
     try:
         qoala_prob_path = next((nas_path / 'Qoala' / dataset_prefix_path).glob('Qoala*'))
         copyfile(str(qoala_prob_path), str(dataset_path / 'qoala_prob.csv'))
     except:
-        print('{} does not have Qoala*'.format(dataset_prefix_path))
+        print(f'{dataset_prefix_path} does not have Qoala*')
 
 
 def main(nas_path_str):
@@ -84,5 +86,5 @@ def main(nas_path_str):
             download_files(data_dir, subdirectory_selected_path, dataset_name + '/' + scanner_name, nas_path)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(args.nas_path_str)

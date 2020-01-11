@@ -20,10 +20,10 @@ def plot_save_histogram_education(edu_level_1, edu_level_2, edu_level_3, edu_lev
              label='Professional qualification')
     plt.hist(edu_level_4, color='green', histtype='step', lw=2, bins=range(45, 75, 1), label='University')
 
-    plt.title("Age distribution in UK BIOBANK by education level", fontsize=17)
+    plt.title('Age distribution in UK BIOBANK by education level', fontsize=17)
     plt.axis('tight')
-    plt.xlabel("Age at MRI scan [years]", fontsize=15)
-    plt.ylabel("Number of subjects", fontsize=15)
+    plt.xlabel('Age at MRI scan [years]', fontsize=15)
+    plt.ylabel('Number of subjects', fontsize=15)
     plt.xticks(range(45, 75, 5))
     plt.yticks(range(0, 401, 50))
     plt.legend(loc='upper right', fontsize=13)
@@ -64,5 +64,5 @@ def main():
     plot_save_histogram_education(gcse_ages, alevels_ages, prof_qual_ages, uni_ages)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

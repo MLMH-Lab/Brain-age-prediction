@@ -7,8 +7,8 @@ Creates 20 bootstrap samples with increasing size
 import argparse
 from pathlib import Path
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from utils import load_demographic_data
 
@@ -66,7 +66,7 @@ def main(experiment_name, scanner_name, input_ids_file, n_bootstrap, n_max_pair)
     # Create a out-of-bag set (~test set)
     for i_n_subject_pairs in range(1, n_max_pair + 1):
         print(i_n_subject_pairs)
-        ids_with_n_subject_pairs_dir = sample_size_dir / '{:02d}'.format(i_n_subject_pairs)
+        ids_with_n_subject_pairs_dir = sample_size_dir / f'{i_n_subject_pairs:02d}'
         ids_with_n_subject_pairs_dir.mkdir(exist_ok=True)
         ids_dir = ids_with_n_subject_pairs_dir / 'ids'
         ids_dir.mkdir(exist_ok=True)
@@ -97,14 +97,12 @@ def main(experiment_name, scanner_name, input_ids_file, n_bootstrap, n_max_pair)
                     dataset_bootstrap_test = pd.concat([dataset_bootstrap_test, random_sample_test[['Image_ID']]])
 
             # Export dataset_bootstrap_train as csv
-            ids_filename = 'sample_size_{:04d}_{:02d}_train.csv'.format(i_bootstrap, i_n_subject_pairs)
-            dataset_bootstrap_train.to_csv(ids_dir / ids_filename, index=False)
-
-            ids_filename = 'sample_size_{:04d}_{:02d}_test.csv'.format(i_bootstrap, i_n_subject_pairs)
-            dataset_bootstrap_test.to_csv(ids_dir / ids_filename, index=False)
+            output_prefix = f'{i_bootstrap:04d}_{i_n_subject_pairs:02d}'
+            dataset_bootstrap_train.to_csv(ids_dir / f'{output_prefix}_train.csv', index=False)
+            dataset_bootstrap_test.to_csv(ids_dir / f'{output_prefix}_test.csv', index=False)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(args.experiment_name, args.scanner_name,
          args.input_ids_file,
          args.n_bootstrap, args.n_max_pair)

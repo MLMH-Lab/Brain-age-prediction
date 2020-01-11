@@ -32,7 +32,7 @@ def main():
 
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
-            params_filename = '{:02d}_{:02d}_params.joblib'.format(i_repetition, i_fold)
+            params_filename = f'{i_repetition:02d}_{i_fold:02d}_params.joblib'
             params_dict = joblib.load(cv_dir / params_filename)
 
             scores_params.append(params_dict['means'])
@@ -77,5 +77,5 @@ def main():
     values_df.to_csv(svm_dir / 'svm_params_values.csv', index=False)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

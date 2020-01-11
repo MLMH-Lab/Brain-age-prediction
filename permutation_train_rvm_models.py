@@ -21,24 +21,30 @@ PROJECT_ROOT = Path.cwd()
 warnings.filterwarnings('ignore')
 
 parser = argparse.ArgumentParser()
+
 parser.add_argument('-E', '--experiment_name',
                     dest='experiment_name',
                     help='Name of the experiment.')
+
 parser.add_argument('-S', '--scanner_name',
                     dest='scanner_name',
                     help='Name of the scanner.')
+
 parser.add_argument('-I', '--input_ids_file',
                     dest='input_ids_file',
                     default='homogenized_ids.csv',
                     help='Filename indicating the ids to be used.')
+
 parser.add_argument('-K', '--index_min',
                     dest='index_min',
                     type=int,
                     help='index of first subject to run')
+
 parser.add_argument('-L', '--index_max',
                     dest='index_max',
                     type=int,
                     help='index of last subject to run', )
+
 args = parser.parse_args()
 
 
@@ -86,7 +92,7 @@ def main(experiment_name, scanner_name, input_ids_file, index_min, index_max):
         i_iteration = 0
 
         # Create variable to hold CV scores per permutation
-        cv_r2_scores = []
+        cv_r2 = []
         cv_mae = []
         cv_rmse = []
         cv_age_error_corr = []
@@ -111,45 +117,45 @@ def main(experiment_name, scanner_name, input_ids_file, index_min, index_max):
                 rvm.fit(x_train, y_train)
                 predictions = rvm.predict(x_test)
 
-                absolute_error = mean_absolute_error(y_test, predictions)
-                root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-                r2_score = rvm.score(x_test, y_test)
+                mae = mean_absolute_error(y_test, predictions)
+                rmse = sqrt(mean_squared_error(y_test, predictions))
+                r2 = rvm.score(x_test, y_test)
                 age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
-                cv_r2_scores.append(r2_score)
-                cv_mae.append(absolute_error)
-                cv_rmse.append(root_squared_error)
+                cv_r2.append(r2)
+                cv_mae.append(mae)
+                cv_rmse.append(rmse)
                 cv_age_error_corr.append(age_error_corr)
 
                 i_iteration += 1
 
                 fold_time = time.time() - start
-                print('Finished permutation {:02d}, repetition {:02d}, fold {:02d}, ETA {:02f}'
-                      .format(i_perm, i_repetition, i_fold, fold_time * (n_repetitions * n_folds - i_iteration)))
+                print(f'Finished permutation {i_perm:02d} repetition {i_repetition:02d} '
+                      f'fold {i_fold:02d} ETA {fold_time * (n_repetitions * n_folds - i_iteration):02f}')
 
         # Create np array with mean coefficients - one row per permutation, one col per feature
         cv_mean_relative_coefs = np.divide(np.abs(cv_coef), np.sum(np.abs(cv_coef), axis=1)[:, np.newaxis])
         cv_coef_mean = np.mean(cv_mean_relative_coefs, axis=0)
 
         # Variables for CV means across all repetitions - one row per permutation
-        cv_r2_mean = np.mean(cv_r2_scores)
+        cv_r2_mean = np.mean(cv_r2)
         cv_mae_mean = np.mean(cv_mae)
         cv_rmse_mean = np.mean(cv_rmse)
         cv_age_error_corr_mean = np.mean(cv_age_error_corr)
 
-        print('{:d}: Mean R2: {:0.3f}, MAE: {:0.3f}, RMSE: {:0.3f}, Error corr: {:0.3f}'
-              .format(i_perm, cv_r2_mean, cv_mae_mean, cv_rmse_mean, cv_age_error_corr_mean))
+        print(f'{i_perm:d}: Mean R2: {cv_r2_mean:0.3f}, MAE: {cv_mae_mean:0.3f}, RMSE: {cv_rmse_mean:0.3f}, '
+              f'Error corr: {cv_age_error_corr_mean:0.3f}')
 
         mean_scores = np.array([cv_r2_mean, cv_mae_mean, cv_rmse_mean, cv_age_error_corr_mean])
 
         # Save arrays with permutation coefs and scores as np files
-        filepath_coef = permutations_dir / ('perm_coef_{:04d}.npy'.format(i_perm))
-        filepath_scores = permutations_dir / ('perm_scores_{:04d}.npy'.format(i_perm))
+        filepath_coef = permutations_dir / f'perm_coef_{i_perm:04d}.npy'
+        filepath_scores = permutations_dir / f'perm_scores_{i_perm:04d}.npy'
         np.save(str(filepath_coef), cv_coef_mean)
         np.save(str(filepath_scores), mean_scores)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(args.experiment_name, args.scanner_name,
          args.input_ids_file,
          args.index_min, args.index_max)

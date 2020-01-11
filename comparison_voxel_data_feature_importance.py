@@ -3,18 +3,18 @@
 for voxel data.
 
 """
-from pathlib import Path
-import random
-
-import numpy as np
-import nibabel as nib
-from sklearn.externals.joblib import load
-from nilearn.masking import apply_mask
-import pandas as pd
-from tqdm import tqdm
 import argparse
+import random
 import sys
+from pathlib import Path
+
+import nibabel as nib
+import numpy as np
+import pandas as pd
+from nilearn.masking import apply_mask
+from sklearn.externals.joblib import load
 from sklearn_rvm import EMRVR
+from tqdm import tqdm
 
 PROJECT_ROOT = Path.cwd()
 
@@ -53,11 +53,11 @@ def main(vm_type):
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
             # Load model
-            model_filename = '{:02d}_{:02d}_regressor.joblib'.format(i_repetition, i_fold)
+            model_filename = f'{i_repetition:02d}_{i_fold:02d}_regressor.joblib'
             vm = load(cv_dir / model_filename)
 
             # Load train index
-            index_filename = '{:02d}_{:02d}_train_index.npy'.format(i_repetition, i_fold)
+            index_filename = f'{i_repetition:02d}_{i_fold:02d}_train_index.npy'
             train_index = np.load(cv_dir / index_filename)
 
             if vm_type=='svm':
@@ -72,12 +72,12 @@ def main(vm_type):
     weights = np.zeros((100, n_voxels))
 
     for i, subject_id in enumerate(tqdm(subject_ids['Participant_ID'])):
-        path = str(dataset_path / '{}_ses-bl_T1w_Warped{}'.format(subject_id, input_data_type))
+        path = str(dataset_path / f'{subject_id}_ses-bl_T1w_Warped{input_data_type}')
 
         try:
             img = nib.load(str(path))
         except FileNotFoundError:
-            print('No image file {}.'.format(path))
+            print(f'No image file {path}.')
             raise
 
         # Extract only the brain voxels. This will create a 1D array.
@@ -100,11 +100,11 @@ def main(vm_type):
                 importance_map[tuple(xyz)] = importance
 
             importance_map_nifti = nib.Nifti1Image(importance_map, np.eye(4))
-            importance_filename = '{:02d}_{:02d}_importance.nii.gz'.format(i_repetition, i_fold)
+            importance_filename = f'{i_repetition:02d}_{i_fold:02d}_importance.nii.gz'
             nib.save(importance_map_nifti, str(cv_dir / importance_filename))
             i = i + 1
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     args = parser.parse_args(sys.argv[1:])
     main(vm_type=args.vm_type)

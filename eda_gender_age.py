@@ -24,10 +24,10 @@ def plot_save_histogram(male_ages, female_ages):
     plt.hist(male_ages, color='blue', histtype='step', lw=2, bins=range(45, 75, 1), label='male')
     plt.hist(female_ages, color='red', histtype='step', lw=2, bins=range(45, 75, 1), label='female')
 
-    plt.title("Age distribution in UK BIOBANK by gender", fontsize=17)
+    plt.title('Age distribution in UK BIOBANK by gender', fontsize=17)
     plt.axis('tight')
-    plt.xlabel("Age at MRI scan [years]", fontsize=15)
-    plt.ylabel("Number of subjects", fontsize=15)
+    plt.xlabel('Age at MRI scan [years]', fontsize=15)
+    plt.ylabel('Number of subjects', fontsize=15)
     plt.xticks(range(45, 75, 5))
     plt.yticks(range(0, 401, 50))
     plt.legend(loc='upper right', fontsize=13)
@@ -63,5 +63,5 @@ def main():
     dataset_excl_nan.groupby('Gender').Age.describe().to_csv(PROJECT_ROOT / 'outputs' / 'scanner01_grouped_dem.csv')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -73,5 +73,5 @@ def main():
     variables_df.to_csv(correlation_dir / 'variables_biobank.csv', index=False)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

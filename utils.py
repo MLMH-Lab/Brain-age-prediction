@@ -1,5 +1,7 @@
 """Helper functions and constants."""
 import pandas as pd
+import numpy as np
+from scipy import stats
 
 
 def load_freesurfer_dataset(participants_path, ids_path, freesurfer_path):
@@ -25,6 +27,40 @@ def load_demographic_data(participants_path, ids_path):
     dataset_df = pd.merge(ids_df, participants_df, on='participant_id')
 
     return dataset_df
+
+
+def ttest_ind_corrected(performance_a, performance_b, k=10, r=10):
+    """Corrected repeated k-fold cv test.
+     The test assumes that the classifiers were evaluated using cross validation.
+
+    Ref:
+        Bouckaert, Remco R., and Eibe Frank. "Evaluating the replicability of significance tests for comparing learning
+         algorithms." Pacific-Asia Conference on Knowledge Discovery and Data Mining. Springer, Berlin, Heidelberg, 2004
+
+    Args:
+        performance_a: performances from classifier A
+        performance_b: performances from classifier B
+        k: number of folds
+        r: number of repetitions
+
+    Returns:
+         t: t-statistic of the corrected test.
+         prob: p-value of the corrected test.
+    """
+    df = k * r - 1
+
+    x = performance_a - performance_b
+    m = np.mean(x)
+
+    sigma_2 = np.var(x, ddof=1)
+    denom = np.sqrt((1 / k * r + 1 / (k - 1)) * sigma_2)
+
+    with np.errstate(divide='ignore', invalid='ignore'):
+        t = np.divide(m, denom)
+
+    prob = stats.t.sf(np.abs(t), df) * 2
+
+    return t, prob
 
 
 COLUMNS_NAME = ['Left-Lateral-Ventricle',

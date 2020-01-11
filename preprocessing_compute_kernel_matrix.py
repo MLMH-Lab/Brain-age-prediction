@@ -6,10 +6,10 @@ The Kernel matrix will be used on the analysis with voxel data.
 import argparse
 from pathlib import Path
 
-import numpy as np
 import nibabel as nib
-from nilearn.masking import apply_mask
+import numpy as np
 import pandas as pd
+from nilearn.masking import apply_mask
 
 PROJECT_ROOT = Path.cwd()
 
@@ -59,7 +59,7 @@ def calculate_gram_matrix(subjects_path, mask_img, step_size=1000):
     for ii in range(int(np.ceil(n_samples / np.float(step_size)))):
         it = ii + 1
         max_it = int(np.ceil(n_samples / np.float(step_size)))
-        print(' Outer loop iteration: {:} of {:}.'.format(it, max_it))
+        print(f' Outer loop iteration: {it} of {max_it}.')
 
         # Generate indices and then paths for this block
         start_ind_1 = ii * step_size
@@ -72,7 +72,7 @@ def calculate_gram_matrix(subjects_path, mask_img, step_size=1000):
             try:
                 img = nib.load(str(path))
             except FileNotFoundError:
-                print('No image file {}.'.format(path))
+                print(f'No image file {path}.')
                 raise
 
             # Extract only the brain voxels. This will create a 1D array.
@@ -88,7 +88,7 @@ def calculate_gram_matrix(subjects_path, mask_img, step_size=1000):
             it = jj + 1
             max_it = ii + 1
 
-            print(' Inner loop iteration: {} of {}.'.format(it, max_it))
+            print(f' Inner loop iteration: {it} of {max_it}.')
 
             # If ii = jj, then sets of image data are the same - no need to load
             if ii == jj:
@@ -108,7 +108,7 @@ def calculate_gram_matrix(subjects_path, mask_img, step_size=1000):
                     try:
                         img = nib.load(str(path))
                     except FileNotFoundError:
-                        print('No image file {}.'.format(path))
+                        print(f'No image file {path}.')
                         raise
 
                     img = apply_mask(img, mask_img)
@@ -136,10 +136,10 @@ def main(input_path_str, experiment_name, input_ids_file, input_data_type, mask_
     ids_df = pd.read_csv(ids_path)
 
     # Get list of subjects included in the analysis
-    subjects_path = [str(dataset_path / '{}_Warped{}'.format(subject_id, input_data_type)) for subject_id in
+    subjects_path = [str(dataset_path / f'{subject_id}_Warped{input_data_type}') for subject_id in
                      ids_df['Image_ID'].str.rstrip('/')]
 
-    print('Total number of images: {}'.format(len(ids_df)))
+    print(f'Total number of images: {len(ids_df)}')
 
     # ----------------------------------------------------------------------------------------
     # Load the mask image
@@ -155,7 +155,7 @@ def main(input_path_str, experiment_name, input_ids_file, input_data_type, mask_
     gram_df.to_csv(output_path / 'kernel.csv')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(args.input_path_str, args.experiment_name,
          args.input_ids_file,
          args.input_data_type, args.mask_filename)

@@ -7,18 +7,21 @@ scripts available at the imaging_preprocessing_ANTs folder.
 NOTE: Only for internal use at the Machine Learning in Mental Health Lab.
 """
 import argparse
-from shutil import copyfile
 from pathlib import Path
+from shutil import copyfile
 
 PROJECT_ROOT = Path.cwd()
 
 parser = argparse.ArgumentParser()
+
 parser.add_argument('-N', '--nas_path',
                     dest='nas_path_str',
                     help='Path to the Network Attached Storage system.')
+
 parser.add_argument('-O', '--output_path',
                     dest='output_path_str',
                     help='Path to the local output folder.')
+
 args = parser.parse_args()
 
 
@@ -40,5 +43,5 @@ def main(nas_path_str, output_path_str):
         copyfile(str(file_path), str(dataset_output_path / file_path.name))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(args.nas_path_str, args.output_path_str)
