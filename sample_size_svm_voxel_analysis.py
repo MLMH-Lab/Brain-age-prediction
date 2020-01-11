@@ -14,10 +14,9 @@ import pandas as pd
 from scipy import stats
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import GridSearchCV, KFold
-from sklearn.preprocessing import RobustScaler
 from sklearn.svm import SVR
 
-from utils import COLUMNS_NAME, load_demographic_data
+from utils import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
 
@@ -81,8 +80,8 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
             train_index = train_dataset['Image_ID']
             test_index = test_dataset['Image_ID']
 
-            x_train = kernel.iloc[train_index, train_index].values
-            x_test = kernel.iloc[test_index, train_index].values
+            x_train = kernel.loc[train_index, train_index].values
+            x_test = kernel.loc[test_index, train_index].values
 
             y_train = train_dataset['Age'].values
             y_test = test_dataset['Age'].values
