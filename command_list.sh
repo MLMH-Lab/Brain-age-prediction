@@ -40,18 +40,21 @@
 ./comparison_statistical_analsysis.py -E "biobank_scanner1" -S "_all" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM"
 
 ## ----------------------------- Generalization comparison -----------------------
-./generalisation_test_fs_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "SCANNER02" -M "SVM" -I 'cleaned_ids_noqc.csv'
-./generalisation_test_fs_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "SCANNER02" -M "RVM" -I 'cleaned_ids_noqc.csv'
-./generalisation_test_fs_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "SCANNER02" -M "GPR" -I 'cleaned_ids_noqc.csv'
+./generalisation_test_fs_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "SCANNER02" -M "SVM" -I 'cleaned_ids.csv'
+./generalisation_test_fs_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "SCANNER02" -M "RVM" -I 'cleaned_ids.csv'
+./generalisation_test_fs_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "SCANNER02" -M "GPR" -I 'cleaned_ids.csv'
 
 ./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR"
 
 # ----------------------------- Sample size analysis ------------------------------------
 ./sample_size_create_ids.py -E "biobank_scanner1" -S "SCANNER01"
 
-./sample_size_svm_fs_analysis.py -E "biobank_scanner1" -S "SCANNER01"
-./sample_size_gp_fs_analysis.py -E "biobank_scanner1" -S "SCANNER01"
-./sample_size_rvm_fs_analysis.py -E "biobank_scanner1" -S "SCANNER01"
+./sample_size_fs_data_svm_analysis.py -E "biobank_scanner1" -S "SCANNER01"
+./sample_size_fs_data_gp_analysis.py -E "biobank_scanner1" -S "SCANNER01"
+./sample_size_fs_data_rvm_analysis.py -E "biobank_scanner1" -S "SCANNER01"
+
+./sample_size_voxel_data_rvm_analysis.py -E "biobank_scanner1" -S "SCANNER01"
+./sample_size_voxel_data_svm_analysis.py -E "biobank_scanner1" -S "SCANNER01"
 
 ./sample_size_create_figures.py -E "biobank_scanner1" -M "SVM"
 ./sample_size_create_figures.py -E "biobank_scanner1" -M "RVM"
@@ -59,7 +62,7 @@
 
 # ----------------------------- Permutation ------------------------------------
 #./permutation_lauch_subprocesses.py
-./permutation_train_models.py
+./permutation_train_rvm_models.py
 ./permutation_significance_test.py
 
 # ----------------------------- Covariates analysis ------------------------------------
