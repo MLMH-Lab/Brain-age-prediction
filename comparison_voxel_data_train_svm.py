@@ -153,7 +153,7 @@ def main(experiment_name, scanner_name, input_ids_file):
                 age_predictions.iloc[row, age_predictions.columns.get_loc(repetition_column_name)] = value
 
             # Print results of the CV fold
-            print(f'Repetition {i_repetition:02d} Fold {r2:02d} R2: {r2:0.3f}, '
+            print(f'Repetition {i_repetition:02d} Fold {i_fold:02d} R2: {r2:0.3f}, '
                   f'MAE: {mae:0.3f} RMSE: {rmse:0.3f} CORR: {age_error_corr:0.3f}')
 
     # Save predictions
