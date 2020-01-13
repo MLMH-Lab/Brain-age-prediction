@@ -49,12 +49,11 @@ def create_histogram(output_dir, input_df, suffix):
     """Save histogram of age distribution by gender in experiment directory as png."""
     plt.figure(figsize=(10, 7))
 
-    plt.hist(input_df.Age, color='blue', histtype='step', lw=2, bins=27)
+    plt.hist(input_df.Age, color='blue', histtype='step', lw=2, bins=input_df.Age.nunique())
 
     plt.title('Age distribution in UK BIOBANK', fontsize=17)
     plt.xlabel('Age at MRI scan [years]', fontsize=15)
     plt.ylabel('Number of subjects', fontsize=15)
-    plt.xticks(range(45, 75, 5))
     plt.tick_params(labelsize=13)
     plt.axis('tight')
 
@@ -71,13 +70,12 @@ def create_gender_histogram(output_dir, input_df, suffix):
 
     plt.figure(figsize=(10, 7))
 
-    plt.hist(male_ages, color='blue', histtype='step', lw=2, bins=27, label='male')
-    plt.hist(female_ages, color='red', histtype='step', lw=2, bins=27, label='female')
+    plt.hist(male_ages, color='blue', histtype='step', lw=2, bins=male_ages.nunique(), label='male')
+    plt.hist(female_ages, color='red', histtype='step', lw=2, bins=female_ages.nunique(), label='female')
 
     plt.title('Age distribution in UK BIOBANK by gender', fontsize=17)
     plt.xlabel('Age at MRI scan [years]', fontsize=15)
     plt.ylabel('Number of subjects', fontsize=15)
-    plt.xticks(range(45, 75, 5))
     plt.legend(loc='upper right', fontsize=13)
     plt.tick_params(labelsize=13)
     plt.axis('tight')
