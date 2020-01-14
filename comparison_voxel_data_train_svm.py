@@ -104,13 +104,13 @@ def main(experiment_name, scanner_name, input_ids_file):
             x_test = kernel.iloc[test_index, train_index].values
             y_train, y_test = age[train_index], age[test_index]
 
-            model = SVR(kernel='precomputed')
+            model_type = SVR(kernel='precomputed')
 
             # Systematic search for best hyperparameters
             search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
             nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True,
                                          random_state=i_repetition)
-            gridsearch = GridSearchCV(model,
+            gridsearch = GridSearchCV(model_type,
                                       param_grid=search_space,
                                       scoring='neg_mean_absolute_error',
                                       refit=True, cv=nested_skf,
@@ -118,16 +118,16 @@ def main(experiment_name, scanner_name, input_ids_file):
 
             gridsearch.fit(x_train, y_train)
 
-            best_model = gridsearch.best_estimator_
+            model = gridsearch.best_estimator_
 
             params_results = {'means': gridsearch.cv_results_['mean_test_score'],
                               'params': gridsearch.cv_results_['params']}
 
-            predictions = best_model.predict(x_test)
+            predictions = model.predict(x_test)
 
             mae = mean_absolute_error(y_test, predictions)
             rmse = sqrt(mean_squared_error(y_test, predictions))
-            r2 = best_model.score(x_test, y_test)
+            r2 = model.score(x_test, y_test)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
             cv_r2.append(r2)
