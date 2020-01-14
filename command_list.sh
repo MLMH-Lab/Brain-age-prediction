@@ -35,8 +35,8 @@
 ./comparison_voxel_data_train_svm.py -E "biobank_scanner1" -S "SCANNER01"
 ./comparison_voxel_data_train_rvm.py -E "biobank_scanner1" -S "SCANNER01"
 
+./comparison_voxel_data_svm_primal_weights.py
 ./comparison_feature_importance_visualisation.py
-./comparison_feature_importance_voxel_data.py
 
 ./comparison_statistical_analsysis.py -E "biobank_scanner1" -S "_all" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM"
 
