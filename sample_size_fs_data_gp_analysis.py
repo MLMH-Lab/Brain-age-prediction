@@ -116,8 +116,8 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
             print(f'R2: {r2:0.3f} MAE: {mae:0.3f} RMSE: {rmse:0.3f} CORR: {age_error_corr:0.3f}')
 
             # Save arrays with permutation coefs and scores as np files
-            mean_scores = np.array([r2, mae, rmse, age_error_corr])
-            np.save(str(scores_dir / f'scores_{i_bootstrap:04d}_{model_name}.npy'), mean_scores)
+            scores = np.array([r2, mae, rmse, age_error_corr])
+            np.save(str(scores_dir / f'scores_{i_bootstrap:04d}_{model_name}.npy'), scores)
 
 
 if __name__ == '__main__':

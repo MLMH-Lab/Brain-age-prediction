@@ -106,17 +106,16 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
 
             predictions = best_model.predict(x_test)
 
-            absolute_error = mean_absolute_error(y_test, predictions)
-            root_squared_error = sqrt(mean_squared_error(y_test, predictions))
-            r2_score = best_model.score(x_test, y_test)
+            mae = mean_absolute_error(y_test, predictions)
+            rmse = sqrt(mean_squared_error(y_test, predictions))
+            r2 = best_model.score(x_test, y_test)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
-            print(f'R2: {r2_score:0.3f}, MAE: {absolute_error:0.3f}, RMSE: {root_squared_error:0.3f}, CORR: {age_error_corr:0.3f}')
-
-            mean_scores = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
+            print(f'R2: {r2:0.3f}, MAE: {mae:0.3f}, RMSE: {rmse:0.3f}, CORR: {age_error_corr:0.3f}')
 
             # Save arrays with permutation coefs and scores as np files
-            np.save(str(scores_dir / f'scores_{i_bootstrap:04d}_{model_name}.npy'), mean_scores)
+            scores = np.array([r2, mae, rmse, age_error_corr])
+            np.save(str(scores_dir / f'scores_{i_bootstrap:04d}_{model_name}.npy'), scores)
 
 
 
