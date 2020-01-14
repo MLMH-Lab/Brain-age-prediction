@@ -129,6 +129,9 @@ def main(experiment_name, scanner_name, input_ids_file):
             scores_array = np.array([r2, mae, rmse, age_error_corr])
             np.save(cv_dir / f'{output_prefix}_scores.npy', scores_array)
 
+            # Save train index
+            np.save(cv_dir / f'{output_prefix}_train_index.npy', train_index)
+
             # ----------------------------------------------------------------------------------------
             # Add predictions per test_index to age_predictions
             for row, value in zip(test_index, predictions):
