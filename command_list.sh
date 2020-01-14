@@ -60,6 +60,8 @@
 ./sample_size_create_figures.py -E "biobank_scanner1" -M "SVM"
 ./sample_size_create_figures.py -E "biobank_scanner1" -M "RVM"
 ./sample_size_create_figures.py -E "biobank_scanner1" -M "GPR"
+./sample_size_create_figures.py -E "biobank_scanner1" -M "voxel_SVM"
+./sample_size_create_figures.py -E "biobank_scanner1" -M "voxel_RVM"
 
 # ----------------------------- Permutation ------------------------------------
 #./permutation_lauch_subprocesses.py

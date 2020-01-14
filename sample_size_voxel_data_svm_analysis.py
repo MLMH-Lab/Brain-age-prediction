@@ -53,7 +53,7 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
 
     # Load the Gram matrix
-    kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel_100.csv'
+    kernel_path = PROJECT_ROOT / 'outputs' / 'kernels' / 'kernel.csv'
     kernel = pd.read_csv(kernel_path, header=0, index_col=0)
 
     # ----------------------------------------------------------------------------------------
