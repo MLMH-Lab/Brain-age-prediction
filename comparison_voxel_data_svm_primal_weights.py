@@ -22,14 +22,14 @@ parser.add_argument('-E', '--experiment_name',
                     dest='experiment_name',
                     help='Name of the experiment.')
 
+parser.add_argument('-P', '--input_path',
+                    dest='input_path_str',
+                    help='Path to the local folder with preprocessed images.')
+
 parser.add_argument('-I', '--input_ids_file',
                     dest='input_ids_file',
                     default='homogenized_ids.csv',
                     help='Filename indicating the ids to be used.')
-
-parser.add_argument('-P', '--input_path',
-                    dest='input_path_str',
-                    help='Path to the local folder with preprocessed images.')
 
 parser.add_argument('-D', '--input_data_type',
                     dest='input_data_type',
@@ -80,8 +80,8 @@ def main(experiment_name, input_path_str, input_ids_file, input_data_type, mask_
             index_list.append(train_index[model.support_])
 
     # number of voxels in the mask
-    mask_volume = mask_img.get_fdata()
-    n_voxels = sum(sum(sum(mask_volume > 0)))
+    mask_data = mask_img.get_fdata()
+    n_voxels = sum(sum(sum(mask_data > 0)))
     n_models = 100
     weights = np.zeros((n_models, n_voxels))
 
@@ -115,7 +115,6 @@ def main(experiment_name, input_path_str, input_ids_file, input_data_type, mask_
                 selected_dual_coef = dual_coef[np.argwhere(support_index == i)]
                 weights[j, :] = weights[j, :] + selected_dual_coef * img
 
-    mask_data = mask_img.get_fdata()
     coords = np.argwhere(mask_data > 0)
     i = 0
     for i_repetition in range(n_repetitions):
@@ -124,7 +123,7 @@ def main(experiment_name, input_path_str, input_ids_file, input_data_type, mask_
             for xyz, importance in zip(coords, weights[i, :]):
                 importance_map[tuple(xyz)] = importance
 
-            importance_map_nifti = nib.Nifti1Image(importance_map, np.eye(4))
+            importance_map_nifti = nib.Nifti1Image(importance_map, np.eye(4)) #TODO: use mask affine
             importance_filename = f'{i_repetition:02d}_{i_fold:02d}_importance.nii.gz'
             nib.save(importance_map_nifti, str(cv_dir / importance_filename))
             i = i + 1
