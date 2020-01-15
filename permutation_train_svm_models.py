@@ -114,14 +114,12 @@ def main(experiment_name, scanner_name, input_ids_file, index_min, index_max):
                 x_train = scaling.fit_transform(x_train)
                 x_test = scaling.transform(x_test)
 
+                model_type = LinearSVR(loss='epsilon_insensitive')
+
                 # Systematic search for best hyperparameters
-                svm = LinearSVR(loss='epsilon_insensitive')
-
                 search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
-
                 nested_skf = StratifiedKFold(n_splits=n_nested_folds, shuffle=True, random_state=i_repetition)
-
-                gridsearch = GridSearchCV(svm,
+                gridsearch = GridSearchCV(model_type,
                                           param_grid=search_space,
                                           scoring='neg_mean_absolute_error',
                                           refit=True, cv=nested_skf,
@@ -129,15 +127,15 @@ def main(experiment_name, scanner_name, input_ids_file, index_min, index_max):
 
                 gridsearch.fit(x_train, y_train)
 
-                best_svm = gridsearch.best_estimator_
+                model = gridsearch.best_estimator_
 
-                cv_coef[i_iteration] = best_svm.coef_
+                cv_coef[i_iteration] = model.coef_
 
-                predictions = best_svm.predict(x_test)
+                predictions = model.predict(x_test)
 
                 mae = mean_absolute_error(y_test, predictions)
                 rmse = sqrt(mean_squared_error(y_test, predictions))
-                r2 = best_svm.score(x_test, y_test)
+                r2 = model.score(x_test, y_test)
                 age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
                 cv_r2.append(r2)
@@ -167,10 +165,8 @@ def main(experiment_name, scanner_name, input_ids_file, index_min, index_max):
         mean_scores = np.array([cv_r2_mean, cv_mae_mean, cv_rmse_mean, cv_age_error_corr_mean])
 
         # Save arrays with permutation coefs and scores as np files
-        filepath_coef = permutations_dir / f'perm_coef_{i_perm:04d}.npy'
-        filepath_scores = permutations_dir / f'perm_scores_{i_perm:04d}.npy'
-        np.save(str(filepath_coef), cv_coef_mean)
-        np.save(str(filepath_scores), mean_scores)
+        np.save(str(permutations_dir / f'perm_coef_{i_perm:04d}.npy'), cv_coef_mean)
+        np.save(str(permutations_dir / f'perm_scores_{i_perm:04d}.npy'), mean_scores)
 
 
 if __name__ == '__main__':
