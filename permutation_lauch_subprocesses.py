@@ -28,7 +28,7 @@ parser.add_argument('-T', '--script_filename',
 args = parser.parse_args()
 
 
-def main(experiment_name, scanner_name, script_filename):
+def main(experiment_name, scanner_name, input_ids_file, script_filename):
     venv_python = PROJECT_ROOT / 'venv' / 'bin' / 'python3'
     code_perm = PROJECT_ROOT / script_filename
 
@@ -56,4 +56,5 @@ def main(experiment_name, scanner_name, script_filename):
 
 if __name__ == '__main__':
     main(args.experiment_name, args.scanner_name,
-         args.input_ids_file)
+         args.input_ids_file,
+         args.script_filename)
