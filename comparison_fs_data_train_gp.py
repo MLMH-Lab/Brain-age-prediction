@@ -108,7 +108,7 @@ def main(experiment_name, scanner_name, input_ids_file):
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
 
-            model = GaussianProcessRegressor(kernel=DotProduct() + WhiteKernel(), random_state=0)
+            model = GaussianProcessRegressor(kernel=DotProduct(), random_state=0)
 
             model.fit(x_train, y_train)
 

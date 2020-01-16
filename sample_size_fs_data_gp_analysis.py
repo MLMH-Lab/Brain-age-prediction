@@ -98,7 +98,7 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
 
-            gpr = GaussianProcessRegressor(kernel=DotProduct() + WhiteKernel(), random_state=0)
+            gpr = GaussianProcessRegressor(kernel=DotProduct(), random_state=0)
 
             gpr.fit(x_train, y_train)
 
