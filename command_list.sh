@@ -47,7 +47,7 @@
 
 ./generalisation_test_voxel_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "SCANNER02" -M "voxel_SVM" -P "/media/kcl_1/HDD/DATASETS/BIOBANK/BIOBANK"
 
-./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR"
+./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR" "voxel_SVM"
 
 # ----------------------------- Sample size analysis ------------------------------------
 ./sample_size_create_ids.py -E "biobank_scanner1" -S "SCANNER01"

@@ -5,13 +5,15 @@ for voxel data.
 """
 import argparse
 import random
+import sys
 from pathlib import Path
 
 import nibabel as nib
 import numpy as np
 import pandas as pd
-from joblib import load
 from nilearn.masking import apply_mask
+from joblib import load
+from sklearn_rvm import EMRVR
 from tqdm import tqdm
 
 PROJECT_ROOT = Path.cwd()
@@ -49,7 +51,7 @@ def main(experiment_name, input_path_str, input_ids_file, input_data_type, mask_
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     dataset_path = Path(input_path_str)
 
-    model_dir = experiment_dir / 'voxel_SVM'
+    model_dir = experiment_dir / 'voxel_RVM'
     cv_dir = model_dir / 'cv'
 
     ids_path = PROJECT_ROOT / 'outputs' / experiment_name / input_ids_file
@@ -76,14 +78,16 @@ def main(experiment_name, input_path_str, input_ids_file, input_data_type, mask_
             # Load train index
             train_index = np.load(cv_dir / f'{prefix}_train_index.npy')
 
-            coef_list.append(model.dual_coef_[0])
-            index_list.append(train_index[model.support_])
+            coef_list.append(model.mu_[1:])
+            index_list.append(train_index[model.relevance_])
 
     # number of voxels in the mask
     mask_data = mask_img.get_fdata()
     n_voxels = sum(sum(sum(mask_data > 0)))
     n_models = 100
     weights = np.zeros((n_models, n_voxels))
+
+    relevance_vector_dict = dict((el, []) for el in range(100))
 
     for i, subject_id in enumerate(tqdm(ids_df['Image_ID'])):
         # Check if subject is support vector in any model before load the image.
@@ -115,6 +119,8 @@ def main(experiment_name, input_path_str, input_ids_file, input_data_type, mask_
                 selected_dual_coef = dual_coef[np.argwhere(support_index == i)]
                 weights[j, :] = weights[j, :] + selected_dual_coef * img
 
+                relevance_vector_dict[j].append(img.astype('float16'))
+
     coords = np.argwhere(mask_data > 0)
     i = 0
     for i_repetition in range(n_repetitions):
@@ -123,8 +129,16 @@ def main(experiment_name, input_path_str, input_ids_file, input_data_type, mask_
             for xyz, importance in zip(coords, weights[i, :]):
                 importance_map[tuple(xyz)] = importance
 
-            importance_map_nifti = nib.Nifti1Image(importance_map, np.eye(4)) #TODO: use mask affine
+            importance_map_nifti = nib.Nifti1Image(importance_map, np.eye(4))
             nib.save(importance_map_nifti, str(cv_dir / f'{i_repetition:02d}_{i_fold:02d}_importance.nii.gz'))
+            i = i + 1
+
+    i = 0
+    for i_repetition in range(n_repetitions):
+        for i_fold in range(n_folds):
+            prefix = f'{i_repetition:02d}_{i_fold:02d}'
+            np.savez_compressed(cv_dir / f'{prefix}_relevance_vectors.npz',
+                                relevance_vectors_=np.array(relevance_vector_dict[i]))
             i = i + 1
 
 
