@@ -20,7 +20,7 @@ import numpy as np
 from joblib import dump
 from scipy import stats
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import DotProduct
+from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
@@ -108,7 +108,7 @@ def main(experiment_name, scanner_name, input_ids_file):
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
 
-            model = GaussianProcessRegressor(kernel=DotProduct(), random_state=0)
+            model = GaussianProcessRegressor(kernel=DotProduct() + WhiteKernel(), random_state=0)
 
             model.fit(x_train, y_train)
 

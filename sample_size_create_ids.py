@@ -93,7 +93,7 @@ def main(experiment_name, scanner_name, input_ids_file, n_bootstrap, n_max_pair)
 
                     # Sample test set with always the same size
                     not_sampled = ~gender_group['Image_ID'].isin(random_sample_train['Image_ID'])
-                    random_sample_test = gender_group[not_sampled].sample(n=n_max_pair, replace=False)
+                    random_sample_test = gender_group[not_sampled].sample(n=20, replace=False)
                     dataset_bootstrap_test = pd.concat([dataset_bootstrap_test, random_sample_test[['Image_ID']]])
 
             # Export dataset_bootstrap_train as csv

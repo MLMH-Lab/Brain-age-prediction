@@ -14,15 +14,13 @@ from pathlib import Path
 import numpy as np
 from scipy import stats
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import DotProduct
+from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import RobustScaler
 
 from utils import COLUMNS_NAME, load_freesurfer_dataset
 
 PROJECT_ROOT = Path.cwd()
-
-warnings.filterwarnings('ignore')
 
 parser = argparse.ArgumentParser()
 
@@ -100,9 +98,7 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
 
-            kernel = DotProduct()
-
-            gpr = GaussianProcessRegressor(kernel=kernel, random_state=0)
+            gpr = GaussianProcessRegressor(kernel=DotProduct() + WhiteKernel(), random_state=0)
 
             gpr.fit(x_train, y_train)
 
