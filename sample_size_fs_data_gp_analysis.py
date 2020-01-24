@@ -14,8 +14,8 @@ from pathlib import Path
 import numpy as np
 from scipy import stats
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.gaussian_process.kernels import DotProduct
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import RobustScaler
 
 from utils import COLUMNS_NAME, load_freesurfer_dataset
@@ -106,7 +106,7 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
 
             mae = mean_absolute_error(y_test, predictions)
             rmse = sqrt(mean_squared_error(y_test, predictions))
-            r2 = gpr.score(x_test, y_test)
+            r2 = r2_score(y_test, predictions)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
             print(f'R2: {r2:0.3f} MAE: {mae:0.3f} RMSE: {rmse:0.3f} CORR: {age_error_corr:0.3f}')

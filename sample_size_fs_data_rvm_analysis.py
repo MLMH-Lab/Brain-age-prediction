@@ -13,7 +13,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy import stats
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import RobustScaler
 from sklearn_rvm import EMRVR
 
@@ -106,7 +106,7 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
 
             mae = mean_absolute_error(y_test, predictions)
             rmse = sqrt(mean_squared_error(y_test, predictions))
-            r2 = rvm.score(x_test, y_test)
+            r2 = r2_score(y_test, predictions)
             age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
 
             print(f'R2: {r2:0.3f} MAE: {mae:0.3f} RMSE: {rmse:0.3f} CORR: {age_error_corr:0.3f}')
@@ -114,6 +114,13 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
             # Save arrays with permutation coefs and scores as np files
             scores = np.array([r2, mae, rmse, age_error_corr])
             np.save(str(scores_dir / f'scores_{i_bootstrap:04d}_{model_name}.npy'), scores)
+
+            train_predictions = rvm.predict(x_train)
+
+            mae = mean_absolute_error(y_train, train_predictions)
+            rmse = sqrt(mean_squared_error(y_train, train_predictions))
+            r2 = r2_score(y_train, train_predictions)
+            age_error_corr, _ = stats.spearmanr(np.abs(y_train - train_predictions), y_train)
 
 
 if __name__ == '__main__':

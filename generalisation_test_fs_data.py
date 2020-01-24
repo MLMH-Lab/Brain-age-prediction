@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 from joblib import load
 from scipy import stats
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 from utils import COLUMNS_NAME, load_freesurfer_dataset
 
@@ -98,14 +98,14 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
 
             absolute_error = mean_absolute_error(age, predictions)
             root_squared_error = sqrt(mean_squared_error(age, predictions))
-            r2_score = model.score(x_test, age)
+            r2 = r2_score(age, predictions)
             age_error_corr, _ = stats.spearmanr(np.abs(age - predictions), age)
 
             # Save prediction per model in df
             age_predictions[f'Prediction {i_repetition:02d}_{i_fold:02d}'] = predictions
 
             # Save model scores
-            scores_array = np.array([r2_score, absolute_error, root_squared_error, age_error_corr])
+            scores_array = np.array([r2, absolute_error, root_squared_error, age_error_corr])
             np.save(test_cv_dir / f'{prefix}_scores.npy', scores_array)
 
     # Save predictions
