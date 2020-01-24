@@ -57,7 +57,7 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
     # ----------------------------------------------------------------------------------------
 
     # Loop over the 20 bootstrap samples with up to 20 gender-balanced subject pairs per age group/year
-    for i_n_subject_pairs in range(1, n_max_pair+1):
+    for i_n_subject_pairs in range(1, n_max_pair + 1):
         print(f'Bootstrap number of subject pairs: {i_n_subject_pairs}')
         ids_with_n_subject_pairs_dir = experiment_dir / 'sample_size' / f'{i_n_subject_pairs:02d}' / 'ids'
 
@@ -116,11 +116,13 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
             np.save(str(scores_dir / f'scores_{i_bootstrap:04d}_{model_name}.npy'), scores)
 
             train_predictions = rvm.predict(x_train)
+            train_mae = mean_absolute_error(y_train, train_predictions)
+            train_rmse = sqrt(mean_squared_error(y_train, train_predictions))
+            train_r2 = r2_score(y_train, train_predictions)
+            train_age_error_corr, _ = stats.spearmanr(np.abs(y_train - train_predictions), y_train)
 
-            mae = mean_absolute_error(y_train, train_predictions)
-            rmse = sqrt(mean_squared_error(y_train, train_predictions))
-            r2 = r2_score(y_train, train_predictions)
-            age_error_corr, _ = stats.spearmanr(np.abs(y_train - train_predictions), y_train)
+            train_scores = np.array([train_r2, train_mae, train_rmse, train_age_error_corr])
+            np.save(str(scores_dir / f'scores_{i_bootstrap:04d}_{model_name}_train.npy'), train_scores)
 
 
 if __name__ == '__main__':
