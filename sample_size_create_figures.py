@@ -42,17 +42,22 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
     i_n_subject_pairs_list = range(1, n_max_pair+1)
 
     scores_i_n_subject_pairs = []
+    train_scores_i_n_subject_pairs = []
 
     for i_n_subject_pairs in i_n_subject_pairs_list:
         ids_with_n_subject_pairs_dir = experiment_dir / 'sample_size' / f'{i_n_subject_pairs:02d}'
         scores_dir = ids_with_n_subject_pairs_dir / 'scores'
         scores_bootstrap = []
+        train_scores_bootstrap = []
         for i_bootstrap in range(n_bootstrap):
-            # Save arrays with permutation coefs and scores as np files
             filepath_scores = scores_dir / f'scores_{i_bootstrap:04d}_{model_name}.npy'
             scores_bootstrap.append(np.load(str(filepath_scores))[1])
 
+            train_filepath_scores = scores_dir / f'scores_{i_bootstrap:04d}_{model_name}_train.npy'
+            train_scores_bootstrap.append(np.load(str(train_filepath_scores))[1])
+
         scores_i_n_subject_pairs.append(scores_bootstrap)
+        train_scores_i_n_subject_pairs.append(train_scores_bootstrap)
 
     age_min = 47
     age_max = 73
@@ -68,10 +73,19 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
     plt.plot(i_n_subject_pairs_list, std_uniform_dist * np.ones_like(i_n_subject_pairs_list), '--',
              color='#111111', label='Chance line')
 
+    plt.plot(i_n_subject_pairs_list,
+             np.mean(train_scores_i_n_subject_pairs, axis=1),
+             color='#111111', label=model_name+' train performance')
+
     # Draw bands
     plt.fill_between(i_n_subject_pairs_list,
                      np.percentile(scores_i_n_subject_pairs, 2.5, axis=1),
                      np.percentile(scores_i_n_subject_pairs, 97.5, axis=1),
+                     color='#DDDDDD')
+
+    plt.fill_between(i_n_subject_pairs_list,
+                     np.percentile(train_scores_i_n_subject_pairs, 2.5, axis=1),
+                     np.percentile(train_scores_i_n_subject_pairs, 97.5, axis=1),
                      color='#DDDDDD')
 
     # Create plot
