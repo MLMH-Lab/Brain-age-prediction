@@ -149,8 +149,8 @@ def main(experiment_name, scanner_name, input_ids_file, index_min, index_max):
         mean_scores = np.array([cv_r2_mean, cv_mae_mean, cv_rmse_mean, cv_age_error_corr_mean])
 
         # Save arrays with permutation coefs and scores as np files
-        filepath_coef = permutations_dir / f'perm_coef_{i_perm:04d}.npy'
-        filepath_scores = permutations_dir / f'perm_scores_{i_perm:04d}.npy'
+        filepath_coef = permutations_dir / f'perm_coef_{i_perm:04d}_rvm.npy'
+        filepath_scores = permutations_dir / f'perm_scores_{i_perm:04d}_rvm.npy'
         np.save(str(filepath_coef), cv_coef_mean)
         np.save(str(filepath_scores), mean_scores)
 
