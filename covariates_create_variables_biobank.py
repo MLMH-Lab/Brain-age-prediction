@@ -27,26 +27,23 @@ PROJECT_ROOT = Path.cwd()
 def main():
     """"""
     # ----------------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
-
-    demographic_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'Scanner1' / 'ukb22321.csv'
+    covariates_path = PROJECT_ROOT / 'data' / 'BIOBANK' / 'ukb22321.csv'
     # ----------------------------------------------------------------------------------------
-    experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
-    correlation_dir = experiment_dir / 'correlation_analysis'
-    correlation_dir.mkdir(exist_ok=True)
+    covariates_data_dir = PROJECT_ROOT / 'outputs' / 'covariates'
+    covariates_data_dir.mkdir(exist_ok=True)
 
     # Loading demographic data in UK Biobank to access variables
-    variables_df = pd.read_csv(demographic_path,
-                               usecols=['eid',
-                                        '6138-2.0', '6138-2.1', '6138-2.2', '6138-2.3', '6138-2.4',
-                                        '24005-0.0',
-                                        '24009-0.0', '24010-0.0', '24014-0.0',
-                                        '24500-0.0', '24501-0.0', '24502-0.0', '24506-0.0'])
-    variables_df.columns = ['ID',
-                            'Education_1', 'Education_2', 'Education_3', 'Education_4', 'Education_5',
-                            'Air_pollution',
-                            'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
-                            'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
+    covariates_df = pd.read_csv(covariates_path,
+                                usecols=['eid',
+                                         '6138-2.0', '6138-2.1', '6138-2.2', '6138-2.3', '6138-2.4',
+                                         '24005-0.0',
+                                         '24009-0.0', '24010-0.0', '24014-0.0',
+                                         '24500-0.0', '24501-0.0', '24502-0.0', '24506-0.0'])
+    covariates_df.columns = ['id',
+                             'Education_1', 'Education_2', 'Education_3', 'Education_4', 'Education_5',
+                             'Air_pollution',
+                             'Traffic_intensity', 'Inverse_dist_road', 'Close_road_bin',
+                             'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
 
     # Create new education cols to simulate ordinal scale
     # The original 6-point education scale was reduced to a 4-point scale using the following assumptions:
@@ -54,23 +51,23 @@ def main():
     # Codes 5 "NVQ or HND or HNC or equivalent" and 6 "Other professional qualifications" are equivalent
     # Codes -7	"None of the above" and -3	"Prefer not to answer" are treated as missing data
     education_dict = {1: 4, 2: 2, 3: 1, 4: 1, 5: 3, 6: 3}
-    variables_df['Education_1'] = variables_df['Education_1'].map(education_dict)
-    variables_df['Education_2'] = variables_df['Education_2'].map(education_dict)
-    variables_df['Education_3'] = variables_df['Education_3'].map(education_dict)
-    variables_df['Education_4'] = variables_df['Education_4'].map(education_dict)
-    variables_df['Education_5'] = variables_df['Education_5'].map(education_dict)
+    covariates_df['Education_1'] = covariates_df['Education_1'].map(education_dict)
+    covariates_df['Education_2'] = covariates_df['Education_2'].map(education_dict)
+    covariates_df['Education_3'] = covariates_df['Education_3'].map(education_dict)
+    covariates_df['Education_4'] = covariates_df['Education_4'].map(education_dict)
+    covariates_df['Education_5'] = covariates_df['Education_5'].map(education_dict)
 
     # Create col for maximum of education level per respondent and drop original variables
-    variables_df['Education_highest'] = variables_df[['Education_1',
-                                                      'Education_2',
-                                                      'Education_3',
-                                                      'Education_4',
-                                                      'Education_5']].apply(max, axis=1)
-    variables_df = variables_df.drop(['Education_1', 'Education_2', 'Education_3', 'Education_4', 'Education_5'],
-                                     axis=1)
+    covariates_df['Education_highest'] = covariates_df[['Education_1',
+                                                        'Education_2',
+                                                        'Education_3',
+                                                        'Education_4',
+                                                        'Education_5']].apply(max, axis=1)
+    covariates_df = covariates_df.drop(['Education_1', 'Education_2', 'Education_3', 'Education_4', 'Education_5'],
+                                       axis=1)
 
     # output csv with age variables and demographic variables
-    variables_df.to_csv(correlation_dir / 'variables_biobank.csv', index=False)
+    covariates_df.to_csv(covariates_data_dir / 'covariates.csv', index=False)
 
 
 if __name__ == '__main__':

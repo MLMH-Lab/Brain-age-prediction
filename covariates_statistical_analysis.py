@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Script to assess correlations between BrainAGE/BrainAGER and demographic variables in UK Biobank
 (dataset created in variables_biobank.py)"""
-
+import argparse
 from pathlib import Path
 
 import pandas as pd
@@ -9,6 +9,18 @@ import numpy as np
 from scipy.stats import spearmanr, ttest_ind
 
 PROJECT_ROOT = Path.cwd()
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+
+parser.add_argument('-M', '--model_name',
+                    dest='model_name',
+                    help='Name of the model.')
+
+args = parser.parse_args()
 
 UNIVERSITY_CODE = 4
 PROFESSIONAL_QUAL_CODE = 3
@@ -25,9 +37,9 @@ def spearman(df, x, y):
     n = len(df)
 
     if spearman_p < alpha:
-        print('n={}, {} and {} - reject H0: p = {:6.3}, rho = {:6.3}'.format(n, x, y, spearman_p, spearman_rho))
+        print(f'n={n}, {x} and {y} - reject H0: p = {spearman_p:6.3}, rho = {spearman_rho:6.3}')
     else:
-        print('n={}, {} and {} - not significant: p = {:6.3}, rho = {:6.3}'.format(n, x, y, spearman_p, spearman_rho))
+        print(f'n={n}, {x} and {y} - not significant: p = {spearman_p:6.3}, rho = {spearman_rho:6.3}')
 
 
 def cohend(d1, d2):
@@ -42,20 +54,18 @@ def cohend(d1, d2):
     return effect_size
 
 
-def main():
+def main(experiment_name, model_name):
     """"""
-    # ----------------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
-    # ----------------------------------------------------------------------------------------
     correlation_dir = PROJECT_ROOT / 'outputs' / experiment_name / 'correlation_analysis'
 
-    ensemble_df = pd.read_csv(correlation_dir / 'ensemble_output.csv')
-    ensemble_df['ID'] = ensemble_df['Participant_ID'].str.split('-').str[1]
-    ensemble_df['ID'] = pd.to_numeric(ensemble_df['ID'])
+    ensemble_df = pd.read_csv(correlation_dir / f'ensemble_{model_name}_output.csv')
+    ensemble_df['id'] = ensemble_df['Image_ID'].str.split('_').str[0]
+    ensemble_df['id'] = ensemble_df['id'].str.split('-').str[1]
+    ensemble_df['id'] = pd.to_numeric(ensemble_df['id'])
 
-    variables_df = pd.read_csv(correlation_dir / 'variables_biobank.csv')
+    covariates_df = pd.read_csv(correlation_dir / 'covariates.csv')
 
-    dataset = pd.merge(ensemble_df, variables_df, on='ID')
+    dataset = pd.merge(ensemble_df, covariates_df, on='id')
 
     # Correlation variables
     y_list = ['BrainAGE_predmean', 'BrainAGER_predmean']
@@ -92,7 +102,7 @@ def main():
             y_values.append(spearman_rho)
         corr_output[y] = y_values
 
-    corr_output.to_csv(correlation_dir / 'variables_biobank_spearman_output.csv')
+    corr_output.to_csv(correlation_dir / 'covariates_spearman_output.csv')
 
     # Create empty dataframe for analysis of education level
     education_output = pd.DataFrame({'Row_labels_1': ['uni vs prof_qual', 'uni vs prof_qual',
@@ -126,42 +136,42 @@ def main():
         y_results.append(pval)
         y_results.append(effect_size)
         if pval < alpha_corrected:
-            print("uni vs prof_qual [t-test pval, cohen's d]: {:6.3}, {:6.3}".format(pval, effect_size))
+            print(f"uni vs prof_qual [t-test pval, cohen's d]: {pval:6.3}, {effect_size:6.3}")
 
         tstat, pval = ttest_ind(dataset_uni[y], dataset_a_level[y])
         effect_size = cohend(dataset_uni[y], dataset_a_level[y])
         y_results.append(pval)
         y_results.append(effect_size)
         if pval < alpha_corrected:
-            print("uni vs a_level [t-test pval, cohen's d]: {:6.3}, {:6.3}".format(pval, effect_size))
+            print(f"uni vs a_level [t-test pval, cohen's d]: {pval:6.3}, {effect_size:6.3}")
 
         tstat, pval = ttest_ind(dataset_uni[y], dataset_gcse[y])
         effect_size = cohend(dataset_uni[y], dataset_gcse[y])
         y_results.append(pval)
         y_results.append(effect_size)
         if pval < alpha_corrected:
-            print("uni vs gcse [t-test pval, cohen's d]: {:6.3}, {:6.3}".format(pval, effect_size))
+            print(f"uni vs gcse [t-test pval, cohen's d]: {pval:6.3}, {effect_size:6.3}")
 
         tstat, pval = ttest_ind(dataset_prof_qual[y], dataset_a_level[y])
         effect_size = cohend(dataset_prof_qual[y], dataset_a_level[y])
         y_results.append(pval)
         y_results.append(effect_size)
         if pval < alpha_corrected:
-            print("prof_qual vs a_level [t-test pval, cohen's d]: {:6.3}, {:6.3}".format(pval, effect_size))
+            print(f"prof_qual vs a_level [t-test pval, cohen's d]: {pval:6.3}, {effect_size:6.3}")
 
         tstat, pval = ttest_ind(dataset_prof_qual[y], dataset_gcse[y])
         effect_size = cohend(dataset_prof_qual[y], dataset_gcse[y])
         y_results.append(pval)
         y_results.append(effect_size)
         if pval < alpha_corrected:
-            print("prof_qual vs gcse [t-test pval, cohen's d]: {:6.3}, {:6.3}".format(pval, effect_size))
+            print(f"prof_qual vs gcse [t-test pval, cohen's d]: {pval:6.3}, {effect_size:6.3}")
 
         tstat, pval = ttest_ind(dataset_a_level[y], dataset_gcse[y])
         effect_size = cohend(dataset_a_level[y], dataset_gcse[y])
         y_results.append(pval)
         y_results.append(effect_size)
         if pval < alpha_corrected:
-            print("a_level vs gcse [t-test pval, cohen's d]: {:6.3}, {:6.3}".format(pval, effect_size))
+            print(f"a_level vs gcse [t-test pval, cohen's d]: {pval:6.3}, {effect_size:6.3}")
 
         education_output[y] = y_results
 
@@ -169,4 +179,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(args.experiment_name,
+         args.model_name)

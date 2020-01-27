@@ -74,10 +74,8 @@
 
 # ----------------------------- Covariates analysis ------------------------------------
 ./covariates_create_variables_biobank.py
-./covariates_create_variables_indices_of_deprivation.py
-./covariates_ensemble_output.py
-./covariates_lsoa_corr.py
-./covariates_statistical_analysis.py
+./covariates_ensemble_output.py -E "biobank_scanner1" -M "SVM"
+./covariates_statistical_analysis.py -E "biobank_scanner1" -M "SVM"
 
 # ----------------------------- Miscelanious ------------------------------------
 # Univariate analysis on freesurfer data

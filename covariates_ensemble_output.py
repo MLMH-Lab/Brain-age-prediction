@@ -7,6 +7,7 @@ References:
 A Nonlinear Simulation Framework Supports Adjusting for Age When Analyzing BrainAGE.
 Front. Aging Neurosci. 10:317. doi: 10.3389/fnagi.2018.00317
 """
+import argparse
 from pathlib import Path
 
 import pandas as pd
@@ -14,6 +15,17 @@ import statsmodels.api as sm
 
 PROJECT_ROOT = Path.cwd()
 
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+
+parser.add_argument('-M', '--model_name',
+                    dest='model_name',
+                    help='Name of the model.')
+
+args = parser.parse_args()
 
 def get_brainager(age, predicted_age):
     """Calculates BrainAGER, the residual error of the regression of chronological and predicted brain age"""
@@ -25,26 +37,22 @@ def get_brainager(age, predicted_age):
     return residuals
 
 
-def main():
+def main(experiment_name, model_name):
     """"""
-    # ----------------------------------------------------------------------------------------
-    experiment_name = 'biobank_scanner1'
-
-    n_repetitions = 10
-    # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
-    svm_dir = experiment_dir / 'SVM'
+    svm_dir = experiment_dir / model_name
     correlation_dir = experiment_dir / 'correlation_analysis'
     correlation_dir.mkdir(exist_ok=True)
 
     # Load SVR age predictions
     age_predictions_df = pd.read_csv(svm_dir / 'age_predictions.csv')
 
-    ensemble_df = pd.DataFrame(age_predictions_df[['Participant_ID', 'Age']])
+    ensemble_df = age_predictions_df[['Image_ID', 'Age']]
 
+    n_repetitions = 10
     repetition_column_name = []
     for i_repetition in range(n_repetitions):
-        repetition_column_name.append('Prediction repetition {:02d}'.format(i_repetition))
+        repetition_column_name.append(f'Prediction repetition {i_repetition:02d}')
 
     ensemble_df['Mean_predicted_age'] = age_predictions_df[repetition_column_name].mean(axis=1)
 
@@ -60,8 +68,9 @@ def main():
     ensemble_df['BrainAGER_predmean'] = get_brainager(ensemble_df['Age'],
                                                       ensemble_df['Mean_predicted_age'])
 
-    ensemble_df.to_csv(correlation_dir / 'ensemble_output.csv', index=False)
+    ensemble_df.to_csv(correlation_dir / f'ensemble_{model_name}_output.csv', index=False)
 
 
 if __name__ == '__main__':
-    main()
+    main(args.experiment_name,
+         args.model_name)
