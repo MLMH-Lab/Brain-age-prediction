@@ -27,6 +27,9 @@
 # Create kernel matrix for voxel-based analysis
 ./preprocessing_compute_kernel_matrix.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1"
 
+# Create pca models
+./preprocessing_compute_principal_components.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1" -S "SCANNER01"
+
 # ----------------------------- Regressors comparison ------------------------------------
 ./comparison_fs_data_train_svm.py -E "biobank_scanner1" -S "SCANNER01"
 ./comparison_fs_data_train_rvm.py -E "biobank_scanner1" -S "SCANNER01"
@@ -47,7 +50,7 @@
 
 ./generalisation_test_voxel_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "SCANNER02" -M "voxel_SVM" -P "/media/kcl_1/HDD/DATASETS/BIOBANK/BIOBANK"
 
-./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR" "voxel_SVM"
+./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM"
 
 # ----------------------------- Sample size analysis ------------------------------------
 ./sample_size_create_ids.py -E "biobank_scanner1" -S "SCANNER01"
