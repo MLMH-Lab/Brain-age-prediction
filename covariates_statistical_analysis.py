@@ -102,7 +102,7 @@ def main(experiment_name, model_name):
             y_values.append(spearman_rho)
         corr_output[y] = y_values
 
-    corr_output.to_csv(correlation_dir / 'covariates_spearman_output.csv')
+    corr_output.to_csv(correlation_dir / f'covariates_spearman_{model_name}output.csv')
 
     # Create empty dataframe for analysis of education level
     education_output = pd.DataFrame({'Row_labels_1': ['uni vs prof_qual', 'uni vs prof_qual',
@@ -175,7 +175,7 @@ def main(experiment_name, model_name):
 
         education_output[y] = y_results
 
-    education_output.to_csv(correlation_dir / 'education_ttest_output.csv')
+    education_output.to_csv(correlation_dir / f'education_ttest_{model_name}output.csv')
 
 
 if __name__ == '__main__':
