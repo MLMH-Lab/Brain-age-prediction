@@ -10,6 +10,7 @@
 ./download_data.py -N "/run/user/1000/gvfs/smb-share:server=kc-deeplab.local,share=deeplearning/"
 ./download_ants_data.py -N "/run/user/1000/gvfs/smb-share:server=kc-deeplab.local,share=deeplearning/" -S "SCANNER01" -O "/media/kcl_1/SSD2/BIOBANK"
 ./download_ants_data.py -N "/run/user/1000/gvfs/smb-share:server=kc-deeplab.local,share=deeplearning/" -S "SCANNER02" -O "/media/kcl_1/HDD/DATASETS/BIOBANK"
+./download_covariates.py -N "/run/user/1000/gvfs/smb-share:server=kc-deeplab.local,share=deeplearning/"
 
 # ----------------------------- Preprocessing ------------------------------------
 # Clean UK Biobank data.
@@ -81,6 +82,9 @@
 ./covariates_create_variables_biobank.py
 ./covariates_ensemble_output.py -E "biobank_scanner1" -M "SVM"
 ./covariates_statistical_analysis.py -E "biobank_scanner1" -M "SVM"
+
+./covariates_ensemble_output.py -E "biobank_scanner1" -M "RVM"
+./covariates_statistical_analysis.py -E "biobank_scanner1" -M "RVM"
 
 # ----------------------------- Miscelanious ------------------------------------
 # Univariate analysis on freesurfer data

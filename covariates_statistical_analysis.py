@@ -63,7 +63,7 @@ def main(experiment_name, model_name):
     ensemble_df['id'] = ensemble_df['id'].str.split('-').str[1]
     ensemble_df['id'] = pd.to_numeric(ensemble_df['id'])
 
-    covariates_df = pd.read_csv(correlation_dir / 'covariates.csv')
+    covariates_df = pd.read_csv(PROJECT_ROOT / 'outputs' / 'covariates' / 'covariates.csv')
 
     dataset = pd.merge(ensemble_df, covariates_df, on='id')
 
