@@ -117,7 +117,7 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair):
             scores = np.array([r2, mae, rmse, age_error_corr])
             np.save(str(scores_dir / f'scores_{i_bootstrap:04d}_{model_name}.npy'), scores)
 
-            train_predictions = model.predict(x_train)
+            train_predictions = best_model.predict(x_train)
             train_mae = mean_absolute_error(y_train, train_predictions)
             train_rmse = sqrt(mean_squared_error(y_train, train_predictions))
             train_r2 = r2_score(y_train, train_predictions)
