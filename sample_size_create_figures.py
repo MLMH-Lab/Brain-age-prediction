@@ -68,25 +68,25 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
     # Draw lines
     plt.plot(i_n_subject_pairs_list,
              np.mean(scores_i_n_subject_pairs, axis=1),
-             color='#111111', label=model_name+' performance')
+             color='r', label=model_name+' test performance')
 
     plt.plot(i_n_subject_pairs_list, std_uniform_dist * np.ones_like(i_n_subject_pairs_list), '--',
              color='#111111', label='Chance line')
 
     plt.plot(i_n_subject_pairs_list,
              np.mean(train_scores_i_n_subject_pairs, axis=1),
-             color='#111111', label=model_name+' train performance')
+             color='g', label=model_name+' train performance')
 
     # Draw bands
     plt.fill_between(i_n_subject_pairs_list,
                      np.percentile(scores_i_n_subject_pairs, 2.5, axis=1),
                      np.percentile(scores_i_n_subject_pairs, 97.5, axis=1),
-                     color='#DDDDDD')
+                     color='r', alpha=0.1)
 
     plt.fill_between(i_n_subject_pairs_list,
                      np.percentile(train_scores_i_n_subject_pairs, 2.5, axis=1),
                      np.percentile(train_scores_i_n_subject_pairs, 97.5, axis=1),
-                     color='#DDDDDD')
+                     color='g', alpha=0.1)
 
     # Create plot
     plt.title('Bootstrap Analysis')
@@ -95,7 +95,7 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
     plt.ylabel('Mean Absolute Error')
     plt.legend(loc='best')
     plt.tight_layout()
-    plt.savefig(str(experiment_dir / 'sample_size' / f'sample_size_{model_name}.png'))
+    plt.savefig(experiment_dir / 'sample_size' / f'sample_size_{model_name}.eps', format='eps')
 
 
 if __name__ == '__main__':
