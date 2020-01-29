@@ -4,6 +4,12 @@
 This script removes participants that did not pass the quality
 control performed using MRIQC [1] and Qoala [2].
 
+In Qoala, higher numbers indicate a higher chance of being a high quality scan
+(Source: https://qoala-t.shinyapps.io/qoala-t_app/).
+
+In MRIQC, higher values indicates a higher probability of being from MRIQC's class 1 ('exclude')
+(Source: https://github.com/poldracklab/mriqc/blob/98610ad7596b586966413b01d10f4eb68366a038/mriqc/classifier/helper.py)
+
 References
 ----------
 [1] - Esteban, Oscar, et al. "MRIQC: Advancing the automatic prediction
