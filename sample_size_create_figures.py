@@ -63,19 +63,23 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
     age_max = 73
     std_uniform_dist = np.sqrt(((age_max - age_min) ** 2) / 12)
 
-    plt.figure(figsize=(20, 5))
+    plt.figure(figsize=(10, 5))
 
     # Draw lines
     plt.plot(i_n_subject_pairs_list,
-             np.mean(scores_i_n_subject_pairs, axis=1),
-             color='r', label=model_name+' test performance')
-
-    plt.plot(i_n_subject_pairs_list, std_uniform_dist * np.ones_like(i_n_subject_pairs_list), '--',
-             color='#111111', label='Chance line')
+             np.mean(train_scores_i_n_subject_pairs, axis=1),
+             linewidth = 1.0,
+             color='g', label=model_name+' train performance')
 
     plt.plot(i_n_subject_pairs_list,
-             np.mean(train_scores_i_n_subject_pairs, axis=1),
-             color='g', label=model_name+' train performance')
+             np.mean(scores_i_n_subject_pairs, axis=1),
+             linewidth=1.0,
+             color='r', label=model_name+' test performance')
+
+    plt.plot(i_n_subject_pairs_list,
+             std_uniform_dist * np.ones_like(i_n_subject_pairs_list), '--',
+             linewidth=1.0,
+             color='#111111', label='Chance line')
 
     # Draw bands
     plt.fill_between(i_n_subject_pairs_list,
@@ -89,7 +93,6 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
                      color='g', alpha=0.1)
 
     # Create plot
-    plt.title('Bootstrap Analysis')
     plt.xlabel('Number of subjects')
     plt.xticks(i_n_subject_pairs_list, np.multiply(i_n_subject_pairs_list, 2 * ((73 - 47) + 1)))
     plt.ylabel('Mean Absolute Error')
