@@ -73,6 +73,7 @@ def main(experiment_name, model_name):
               'Traffic_intensity', 'Inverse_dist_road',
               'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
 
+    # TODO: Adicionar pandas melt
     # Create empty dataframe to store correlation results
     corr_output = pd.DataFrame({'Row_labels_1': ['Air_pollution', 'Air_pollution', 'Air_pollution',
                                                  'Traffic_intensity', 'Traffic_intensity', 'Traffic_intensity',
