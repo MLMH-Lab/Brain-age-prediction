@@ -31,6 +31,7 @@
 # Create pca models
 ./preprocessing_compute_principal_components.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1" -S "SCANNER01"
 
+./preprocessing_calculating_principal_components.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1" -S "SCANNER01"
 # ----------------------------- Regressors comparison ------------------------------------
 ./comparison_fs_data_train_svm.py -E "biobank_scanner1" -S "SCANNER01"
 ./comparison_fs_data_train_rvm.py -E "biobank_scanner1" -S "SCANNER01"
