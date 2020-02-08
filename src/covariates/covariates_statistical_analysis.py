@@ -4,11 +4,15 @@
 import argparse
 from pathlib import Path
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from scipy.stats import spearmanr, ttest_ind
 
 PROJECT_ROOT = Path.cwd()
+UNIVERSITY_CODE = 4
+PROFESSIONAL_QUAL_CODE = 3
+A_LEVEL_CODE = 2
+GCSE_CODE = 1
 
 parser = argparse.ArgumentParser()
 
@@ -21,11 +25,6 @@ parser.add_argument('-M', '--model_name',
                     help='Name of the model.')
 
 args = parser.parse_args()
-
-UNIVERSITY_CODE = 4
-PROFESSIONAL_QUAL_CODE = 3
-A_LEVEL_CODE = 2
-GCSE_CODE = 1
 
 
 def spearman(df, x, y):
@@ -59,7 +58,7 @@ def main(experiment_name, model_name):
     correlation_dir = PROJECT_ROOT / 'outputs' / experiment_name / 'correlation_analysis'
 
     ensemble_df = pd.read_csv(correlation_dir / f'ensemble_{model_name}_output.csv')
-    ensemble_df['id'] = ensemble_df['Image_ID'].str.split('_').str[0]
+    ensemble_df['id'] = ensemble_df['image_id'].str.split('_').str[0]
     ensemble_df['id'] = ensemble_df['id'].str.split('-').str[1]
     ensemble_df['id'] = pd.to_numeric(ensemble_df['id'])
 
@@ -73,7 +72,6 @@ def main(experiment_name, model_name):
               'Traffic_intensity', 'Inverse_dist_road',
               'Greenspace_perc', 'Garden_perc', 'Water_perc', 'Natural_env_perc']
 
-    # TODO: Adicionar pandas melt
     # Create empty dataframe to store correlation results
     corr_output = pd.DataFrame({'Row_labels_1': ['Air_pollution', 'Air_pollution', 'Air_pollution',
                                                  'Traffic_intensity', 'Traffic_intensity', 'Traffic_intensity',

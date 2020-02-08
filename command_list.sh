@@ -81,12 +81,12 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./permutation_significance_test.py
 
 # ----------------------------- Covariates analysis ------------------------------------
-./covariates_create_variables_biobank.py
-./covariates_ensemble_output.py -E "biobank_scanner1" -M "SVM"
-./covariates_statistical_analysis.py -E "biobank_scanner1" -M "SVM"
+./src/covariates/covariates_create_variables_biobank.py
+./src/covariates/covariates_ensemble_output.py -E "biobank_scanner1" -M "SVM"
+./src/covariates/covariates_statistical_analysis.py -E "biobank_scanner1" -M "SVM"
 
-./covariates_ensemble_output.py -E "biobank_scanner1" -M "RVM"
-./covariates_statistical_analysis.py -E "biobank_scanner1" -M "RVM"
+./src/covariates/covariates_ensemble_output.py -E "biobank_scanner1" -M "RVM"
+./src/covariates/covariates_statistical_analysis.py -E "biobank_scanner1" -M "RVM"
 
 # ----------------------------- Miscelanious ------------------------------------
 # Univariate analysis on freesurfer data

@@ -47,7 +47,7 @@ def main(experiment_name, model_name):
     # Load SVR age predictions
     age_predictions_df = pd.read_csv(svm_dir / 'age_predictions.csv')
 
-    ensemble_df = age_predictions_df[['Image_ID', 'Age']]
+    ensemble_df = age_predictions_df[['image_id', 'Age']]
 
     n_repetitions = 10
     repetition_column_name = []
