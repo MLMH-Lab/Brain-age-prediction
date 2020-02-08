@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-"""Script to train Gaussian Processes on freesurfer data.
+"""Script to train Relevant Vector Machines on freesurfer data.
 
-We trained the Gaussian Processes (GP) [1] in a 10 repetitions
+We trained the Relevant Vector Machines (RVMs) [1] in a 10 repetitions
 10 stratified k-fold cross-validation (stratified by age).
 
 References
 ----------
-[1] - Williams, Christopher KI, and Carl Edward Rasmussen.
- "Gaussian processes for regression." Advances in neural
- information processing systems. 1996.
+[1] - Tipping, Michael E. "The relevance vector machine."
+Advances in neural information processing systems. 2000.
 """
 import argparse
 import random
@@ -19,11 +18,10 @@ from pathlib import Path
 import numpy as np
 from joblib import dump
 from scipy import stats
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import DotProduct
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
+from sklearn_rvm import EMRVR
 
 from utils import COLUMNS_NAME, load_freesurfer_dataset
 
@@ -56,7 +54,7 @@ def main(experiment_name, scanner_name, input_ids_file):
     freesurfer_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
     ids_path = experiment_dir / input_ids_file
 
-    model_dir = experiment_dir / 'GPR'
+    model_dir = experiment_dir / 'RVM'
     model_dir.mkdir(exist_ok=True)
     cv_dir = model_dir / 'cv'
     cv_dir.mkdir(exist_ok=True)
@@ -67,7 +65,6 @@ def main(experiment_name, scanner_name, input_ids_file):
     # Initialise random seed
     np.random.seed(42)
     random.seed(42)
-
     # Normalise regional volumes by total intracranial volume (tiv)
     regions = dataset[COLUMNS_NAME].values
 
@@ -83,10 +80,9 @@ def main(experiment_name, scanner_name, input_ids_file):
     cv_age_error_corr = []
 
     # Create DataFrame to hold actual and predicted ages
-    age_predictions = dataset[['Image_ID', 'Age']]
-    age_predictions = age_predictions.set_index('Image_ID')
+    age_predictions = dataset[['image_id', 'Age']]
+    age_predictions = age_predictions.set_index('image_id')
 
-    # Create list of model prefixes
     n_repetitions = 10
     n_folds = 10
 
@@ -108,7 +104,7 @@ def main(experiment_name, scanner_name, input_ids_file):
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
 
-            model = GaussianProcessRegressor(kernel=DotProduct(), random_state=0)
+            model = EMRVR(kernel='linear')
 
             model.fit(x_train, y_train)
 

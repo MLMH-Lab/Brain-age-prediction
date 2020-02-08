@@ -11,11 +11,6 @@ import numpy as np
 import pandas as pd
 from nilearn.masking import apply_mask
 from joblib import load
-from tqdm import tqdm
-import warnings
-
-from utils import load_demographic_data
-
 
 PROJECT_ROOT = Path.cwd()
 

@@ -14,7 +14,7 @@ def load_freesurfer_dataset(participants_path, ids_path, freesurfer_path):
 
     freesurfer_df = pd.read_csv(freesurfer_path)
 
-    dataset_df = pd.merge(freesurfer_df, demographic_data, on='Image_ID')
+    dataset_df = pd.merge(freesurfer_df, demographic_data, on='image_id')
 
     return dataset_df
 
@@ -24,9 +24,9 @@ def load_demographic_data(participants_path, ids_path):
     participants_df = pd.read_csv(participants_path, sep='\t')
     participants_df = participants_df.dropna()
 
-    ids_df = pd.read_csv(ids_path, usecols=['Image_ID'])
+    ids_df = pd.read_csv(ids_path, usecols=['image_id'])
 
-    ids_df['participant_id'] = ids_df['Image_ID'].str.split('_').str[0]
+    ids_df['participant_id'] = ids_df['image_id'].str.split('_').str[0]
 
     dataset_df = pd.merge(ids_df, participants_df, on='participant_id')
 

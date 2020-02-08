@@ -83,7 +83,7 @@ def get_balanced_dataset(dataset_df):
                                  (dataset_df['Gender'] == condition_imbalanced)
 
         list_to_drop = list(dataset_df[problematic_group_mask].sample(1).index)
-        print('Dropping {:}'.format(dataset_df['Image_ID'].iloc[list_to_drop].values[0]))
+        print('Dropping {:}'.format(dataset_df['image_id'].iloc[list_to_drop].values[0]))
         dataset_df = dataset_df.drop(list_to_drop, axis=0)
 
     return dataset_df
@@ -103,7 +103,7 @@ def main(experiment_name, scanner_name, input_ids_file):
 
     dataset_balanced = get_balanced_dataset(dataset_df)
 
-    homogeneous_ids_df = dataset_balanced[['Image_ID']]
+    homogeneous_ids_df = dataset_balanced[['image_id']]
     homogeneous_ids_df.to_csv(experiment_dir / 'homogenized_ids.csv', index=False)
 
 

@@ -7,7 +7,6 @@ samples with few participants
 """
 import argparse
 import random
-import warnings
 from math import sqrt
 from pathlib import Path
 

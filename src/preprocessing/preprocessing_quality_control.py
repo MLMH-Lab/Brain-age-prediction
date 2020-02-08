@@ -72,19 +72,16 @@ def main(experiment_name, scanner_name, input_ids_file, mriqc_threshold, qoala_t
     prob_qoala_df = pd.read_csv(qoala_prob_path)
 
     prob_mriqc_df = prob_mriqc_df.rename(columns={'prob_y': 'mriqc_prob'})
-    prob_mriqc_df['Image_ID'] = prob_mriqc_df['subject_id'] + '_ses-bl_T1w/'
-    prob_mriqc_df = prob_mriqc_df[['Image_ID', 'mriqc_prob']]
+    prob_mriqc_df = prob_mriqc_df[['image_id', 'mriqc_prob']]
 
-    prob_qoala_df = prob_qoala_df.rename(columns={'image_id': 'Image_ID', 'prob_qoala': 'qoala_prob'})
-    prob_qoala_df['Image_ID'] = prob_qoala_df['Image_ID'].str.lstrip('./')
-    prob_qoala_df['Image_ID'] = prob_qoala_df['Image_ID'] + '/'
-    prob_qoala_df = prob_qoala_df[['Image_ID', 'qoala_prob']]
+    prob_qoala_df = prob_qoala_df.rename(columns={'prob_qoala': 'qoala_prob'})
+    prob_qoala_df = prob_qoala_df[['image_id', 'qoala_prob']]
 
-    qc_df = pd.merge(prob_mriqc_df, prob_qoala_df, on='Image_ID')
+    qc_df = pd.merge(prob_mriqc_df, prob_qoala_df, on='image_id')
 
     selected_subjects = qc_df[(qc_df['mriqc_prob'] < mriqc_threshold) | (qc_df['qoala_prob'] < qoala_threshold)]
 
-    ids_qc_df = pd.merge(ids_df, selected_subjects[['Image_ID']], on='Image_ID')
+    ids_qc_df = pd.merge(ids_df, selected_subjects[['image_id']], on='image_id')
 
     ids_qc_df.to_csv(experiment_dir / qc_output_filename, index=False)
 

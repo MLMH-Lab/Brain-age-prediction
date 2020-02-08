@@ -17,7 +17,6 @@ from tqdm import tqdm
 from nilearn.masking import apply_mask
 import nibabel as nib
 from sklearn.metrics.pairwise import pairwise_kernels
-from sklearn_rvm import EMRVR
 
 from utils import load_demographic_data
 

@@ -76,8 +76,8 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
     age = dataset['Age'].values
 
     # Create dataframe to hold actual and predicted ages
-    age_predictions = dataset[['Image_ID', 'Age']]
-    age_predictions = age_predictions.set_index('Image_ID')
+    age_predictions = dataset[['image_id', 'Age']]
+    age_predictions = age_predictions.set_index('image_id')
 
     n_repetitions = 10
     n_folds = 10

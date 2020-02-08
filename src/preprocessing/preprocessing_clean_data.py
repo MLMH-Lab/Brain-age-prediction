@@ -53,9 +53,9 @@ def main(experiment_name, scanner_name, input_ids_file):
     # Exclude patients
     dataset = dataset[dataset['Diagn'] == 1]
 
-    output_ids_df = dataset[['Image_ID']]
+    output_ids_df = dataset[['image_id']]
 
-    assert sum(output_ids_df.duplicated(subset='Image_ID')) == 0
+    assert sum(output_ids_df.duplicated(subset='image_id')) == 0
 
     output_ids_df.to_csv(experiment_dir / output_ids_filename, index=False)
 

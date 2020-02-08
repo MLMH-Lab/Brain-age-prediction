@@ -6,6 +6,6 @@ functionality.
 
 1. [Comparison between machine learning methods](comparison)
 2. [Permutation test to verify regressors performance](permutation)
-3. [Measuring the generalization of trained regressors](generalization) 
+3. [Measuring the generalization of trained regressors](generalisation) 
 4. [Performance of models by the size of training set](sample_size)
 5. [Correlation between model predictions and covariates](covariates)
