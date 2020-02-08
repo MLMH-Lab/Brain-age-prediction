@@ -61,11 +61,11 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM"
 
 # ----------------------------- Sample size analysis ------------------------------------
-./src/sample_size/sample_size_create_ids.py -E "biobank_scanner1" -S "SCANNER01"
+./src/sample_size/sample_size_create_ids.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 
-./sample_size_fs_data_svm_analysis.py -E "biobank_scanner1" -S "SCANNER01"
-./sample_size_fs_data_gp_analysis.py -E "biobank_scanner1" -S "SCANNER01"
-./sample_size_fs_data_rvm_analysis.py -E "biobank_scanner1" -S "SCANNER01"
+./src/sample_size/sample_size_fs_data_svm_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01" -G "biobank_scanner2" -C "BIOBANK-SCANNER02"
+./src/sample_size/sample_size_fs_data_gp_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01" -G "biobank_scanner2" -C "BIOBANK-SCANNER02"
+./src/sample_size/sample_size_fs_data_rvm_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01" -G "biobank_scanner2" -C "BIOBANK-SCANNER02"
 
 ./sample_size_voxel_data_rvm_analysis.py -E "biobank_scanner1" -S "SCANNER01"
 ./sample_size_voxel_data_svm_analysis.py -E "biobank_scanner1" -S "SCANNER01"

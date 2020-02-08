@@ -39,16 +39,18 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
     # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
-    i_n_subject_pairs_list = range(1, n_max_pair+1)
+    i_n_subject_pairs_list = range(1, n_max_pair + 1)
 
     scores_i_n_subject_pairs = []
     train_scores_i_n_subject_pairs = []
+    general_scores_i_n_subject_pairs = []
 
     for i_n_subject_pairs in i_n_subject_pairs_list:
         ids_with_n_subject_pairs_dir = experiment_dir / 'sample_size' / f'{i_n_subject_pairs:02d}'
         scores_dir = ids_with_n_subject_pairs_dir / 'scores'
         scores_bootstrap = []
         train_scores_bootstrap = []
+        general_scores_bootstrap = []
         for i_bootstrap in range(n_bootstrap):
             filepath_scores = scores_dir / f'scores_{i_bootstrap:04d}_{model_name}.npy'
             scores_bootstrap.append(np.load(str(filepath_scores))[1])
@@ -56,8 +58,12 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
             train_filepath_scores = scores_dir / f'scores_{i_bootstrap:04d}_{model_name}_train.npy'
             train_scores_bootstrap.append(np.load(str(train_filepath_scores))[1])
 
+            general_filepath_scores = scores_dir / f'scores_{i_bootstrap:04d}_{model_name}_general.npy'
+            general_scores_bootstrap.append(np.load(str(general_filepath_scores))[1])
+
         scores_i_n_subject_pairs.append(scores_bootstrap)
         train_scores_i_n_subject_pairs.append(train_scores_bootstrap)
+        general_scores_i_n_subject_pairs.append(general_scores_bootstrap)
 
     age_min = 47
     age_max = 73
@@ -67,14 +73,19 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
 
     # Draw lines
     plt.plot(i_n_subject_pairs_list,
-             np.mean(train_scores_i_n_subject_pairs, axis=1),
-             linewidth = 1.0,
-             color='g', label=model_name+' train performance')
-
-    plt.plot(i_n_subject_pairs_list,
              np.mean(scores_i_n_subject_pairs, axis=1),
              linewidth=1.0,
-             color='r', label=model_name+' test performance')
+             color='r', label=model_name + ' test performance')
+
+    plt.plot(i_n_subject_pairs_list,
+             np.mean(train_scores_i_n_subject_pairs, axis=1),
+             linewidth=1.0,
+             color='g', label=model_name + ' train performance')
+
+    plt.plot(i_n_subject_pairs_list,
+             np.mean(general_scores_i_n_subject_pairs, axis=1),
+             linewidth=1.0,
+             color='b', label=model_name + ' generalisation performance')
 
     plt.plot(i_n_subject_pairs_list,
              std_uniform_dist * np.ones_like(i_n_subject_pairs_list), '--',
@@ -91,6 +102,11 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
                      np.percentile(train_scores_i_n_subject_pairs, 2.5, axis=1),
                      np.percentile(train_scores_i_n_subject_pairs, 97.5, axis=1),
                      color='g', alpha=0.1)
+
+    plt.fill_between(i_n_subject_pairs_list,
+                     np.percentile(general_scores_i_n_subject_pairs, 2.5, axis=1),
+                     np.percentile(general_scores_i_n_subject_pairs, 97.5, axis=1),
+                     color='b', alpha=0.1)
 
     # Create plot
     plt.xlabel('Number of subjects')
