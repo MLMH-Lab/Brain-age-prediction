@@ -74,8 +74,8 @@ def main(experiment_name, scanner_name, input_ids_file, n_bootstrap, n_max_pair)
         # Loop to create 1000 random subject samples of the same size (with replacement) per bootstrap sample
         for i_bootstrap in range(n_bootstrap):
             # Create empty df to add bootstrap subjects to
-            dataset_bootstrap_train = pd.DataFrame(columns=['Image_ID'])
-            dataset_bootstrap_test = pd.DataFrame(columns=['Image_ID'])
+            dataset_bootstrap_train = pd.DataFrame(columns=['image_id'])
+            dataset_bootstrap_test = pd.DataFrame(columns=['image_id'])
 
             # Loop over ages (27 in total)
             for age in range(age_min, (age_max + 1)):
@@ -89,12 +89,12 @@ def main(experiment_name, scanner_name, input_ids_file, n_bootstrap, n_max_pair)
 
                     # Extract random subject of that gender and add to dataset_bootstrap_train
                     random_sample_train = gender_group.sample(n=i_n_subject_pairs, replace=True)
-                    dataset_bootstrap_train = pd.concat([dataset_bootstrap_train, random_sample_train[['Image_ID']]])
+                    dataset_bootstrap_train = pd.concat([dataset_bootstrap_train, random_sample_train[['image_id']]])
 
                     # Sample test set with always the same size
-                    not_sampled = ~gender_group['Image_ID'].isin(random_sample_train['Image_ID'])
+                    not_sampled = ~gender_group['image_id'].isin(random_sample_train['image_id'])
                     random_sample_test = gender_group[not_sampled].sample(n=20, replace=False)
-                    dataset_bootstrap_test = pd.concat([dataset_bootstrap_test, random_sample_test[['Image_ID']]])
+                    dataset_bootstrap_test = pd.concat([dataset_bootstrap_test, random_sample_test[['image_id']]])
 
             # Export dataset_bootstrap_train as csv
             output_prefix = f'{i_bootstrap:04d}_{i_n_subject_pairs:02d}'

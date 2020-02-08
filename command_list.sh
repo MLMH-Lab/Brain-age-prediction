@@ -61,7 +61,7 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./comparison_statistical_analsysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM"
 
 # ----------------------------- Sample size analysis ------------------------------------
-./sample_size_create_ids.py -E "biobank_scanner1" -S "SCANNER01"
+./src/sample_size/sample_size_create_ids.py -E "biobank_scanner1" -S "SCANNER01"
 
 ./sample_size_fs_data_svm_analysis.py -E "biobank_scanner1" -S "SCANNER01"
 ./sample_size_fs_data_gp_analysis.py -E "biobank_scanner1" -S "SCANNER01"
@@ -99,6 +99,6 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./misc_svm_hyperparameters_analysis.py -E "biobank_scanner1"
 
 # ----------------------------- Exploratory Data Analysis ------------------------------------
-./eda_demographic_data.py -E "biobank_scanner1" -S "SCANNER01" -U "_homogenized" -I 'homogenized_ids.csv'
-./eda_demographic_data.py -E "biobank_scanner2" -S "SCANNER02" -U "_cleaned" -I 'cleaned_ids.csv'
+./src/eda/eda_demographic_data.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01" -U "_homogenized" -I 'homogenized_ids.csv'
+./src/eda/eda_demographic_data.py -E "biobank_scanner2" -S "BIOBANK-SCANNER02" -U "_cleaned" -I 'cleaned_ids.csv'
 ./eda_education_age.py
