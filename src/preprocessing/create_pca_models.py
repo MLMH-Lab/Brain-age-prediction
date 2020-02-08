@@ -4,13 +4,19 @@
 The Kernel matrix will be used on the analysis with voxel data.
 """
 import argparse
+import warnings
 from pathlib import Path
 
 import nibabel as nib
 import numpy as np
 import pandas as pd
+from joblib import dump
 from nilearn.masking import apply_mask
-from joblib import load
+from sklearn.decomposition import IncrementalPCA
+from sklearn.model_selection import StratifiedKFold
+from tqdm import tqdm
+
+from utils import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
 
@@ -46,7 +52,6 @@ parser.add_argument('-M', '--mask_filename',
 args = parser.parse_args()
 
 
-
 def main(input_path_str, experiment_name, input_ids_file, scanner_name, input_data_type, mask_filename):
     """"""
     dataset_path = Path(input_path_str)
@@ -62,9 +67,15 @@ def main(input_path_str, experiment_name, input_ids_file, scanner_name, input_da
 
     # Get list of subjects included in the analysis
     subjects_path = [str(dataset_path / f'{subject_id}_Warped{input_data_type}') for subject_id in
-                     ids_df['Image_ID'].str.rstrip('/')]
+                     ids_df['image_id'].str.rstrip('/')]
 
     print(f'Total number of images: {len(ids_df)}')
+
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
+
+    dataset = load_demographic_data(participants_path, ids_path)
+
+    age = dataset['Age'].values
 
     # ----------------------------------------------------------------------------------------
     # Load the mask image
@@ -73,52 +84,48 @@ def main(input_path_str, experiment_name, input_ids_file, scanner_name, input_da
 
     n_repetitions = 10
     n_folds = 10
-    prefix_list = []
+    step_size = 850
     for i_repetition in range(n_repetitions):
-        for i_fold in range(n_folds):
+        # Create 10-fold cross-validation scheme stratified by age
+        skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
+        for i_fold, (train_index, test_index) in enumerate(skf.split(age, age)):
+            print(f'Running repetition {i_repetition:02d}, fold {i_fold:02d}')
+            print(train_index.shape)
+            n_samples = len(subjects_path)
+            pca = IncrementalPCA(n_components=800, copy=False)
+
+            for i in tqdm(range(int(np.ceil(n_samples / np.float(step_size))))):
+                # Generate indices and then paths for this block
+                start_ind = i * step_size
+                stop_ind = min(start_ind + step_size, n_samples)
+                block_paths = subjects_path[start_ind:stop_ind]
+
+                # Read in the images in this block
+                images = []
+                for path in tqdm(block_paths):
+                    try:
+                        img = nib.load(str(path))
+                    except FileNotFoundError:
+                        print(f'No image file {path}.')
+                        raise
+
+                    # Extract only the brain voxels. This will create a 1D array.
+                    img = apply_mask(img, mask_img)
+                    img = np.asarray(img, dtype='float32')
+                    img = np.nan_to_num(img)
+                    images.append(img)
+                    del img
+                images = np.array(images, dtype='float32')
+
+                selected_index = train_index[(train_index >= start_ind) & (train_index < stop_ind)] - start_ind
+                images_selected = images[selected_index]
+                try:
+                    pca.partial_fit(images_selected)
+                except ValueError:
+                    warnings.warn('n_components higher than number of subjects.')
+
             prefix = f'{i_repetition:02d}_{i_fold:02d}'
-            prefix_list.append(prefix)
-
-    n_models = 100
-    step = 10
-
-    component_list = []
-    for _ in range(100):
-        component_list.append(np.zeros((len(subjects_path), 200)))
-
-    for i_step in range(n_models//step):
-        print(i_step)
-        print(i_step*step)
-        print((i_step+1) * step)
-
-        models = []
-        for i_model in range(i_step*step, (i_step+1) * step):
-            model = load(models_output_path / f'{prefix_list[i_model]}_pca.joblib')
-            models.append(model)
-            del model
-
-        for i_subj, subject_path in enumerate(subjects_path):
-            print(subject_path)
-            # Read in the images in this block
-            try:
-                img = nib.load(str(subject_path))
-            except FileNotFoundError:
-                print(f'No image file {subject_path}.')
-                raise
-
-            # Extract only the brain voxels. This will create a 1D array.
-            img = apply_mask(img, mask_img)
-            img = np.asarray(img, dtype='float32')
-            img = np.nan_to_num(img)
-
-            for model, i_model in zip(models, range(i_step*step, (i_step+1) * step)):
-                transformed = model.transform(img[None, :])
-                component_list[i_model][i_subj, :] = transformed
-
-    for i_comp, component in enumerate(component_list):
-        pca_df = pd.DataFrame(data = component)
-        pca_df['Image_ID'] = subjects_path
-        pca_df.to_csv(output_path / f'{prefix_list[i_comp]}_pca_components.csv', index=False)
+            dump(pca, models_output_path / f'{prefix}_pca.joblib')
 
 
 if __name__ == '__main__':

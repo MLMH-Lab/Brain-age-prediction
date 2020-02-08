@@ -137,7 +137,7 @@ def main(input_path_str, experiment_name, input_ids_file, input_data_type, mask_
 
     # Get list of subjects included in the analysis
     subjects_path = [str(dataset_path / f'{subject_id}_Warped{input_data_type}') for subject_id in
-                     ids_df['Image_ID'].str.rstrip('/')]
+                     ids_df['image_id'].str.rstrip('/')]
 
     print(f'Total number of images: {len(ids_df)}')
 
@@ -148,9 +148,9 @@ def main(input_path_str, experiment_name, input_ids_file, input_data_type, mask_
 
     gram_matrix = calculate_gram_matrix(subjects_path, mask_img)
 
-    gram_df = pd.DataFrame(columns=ids_df['Image_ID'].tolist(), data=gram_matrix)
-    gram_df['Image_ID'] = ids_df['Image_ID']
-    gram_df = gram_df.set_index('Image_ID')
+    gram_df = pd.DataFrame(columns=ids_df['image_id'].tolist(), data=gram_matrix)
+    gram_df['image_id'] = ids_df['image_id']
+    gram_df = gram_df.set_index('image_id')
 
     gram_df.to_csv(output_path / 'kernel.csv')
 

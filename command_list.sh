@@ -15,23 +15,23 @@ export PYTHONPATH=$PYTHONPATH:./src
 
 # ----------------------------- Preprocessing ------------------------------------
 # Clean UK Biobank data.
-./src/preprocessing/preprocessing_clean_data.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
-./src/preprocessing/preprocessing_clean_data.py -E "biobank_scanner2" -S "BIOBANK-SCANNER02"
+./src/preprocessing/clean_data.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
+./src/preprocessing/clean_data.py -E "biobank_scanner2" -S "BIOBANK-SCANNER02"
 
 # Perform quality control.
-./src/preprocessing/preprocessing_quality_control.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
-./src/preprocessing/preprocessing_quality_control.py -E "biobank_scanner2" -S "BIOBANK-SCANNER02"
+./src/preprocessing/quality_control.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
+./src/preprocessing/quality_control.py -E "biobank_scanner2" -S "BIOBANK-SCANNER02"
 
 # Make gender homogeneous along age range (performed only in the scanner1
 # because we were concerned in not create a biased regressor).
-./src/preprocessing/preprocessing_homogenize_gender.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
+./src/preprocessing/homogenize_gender.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 
 # Create kernel matrix for voxel-based analysis
-./preprocessing_compute_kernel_matrix.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1"
+./compute_kernel_matrix.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1"
 
 # Create pca models
-./preprocessing_compute_principal_components.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1" -S "SCANNER01"
-./preprocessing_calculating_principal_components.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1" -S "SCANNER01"
+./src/preprocessing/create_pca_models.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
+./calculating_principal_components.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1" -S "SCANNER01"
 
 # ----------------------------- Regressors comparison ------------------------------------
 ./src/comparison/comparison_fs_data_train_svm.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
@@ -90,7 +90,7 @@ export PYTHONPATH=$PYTHONPATH:./src
 
 # ----------------------------- Miscelanious ------------------------------------
 # Univariate analysis on freesurfer data
-./misc_univariate_analysis.py -E "biobank_scanner1" -S "SCANNER01"
+./src/misc/misc_univariate_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 
 ./misc_classifier_train_svm.py
 ./misc_classifier_regressor_comparison.py
