@@ -70,9 +70,9 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./sample_size_voxel_data_rvm_analysis.py -E "biobank_scanner1" -S "SCANNER01"
 ./sample_size_voxel_data_svm_analysis.py -E "biobank_scanner1" -S "SCANNER01"
 
-./sample_size_create_figures.py -E "biobank_scanner1" -M "SVM"
-./sample_size_create_figures.py -E "biobank_scanner1" -M "RVM"
-./sample_size_create_figures.py -E "biobank_scanner1" -M "GPR"
+./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "SVM"
+./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "RVM"
+./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "GPR"
 ./sample_size_create_figures.py -E "biobank_scanner1" -M "voxel_SVM"
 ./sample_size_create_figures.py -E "biobank_scanner1" -M "voxel_RVM"
 
