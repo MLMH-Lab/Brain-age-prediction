@@ -10,6 +10,7 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 from nilearn.masking import apply_mask
+from tqdm import tqdm
 
 PROJECT_ROOT = Path.cwd()
 
@@ -56,11 +57,9 @@ def calculate_gram_matrix(subjects_path, mask_img, step_size=1000):
     gram_matrix = np.float64(np.zeros((n_samples, n_samples)))
 
     # Outer loop
-    for ii in range(int(np.ceil(n_samples / np.float(step_size)))):
-        it = ii + 1
-        max_it = int(np.ceil(n_samples / np.float(step_size)))
-        print(f' Outer loop iteration: {it} of {max_it}.')
-
+    outer_pbar = tqdm(range(int(np.ceil(n_samples / np.float(step_size)))))
+    for ii in outer_pbar:
+        outer_pbar.set_description(f'Processing outer loop {ii}')
         # Generate indices and then paths for this block
         start_ind_1 = ii * step_size
         stop_ind_1 = min(start_ind_1 + step_size, n_samples)
@@ -68,7 +67,9 @@ def calculate_gram_matrix(subjects_path, mask_img, step_size=1000):
 
         # Read in the images in this block
         images_1 = []
-        for k, path in enumerate(block_paths_1):
+        images_1_pbar = tqdm(block_paths_1)
+        for path in images_1_pbar:
+            images_1_pbar.set_description(f'Loading outer image {path}')
             try:
                 img = nib.load(str(path))
             except FileNotFoundError:
@@ -84,11 +85,8 @@ def calculate_gram_matrix(subjects_path, mask_img, step_size=1000):
         images_1 = np.array(images_1)
 
         # Inner loop
-        for jj in range(ii + 1):
-            it = jj + 1
-            max_it = ii + 1
-
-            print(f' Inner loop iteration: {it} of {max_it}.')
+        inner_pbar = tqdm(range(ii + 1))
+        for jj in inner_pbar:
 
             # If ii = jj, then sets of image data are the same - no need to load
             if ii == jj:
@@ -104,7 +102,8 @@ def calculate_gram_matrix(subjects_path, mask_img, step_size=1000):
                 block_paths_2 = subjects_path[start_ind_2:stop_ind_2]
 
                 images_2 = []
-                for k, path in enumerate(block_paths_2):
+                images_2_pbar = tqdm(block_paths_2)
+                for path in images_2_pbar:
                     try:
                         img = nib.load(str(path))
                     except FileNotFoundError:
@@ -132,12 +131,10 @@ def main(input_path_str, experiment_name, input_ids_file, input_data_type, mask_
     output_path = PROJECT_ROOT / 'outputs' / 'kernels'
     output_path.mkdir(exist_ok=True, parents=True)
 
-    ids_path = PROJECT_ROOT / 'outputs' / experiment_name / input_ids_file
-    ids_df = pd.read_csv(ids_path)
+    ids_df = pd.read_csv(PROJECT_ROOT / 'outputs' / experiment_name / input_ids_file)
 
     # Get list of subjects included in the analysis
-    subjects_path = [str(dataset_path / f'{subject_id}_Warped{input_data_type}') for subject_id in
-                     ids_df['image_id'].str.rstrip('/')]
+    subjects_path = [str(dataset_path / f'{subject_id}_Warped{input_data_type}') for subject_id in ids_df['image_id']]
 
     print(f'Total number of images: {len(ids_df)}')
 
