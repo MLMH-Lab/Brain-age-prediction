@@ -27,12 +27,10 @@ def main():
     print(feat_imp_dir)
 
     # Load anatomical template image
-    template = (PROJECT_ROOT / 'imaging_preprocessing_ANTs' /
-                'mni_icbm152_t1_tal_nlin_sym_09c.nii')
+    template = (PROJECT_ROOT / 'imaging_preprocessing_ANTs' / 'mni_icbm152_t1_tal_nlin_sym_09c.nii')
     template = nib.load(str(template))
 
-    brain_mask = (PROJECT_ROOT / 'imaging_preprocessing_ANTs' /
-                  'mni_icbm152_t1_tal_nlin_sym_09c_mask.nii')
+    brain_mask = (PROJECT_ROOT / 'imaging_preprocessing_ANTs' / 'mni_icbm152_t1_tal_nlin_sym_09c_mask.nii')
     mask_img = nib.load(str(brain_mask))
     bg_img = template.get_fdata() * mask_img.get_fdata()
     template = nib.Nifti1Image(bg_img, template.affine)
@@ -76,8 +74,7 @@ def main():
         plotting.plot_stat_map(importance_map_nifti,
                                bg_img=template,
                                cut_coords=coordinates,
-                               output_file=feat_imp_dir /
-                                           'feature_importance_{}.png'.format(i),
+                               output_file=feat_imp_dir / 'feature_importance_{}.png'.format(i),
                                draw_cross=False,
                                cmap='Reds',
                                threshold=thr_mean + 3 * thr_std,

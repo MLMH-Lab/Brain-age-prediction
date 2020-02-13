@@ -3,8 +3,8 @@
 Compares performance of SVM models with different hyperparameters C.
 """
 import argparse
-from pathlib import Path
 import itertools
+from pathlib import Path
 
 import numpy as np
 import pandas as pd

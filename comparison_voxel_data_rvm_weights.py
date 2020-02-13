@@ -99,7 +99,7 @@ def main(vm_type):
             for xyz, importance in zip(coords, weights[i, :]):
                 importance_map[tuple(xyz)] = importance
 
-            importance_map_nifti = nib.Nifti1Image(importance_map, np.eye(4))
+            importance_map_nifti = nib.Nifti1Image(importance_map, mask_img.affine)
             importance_filename = f'{i_repetition:02d}_{i_fold:02d}_importance.nii.gz'
             nib.save(importance_map_nifti, str(cv_dir / importance_filename))
             i = i + 1

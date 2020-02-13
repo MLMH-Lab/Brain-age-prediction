@@ -49,7 +49,7 @@ parser.add_argument('-L', '--index_max',
 args = parser.parse_args()
 
 
-def main(experiment_name, scanner_name, input_ids_file, index_min, index_max):
+def train(experiment_name, scanner_name, input_ids_file, index_min, index_max):
     """"""
     # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
@@ -149,6 +149,8 @@ def main(experiment_name, scanner_name, input_ids_file, index_min, index_max):
                 print(f'Finished permutation {i_perm:02d} repetition {i_repetition:02d} '
                       f'fold {i_fold:02d} ETA {fold_time * (n_repetitions * n_folds - i_iteration):02f}')
 
+                del model, model_type, gridsearch
+
         # Create np array with mean coefficients - one row per permutation, one col per feature
         cv_mean_relative_coefs = np.divide(np.abs(cv_coef), np.sum(np.abs(cv_coef), axis=1)[:, np.newaxis])
         cv_coef_mean = np.mean(cv_mean_relative_coefs, axis=0)
@@ -170,6 +172,6 @@ def main(experiment_name, scanner_name, input_ids_file, index_min, index_max):
 
 
 if __name__ == '__main__':
-    main(args.experiment_name, args.scanner_name,
+    train(args.experiment_name, args.scanner_name,
          args.input_ids_file,
          args.index_min, args.index_max)

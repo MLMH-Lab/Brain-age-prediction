@@ -9,14 +9,13 @@ import random
 from math import sqrt
 from pathlib import Path
 
+import nibabel as nib
 import numpy as np
 from joblib import load
+from nilearn.masking import apply_mask
 from scipy import stats
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from tqdm import tqdm
-from nilearn.masking import apply_mask
-import nibabel as nib
-from sklearn.metrics.pairwise import pairwise_kernels
 
 from utils import load_demographic_data
 
@@ -99,24 +98,14 @@ def main(training_experiment_name,
     age = demographic['Age'].values
 
     # Create dataframe to hold actual and predicted ages
-    age_predictions = demographic[['Image_ID', 'Age']]
-    age_predictions = age_predictions.set_index('Image_ID')
+    age_predictions = demographic[['image_id', 'Age']]
+    age_predictions = age_predictions.set_index('image_id')
 
     n_repetitions = 10
     n_folds = 10
 
-    relevance_vector = {}
-    models = {}
-    i = 0
-    for i_repetition in range(n_repetitions):
-        for i_fold in range(n_folds):
-            prefix = f'{i_repetition:02d}_{i_fold:02d}'
-            relevance_vector[i] = np.load(training_cv_dir / f'{prefix}_relevance_vectors.npz')['relevance_vectors_']
-            models[i] = load(training_cv_dir / f'{prefix}_regressor.joblib')
-            i = i + 1
-
-    for i, subject_id in enumerate(tqdm(demographic['Image_ID'])):
-        subject_path = input_path / f"{subject_id.rstrip('/')}_Warped{input_data_type}"
+    for i, subject_id in enumerate(tqdm(demographic['image_id'])):
+        subject_path = input_path / f"{subject_id}_Warped{input_data_type}"
         print(subject_path)
 
         try:
@@ -129,25 +118,26 @@ def main(training_experiment_name,
         img = np.asarray(img, dtype='float64')
         img = np.nan_to_num(img)
 
-        j = 0
         for i_repetition in range(n_repetitions):
             for i_fold in range(n_folds):
                 # Load model and scaler
                 prefix = f'{i_repetition:02d}_{i_fold:02d}'
 
-                try:
-                    K = pairwise_kernels(img[None,:], Y=relevance_vector[j] , metric='linear')
-                except:
-                    K = [[]]
-                K = K / models[j]._scale
-                K = np.hstack((np.ones((1, 1)), K))
+                model = load(training_cv_dir / f'{prefix}_regressor.joblib')
+                weights_path = training_cv_dir / f'{prefix}_importance.nii.gz'
+                weights_img = nib.load(str(weights_path))
 
-                prediction = K @ models[j].mu_
+                weights_img = weights_img.get_fdata()
+                weights_img = nib.Nifti1Image(weights_img, mask_img.affine)
+
+                weights_img = apply_mask(weights_img, mask_img)
+                weights_img = np.asarray(weights_img, dtype='float64')
+                weights_img = np.nan_to_num(weights_img)
+
+                prediction = np.dot(weights_img, img.T) + model.intercept_
 
                 # Save prediction per model in df
                 age_predictions.loc[subject_id, f'Prediction {prefix}'] = prediction
-
-                j =j+1
 
     # Save predictions
     age_predictions.to_csv(test_model_dir / 'age_predictions_test.csv')

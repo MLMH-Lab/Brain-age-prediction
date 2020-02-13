@@ -58,7 +58,7 @@ args = parser.parse_args()
 
 
 def main(experiment_name, scanner_name, n_bootstrap, n_max_pair,
-         general_scanner_name, general_experiment_name, general_input_ids_file):
+         general_experiment_name, general_scanner_name, general_input_ids_file):
     # ----------------------------------------------------------------------------------------
     model_name = 'GPR'
 
@@ -165,4 +165,4 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair,
 if __name__ == '__main__':
     main(args.experiment_name, args.scanner_name,
          args.n_bootstrap, args.n_max_pair,
-         args.general_scanner_name, args.general_experiment_name, args.general_input_ids_file)
+         args.general_experiment_name, args.general_scanner_name, args.general_input_ids_file)

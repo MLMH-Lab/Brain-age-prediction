@@ -73,17 +73,17 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
 
     # Draw lines
     plt.plot(i_n_subject_pairs_list,
-             np.mean(scores_i_n_subject_pairs, axis=1),
+             np.median(scores_i_n_subject_pairs, axis=1),
              linewidth=1.0,
              color='r', label=model_name + ' test performance')
 
     plt.plot(i_n_subject_pairs_list,
-             np.mean(train_scores_i_n_subject_pairs, axis=1),
+             np.median(train_scores_i_n_subject_pairs, axis=1),
              linewidth=1.0,
              color='g', label=model_name + ' train performance')
 
     plt.plot(i_n_subject_pairs_list,
-             np.mean(general_scores_i_n_subject_pairs, axis=1),
+             np.median(general_scores_i_n_subject_pairs, axis=1),
              linewidth=1.0,
              color='b', label=model_name + ' generalisation performance')
 
