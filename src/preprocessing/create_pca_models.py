@@ -84,7 +84,7 @@ def main(input_path_str, experiment_name, input_ids_file, scanner_name, input_da
 
     n_repetitions = 10
     n_folds = 10
-    step_size = 1500
+    step_size = 900
     for i_repetition in range(n_repetitions):
         # Create 10-fold cross-validation scheme stratified by age
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
@@ -92,7 +92,7 @@ def main(input_path_str, experiment_name, input_ids_file, scanner_name, input_da
             print(f'Running repetition {i_repetition:02d}, fold {i_fold:02d}')
             print(train_index.shape)
             n_samples = len(subjects_path)
-            pca = IncrementalPCA(n_components=750, copy=False)
+            pca = IncrementalPCA(n_components=200, copy=False)
 
             for i in tqdm(range(int(np.ceil(n_samples / np.float(step_size))))):
                 # Generate indices and then paths for this block
