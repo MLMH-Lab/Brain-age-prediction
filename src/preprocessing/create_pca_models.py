@@ -84,7 +84,7 @@ def main(input_path_str, experiment_name, input_ids_file, scanner_name, input_da
 
     n_repetitions = 10
     n_folds = 10
-    step_size = 600
+    step_size = 400
     for i_repetition in range(n_repetitions):
         # Create 10-fold cross-validation scheme stratified by age
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
