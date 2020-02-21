@@ -30,18 +30,16 @@ def main(experiment_name, scanner_name, input_ids_file):
     initial_index_perm = 0
     number_perm_per_thread = 40
 
-    processes = []
+    args_list = []
     for i in range(n_threads):
-        processes.append(mp.Process(target=train, args=(experiment_name, scanner_name,
+        args_list.append([experiment_name, scanner_name,
                                      input_ids_file,
                                      (initial_index_perm + i * number_perm_per_thread),
-                                     (initial_index_perm + (i + 1) * number_perm_per_thread))))
+                                     (initial_index_perm + (i + 1) * number_perm_per_thread)])
 
-    for proc in processes:
-        proc.start()
-
-    for proc in processes:
-        proc.join()
+    pool = mp.Pool(processes=n_threads)
+    result_list = pool.map(train, args_list)
+    print(result_list)
 
 
 
