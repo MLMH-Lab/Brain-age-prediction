@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Permutation of SVM for BIOBANK Scanner1"""
+"""Permutation of SVM for BIOBANK Scanner1
+
+Ref:
+    Cuingnet, Rémi, et al. "Spatial regularization of SVM for the detection
+    of diffusion alterations associated with stroke outcome."
+    Medical image analysis 15.5 (2011): 729-737.
+"""
 import argparse
 import random
 import time
@@ -103,7 +109,9 @@ def train(args):
 
                 model = gridsearch.best_estimator_
 
-                cv_coef[i_iteration] = model.coef_
+                # Weight value with margin aware from [1]
+                margin = 2.0 / np.linalg.norm(model.coef_)
+                cv_coef[i_iteration] = margin * np.abs(model.coef_) / np.linalg.norm(model.coef_)
 
                 predictions = model.predict(x_test)
 
@@ -126,8 +134,7 @@ def train(args):
                 del model, model_type, gridsearch
 
         # Create np array with mean coefficients - one row per permutation, one col per feature
-        cv_mean_relative_coefs = np.divide(np.abs(cv_coef), np.sum(np.abs(cv_coef), axis=1)[:, np.newaxis])
-        cv_coef_mean = np.mean(cv_mean_relative_coefs, axis=0)
+        cv_coef_mean = np.mean(cv_coef, axis=0)
 
         # Variables for CV means across all repetitions - one row per permutation
         cv_r2_mean = np.mean(cv_r2)
