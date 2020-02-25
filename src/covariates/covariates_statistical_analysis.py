@@ -63,9 +63,12 @@ def main(experiment_name, scanner_name, model_name):
 
     # Create empty dataframe for analysis of education level
     output = pd.DataFrame({'Row_labels_1': ['female vs male',
-                                                      'female vs male',
-                                                      ],
-                                     'Row_labels_2': ['p_val', 'cohen']})
+                                            'female vs male',
+                                            'female vs male',
+                                            'female vs male',
+                                            ],
+                           'Row_labels_2': ['p_val', 'cohen', 'mean_female',
+                                            'mean_male']})
     output.set_index('Row_labels_1', 'Row_labels_2')
 
     # Independent t-tests with alpha corrected for multiple comparisons using Bonferroni's method
@@ -79,6 +82,8 @@ def main(experiment_name, scanner_name, model_name):
         effect_size = cohend(dataset_f[y], dataset_m[y])
         y_results.append(pval)
         y_results.append(effect_size)
+        y_results.append(dataset_f[y].mean())
+        y_results.append(dataset_m[y].mean())
         if pval < alpha_corrected:
             print(f"female vs male [t-test pval, cohen's d]: {pval:6.3}, {effect_size:6.3}")
 
