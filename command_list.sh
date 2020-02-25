@@ -11,7 +11,6 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./src/download/download_data.py -N "/run/user/1000/gvfs/smb-share:server=kc-deeplab.local,share=deeplearning/"
 ./src/download/download_ants_data.py -N "/run/user/1000/gvfs/smb-share:server=kc-deeplab.local,share=deeplearning/" -S "BIOBANK-SCANNER01" -O "/media/kcl_1/SSD2"
 ./src/download/download_ants_data.py -N "/run/user/1000/gvfs/smb-share:server=kc-deeplab.local,share=deeplearning/" -S "BIOBANK-SCANNER02" -O "/media/kcl_1/HDD/DATASETS/BIOBANK"
-./src/download/download_covariates.py -N "/run/user/1000/gvfs/smb-share:server=kc-deeplab.local,share=deeplearning/"
 
 # ----------------------------- Preprocessing ------------------------------------
 # Clean UK Biobank data.
@@ -85,12 +84,11 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./permutation_significance_test.py
 
 # ----------------------------- Covariates analysis ------------------------------------
-./src/covariates/covariates_create_variables_biobank.py
 ./src/covariates/covariates_ensemble_output.py -E "biobank_scanner1" -M "SVM"
-./src/covariates/covariates_statistical_analysis.py -E "biobank_scanner1" -M "SVM"
+./src/covariates/covariates_statistical_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01" -M "SVM"
 
 ./src/covariates/covariates_ensemble_output.py -E "biobank_scanner1" -M "RVM"
-./src/covariates/covariates_statistical_analysis.py -E "biobank_scanner1" -M "RVM"
+./src/covariates/covariates_statistical_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01" -M "RVM"
 
 # ----------------------------- Miscelanious ------------------------------------
 # Univariate analysis on freesurfer data
