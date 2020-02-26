@@ -80,7 +80,7 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "voxel_RVM"
 
 # ----------------------------- Permutation ------------------------------------
-./src/permutation/permutation_lauch_subprocesses.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
+./permutation_lauch_subprocesses.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 ./permutation_significance_test.py
 
 # ----------------------------- Covariates analysis ------------------------------------

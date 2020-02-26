@@ -151,3 +151,39 @@ def train(args):
         np.save(str(permutations_dir / f'perm_coef_{i_perm:04d}.npy'), cv_coef_mean)
         np.save(str(permutations_dir / f'perm_scores_{i_perm:04d}.npy'), mean_scores)
 
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-E', '--experiment_name',
+                        dest='experiment_name',
+                        help='Name of the experiment.')
+
+    parser.add_argument('-S', '--scanner_name',
+                        dest='scanner_name',
+                        help='Name of the scanner.')
+
+    parser.add_argument('-I', '--input_ids_file',
+                        dest='input_ids_file',
+                        default='homogenized_ids.csv',
+                        help='Filename indicating the ids to be used.')
+
+    parser.add_argument('-K', '--index_min',
+                        dest='index_min',
+                        type=int,
+                        help='index of first subject to run')
+
+    parser.add_argument('-L', '--index_max',
+                        dest='index_max',
+                        type=int,
+                        help='index of last subject to run', )
+
+    args = parser.parse_args()
+
+
+    train((args.experiment_name,
+          args.scanner_name,
+          args.input_ids_file,
+          args.index_min,
+          args.index_max))
+
