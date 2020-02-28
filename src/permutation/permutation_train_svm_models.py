@@ -20,6 +20,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
 from sklearn.svm import LinearSVR
+import gc
 
 from utils import COLUMNS_NAME, load_freesurfer_dataset
 
@@ -131,7 +132,8 @@ def train(args):
                 print(f'Finished permutation {i_perm:02d} repetition {i_repetition:02d} '
                       f'fold {i_fold:02d} ETA {fold_time * (n_repetitions * n_folds - i_iteration):02f}')
 
-                del model, model_type, gridsearch
+                del model, model_type, gridsearch, x_train, x_test, y_test, y_train
+                gc.collect()
 
         # Create np array with mean coefficients - one row per permutation, one col per feature
         cv_coef_mean = np.mean(cv_coef, axis=0)
