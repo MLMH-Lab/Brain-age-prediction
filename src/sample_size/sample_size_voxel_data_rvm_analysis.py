@@ -110,7 +110,7 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair,
             y_train = train_dataset['Age'].values
             y_test = test_dataset['Age'].values
 
-            model = EMRVR(kernel='precomputed')
+            model = EMRVR(kernel='precomputed', threshold_alpha=1e9)
             model.fit(x_train, y_train)
             predictions = model.predict(x_test)
 
