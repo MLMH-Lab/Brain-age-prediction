@@ -128,7 +128,7 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair,
             x_test = scaler.transform(x_test)
 
             # Systematic search for best hyperparameters
-            rvm = EMRVR(kernel='linear')
+            rvm = EMRVR(kernel='linear', threshold_alpha=1e9)
             rvm.fit(x_train, y_train)
 
             # Test data

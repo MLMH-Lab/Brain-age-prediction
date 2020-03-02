@@ -104,7 +104,7 @@ def main(experiment_name, scanner_name, input_ids_file):
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
 
-            model = EMRVR(kernel='linear')
+            model = EMRVR(kernel='linear', threshold_alpha=1e9)
 
             model.fit(x_train, y_train)
 
