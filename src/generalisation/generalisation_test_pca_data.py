@@ -13,8 +13,8 @@ import numpy as np
 from joblib import load
 from scipy import stats
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-
-from utils import load_pca_dataset
+from utils import load_demographic_data
+import pandas as pd
 
 PROJECT_ROOT = Path.cwd()
 
@@ -50,7 +50,7 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
     test_experiment_dir = PROJECT_ROOT / 'outputs' / test_experiment_name
 
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
-    pca_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
+    pca_dir = PROJECT_ROOT / 'outputs' / 'pca'
     ids_path = PROJECT_ROOT / 'outputs' / test_experiment_name / input_ids_file
 
     test_model_dir = test_experiment_dir / model_name
@@ -60,7 +60,7 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
     test_cv_dir = test_model_dir / 'cv'
     test_cv_dir.mkdir(exist_ok=True)
 
-    dataset = load_pca_dataset(participants_path, ids_path, pca_path)
+    participants_df = load_demographic_data(participants_path, ids_path)
 
     # ----------------------------------------------------------------------------------------
     # Initialise random seed
@@ -68,12 +68,11 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
     random.seed(42)
 
     # Normalise regional volumes in testing dataset by total intracranial volume (tiv)
-    regions_norm = dataset.values
-    age = dataset['Age'].values
+    age = participants_df['Age'].values
 
     # Create dataframe to hold actual and predicted ages
-    age_predictions = dataset[['Image_ID', 'Age']]
-    age_predictions = age_predictions.set_index('Image_ID')
+    age_predictions = participants_df[['image_id', 'Age']]
+    age_predictions = age_predictions.set_index('image_id')
 
     n_repetitions = 10
     n_folds = 10
@@ -87,7 +86,16 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
             scaler = load(training_cv_dir / f'{prefix}_scaler.joblib')
 
             # Use RobustScaler to transform testing data
-            x_test = scaler.transform(regions_norm)
+            output_prefix = f'{i_repetition:02d}_{i_fold:02d}'
+            pca_path = pca_dir / f'{output_prefix}_pca_components_general.csv'
+
+            pca_df = pd.read_csv(pca_path)
+            pca_df['image_id']=pca_df['image_id'].str.replace('/media/kcl_1/HDD/DATASETS/BIOBANK/BIOBANK/','')
+            pca_df['image_id']=pca_df['image_id'].str.replace('_Warped.nii.gz', '')
+
+            dataset_df = pd.merge(pca_df, participants_df, on='image_id')
+            pca_components = dataset_df[dataset_df.columns.difference(participants_df.columns)].values
+            x_test = scaler.transform(pca_components)
 
             # Apply model to scaled data
             predictions = model.predict(x_test)
