@@ -22,8 +22,8 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import RobustScaler
 from sklearn_rvm import EMRVR
-
-from utils import load_pca_dataset
+import pandas as pd
+from utils import load_demographic_data
 PROJECT_ROOT = Path.cwd()
 
 warnings.filterwarnings('ignore')
@@ -49,7 +49,7 @@ def main(experiment_name, scanner_name, input_ids_file):
     # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
-    pca_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'freesurferData.csv'
+    pca_dir = PROJECT_ROOT / 'outputs' / 'pca'
     ids_path = experiment_dir / input_ids_file
 
     model_dir = experiment_dir / 'pca_RVM'
@@ -57,16 +57,14 @@ def main(experiment_name, scanner_name, input_ids_file):
     cv_dir = model_dir / 'cv'
     cv_dir.mkdir(exist_ok=True)
 
-    dataset = load_pca_dataset(participants_path, ids_path, pca_path)
+    participants_df = load_demographic_data(participants_path, ids_path)
 
     # ----------------------------------------------------------------------------------------
     # Initialise random seed
     np.random.seed(42)
     random.seed(42)
 
-    x_values = dataset.values
-
-    age = dataset['Age'].values
+    age = participants_df['Age'].values
 
     # Cross validation variables
     cv_r2 = []
@@ -75,8 +73,8 @@ def main(experiment_name, scanner_name, input_ids_file):
     cv_age_error_corr = []
 
     # Create DataFrame to hold actual and predicted ages
-    age_predictions = dataset[['Image_ID', 'Age']]
-    age_predictions = age_predictions.set_index('Image_ID')
+    age_predictions = participants_df[['image_id', 'Age']]
+    age_predictions = age_predictions.set_index('image_id')
 
     n_repetitions = 10
     n_folds = 10
@@ -88,8 +86,18 @@ def main(experiment_name, scanner_name, input_ids_file):
 
         # Create 10-fold cross-validation scheme stratified by age
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
-        for i_fold, (train_index, test_index) in enumerate(skf.split(x_values, age)):
+        for i_fold, (train_index, test_index) in enumerate(skf.split(age, age)):
             print(f'Running repetition {i_repetition:02d}, fold {i_fold:02d}')
+
+            output_prefix = f'{i_repetition:02d}_{i_fold:02d}'
+            pca_path = pca_dir / f'{output_prefix}_pca_components.csv'
+
+            pca_df = pd.read_csv(pca_path)
+            pca_df['image_id']=pca_df['image_id'].str.replace('/media/kcl_1/SSD2/BIOBANK/','')
+            pca_df['image_id']=pca_df['image_id'].str.replace('_Warped.nii.gz', '')
+
+            dataset_df = pd.merge(pca_df, participants_df, on='image_id')
+            x_values = dataset_df[dataset_df.columns.difference(participants_df.columns)].values
 
             x_train, x_test = x_values[train_index], x_values[test_index]
             y_train, y_test = age[train_index], age[test_index]
@@ -99,7 +107,7 @@ def main(experiment_name, scanner_name, input_ids_file):
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
 
-            model = EMRVR(kernel='linear')
+            model = EMRVR(kernel='linear', threshold_alpha=1e9)
 
             model.fit(x_train, y_train)
 
@@ -117,7 +125,7 @@ def main(experiment_name, scanner_name, input_ids_file):
 
             # ----------------------------------------------------------------------------------------
             # Save output files
-            output_prefix = f'{i_repetition:02d}_{i_fold:02d}'
+
 
             # Save scaler and model
             dump(scaler, cv_dir / f'{output_prefix}_scaler.joblib')
