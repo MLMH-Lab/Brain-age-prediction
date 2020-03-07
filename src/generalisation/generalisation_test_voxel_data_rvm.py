@@ -113,9 +113,10 @@ def main(training_experiment_name,
             relevance_vector = np.load(training_cv_dir / f'{prefix}_relevance_vectors.npz')['relevance_vectors_']
             model = load(training_cv_dir / f'{prefix}_regressor.joblib')
 
-            for i, subject_id in enumerate(tqdm(demographic['image_id'])):
+            pbar2 = tqdm(demographic['image_id'])
+            for i, subject_id in enumerate(pbar2):
                 subject_path = input_path / f"{subject_id}_Warped{input_data_type}"
-                print(subject_path)
+                pbar2.set_description(f'{subject_path.name}')
 
                 try:
                     img = nib.load(str(subject_path))
