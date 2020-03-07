@@ -4,10 +4,6 @@ import numpy as np
 from scipy import stats
 
 
-def load_pca_dataset(participants_path, ids_path, pca_path):
-    pass
-
-
 def load_freesurfer_dataset(participants_path, ids_path, freesurfer_path):
     """Load dataset."""
     demographic_data = load_demographic_data(participants_path, ids_path)
