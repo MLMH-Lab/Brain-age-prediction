@@ -36,13 +36,13 @@ parser.add_argument('-S', '--scanner_name',
                     dest='scanner_name',
                     help='Name of the scanner.')
 
-parser.add_argument('-M', '--model_name',
-                    dest='model_name',
-                    help='Name of the model.')
-
 parser.add_argument('-P', '--input_path',
                     dest='input_path_str',
                     help='Path to the local folder with preprocessed images.')
+
+parser.add_argument('-M', '--model_name',
+                    dest='model_name',
+                    help='Name of the model.')
 
 parser.add_argument('-I', '--input_ids_file',
                     dest='input_ids_file',
@@ -105,50 +105,42 @@ def main(training_experiment_name,
     n_repetitions = 10
     n_folds = 10
 
-    relevance_vector = {}
-    models = {}
-    i = 0
+    pbar = tqdm(total=100)
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
             prefix = f'{i_repetition:02d}_{i_fold:02d}'
-            relevance_vector[i] = np.load(training_cv_dir / f'{prefix}_relevance_vectors.npz')['relevance_vectors_']
-            models[i] = load(training_cv_dir / f'{prefix}_regressor.joblib')
-            i = i + 1
+            pbar.set_description(f'{prefix}')
+            relevance_vector = np.load(training_cv_dir / f'{prefix}_relevance_vectors.npz')['relevance_vectors_']
+            model = load(training_cv_dir / f'{prefix}_regressor.joblib')
 
-    for i, subject_id in enumerate(tqdm(demographic['image_id'])):
-        subject_path = input_path / f"{subject_id}_Warped{input_data_type}"
-        print(subject_path)
-
-        try:
-            img = nib.load(str(subject_path))
-        except FileNotFoundError:
-            print(f'No image file {subject_path}.')
-            raise
-
-        img = apply_mask(img, mask_img)
-        img = np.asarray(img, dtype='float64')
-        img = np.nan_to_num(img)
-
-        j = 0
-        for i_repetition in range(n_repetitions):
-            for i_fold in range(n_folds):
-                # Load model and scaler
-                prefix = f'{i_repetition:02d}_{i_fold:02d}'
+            for i, subject_id in enumerate(tqdm(demographic['image_id'])):
+                subject_path = input_path / f"{subject_id}_Warped{input_data_type}"
+                print(subject_path)
 
                 try:
-                    K = pairwise_kernels(img[None,:], Y=relevance_vector[j] , metric='linear')
+                    img = nib.load(str(subject_path))
+                except FileNotFoundError:
+                    print(f'No image file {subject_path}.')
+                    raise
+
+                img = apply_mask(img, mask_img)
+                img = np.asarray(img, dtype='float64')
+                img = np.nan_to_num(img)
+
+                try:
+                    K = pairwise_kernels(img[None,:], Y=relevance_vector , metric='linear')
                 except:
                     K = [[]]
-                K = K / models[j]._scale
+                K = K / model._scale
                 K = np.hstack((np.ones((1, 1)), K))
 
-                prediction = K @ models[j].mu_
+                prediction = K @ model.mu_
 
                 # Save prediction per model in df
                 age_predictions.loc[subject_id, f'Prediction {prefix}'] = prediction
 
-                j =j+1
-
+            pbar.update(1)
+    pbar.close()
     # Save predictions
     age_predictions.to_csv(test_model_dir / 'age_predictions_test.csv')
 
