@@ -165,7 +165,8 @@ def main(experiment_name, scanner_name, n_bootstrap, n_max_pair,
             np.save(str(scores_dir / f'scores_{i_bootstrap:04d}_{model_name}_train.npy'), train_scores)
 
             # Generalisation data
-            general_predictions = best_model.predict(x_general)
+            x_general_norm = scaler.transform(x_general)
+            general_predictions = best_model.predict(x_general_norm)
             general_mae = mean_absolute_error(y_general, general_predictions)
             general_rmse = sqrt(mean_squared_error(y_general, general_predictions))
             general_r2 = r2_score(y_general, general_predictions)
