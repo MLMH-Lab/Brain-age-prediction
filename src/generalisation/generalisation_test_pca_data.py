@@ -15,6 +15,7 @@ from scipy import stats
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from utils import load_demographic_data
 import pandas as pd
+from tqdm import tqdm
 
 PROJECT_ROOT = Path.cwd()
 
@@ -78,7 +79,8 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
     n_folds = 10
 
     for i_repetition in range(n_repetitions):
-        for i_fold in range(n_folds):
+        print(f'Repetition : {i_repetition}')
+        for i_fold in tqdm(range(n_folds)):
             # Load model and scaler
             prefix = f'{i_repetition:02d}_{i_fold:02d}'
 

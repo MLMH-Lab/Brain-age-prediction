@@ -140,15 +140,7 @@ def main(training_experiment_name,
                 # Save prediction per model in df
                 age_predictions.loc[subject_id, f'Prediction {prefix}'] = prediction
 
-            pbar.update(1)
-    pbar.close()
-    # Save predictions
-    age_predictions.to_csv(test_model_dir / 'age_predictions_test.csv')
-
-    # Get and save scores
-    for i_repetition in range(n_repetitions):
-        for i_fold in range(n_folds):
-            prefix = f'{i_repetition:02d}_{i_fold:02d}'
+            # Get and save scores
             predictions = age_predictions[f'Prediction {prefix}'].values
 
             mae = mean_absolute_error(age, predictions)
@@ -159,6 +151,11 @@ def main(training_experiment_name,
             # Save model scores
             scores_array = np.array([r2, mae, rmse, age_error_corr])
             np.save(test_cv_dir / f'{prefix}_scores.npy', scores_array)
+
+            pbar.update(1)
+    pbar.close()
+    # Save predictions
+    age_predictions.to_csv(test_model_dir / 'age_predictions_test.csv')
 
 
 if __name__ == '__main__':
