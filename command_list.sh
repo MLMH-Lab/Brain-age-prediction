@@ -81,6 +81,9 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "SVM"
 ./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "RVM"
 ./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "GPR"
+./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "pca_RVM" -F 3 -R 10
+./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "pca_SVM" -F 3 -R 10
+./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "pca_GPR" -F 3 -R 10
 ./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "voxel_SVM"
 ./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "voxel_RVM"
 

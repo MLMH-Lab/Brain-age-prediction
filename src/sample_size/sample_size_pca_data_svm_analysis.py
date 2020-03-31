@@ -17,8 +17,9 @@ import numpy as np
 from nilearn.masking import apply_mask
 from scipy import stats
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.preprocessing import RobustScaler
-from sklearn_rvm import EMRVR
+from sklearn.svm import LinearSVR
 from tqdm import tqdm
 import pandas as pd
 from sklearn.decomposition import PCA
@@ -89,7 +90,7 @@ def main(experiment_name, scanner_name, input_path, n_bootstrap, n_max_pair,
          general_experiment_name, general_scanner_name, input_general_path,
          general_input_ids_file, input_data_type, mask_filename):
     # ----------------------------------------------------------------------------------------
-    model_name = 'pca_RVM'
+    model_name = 'pca_SVM'
 
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
@@ -122,6 +123,7 @@ def main(experiment_name, scanner_name, input_path, n_bootstrap, n_max_pair,
     x_general = np.array(dataset_site2)
     y_general = general_dataset['Age'].values
     # ----------------------------------------------------------------------------------------
+
     # Loop over the 20 bootstrap samples with up to 20 gender-balanced subject pairs per age group/year
     for i_n_subject_pairs in range(3, n_max_pair + 1):
         print(f'Bootstrap number of subject pairs: {i_n_subject_pairs}')
@@ -178,12 +180,24 @@ def main(experiment_name, scanner_name, input_path, n_bootstrap, n_max_pair,
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
 
+            svm = LinearSVR(loss='epsilon_insensitive')
+
             # Systematic search for best hyperparameters
-            rvm = EMRVR(kernel='linear', threshold_alpha=1e9)
-            rvm.fit(x_train, y_train)
+            search_space = {'C': [2 ** -7, 2 ** -5, 2 ** -3, 2 ** -1, 2 ** 0, 2 ** 1, 2 ** 3, 2 ** 5, 2 ** 7]}
+            n_nested_folds = 5
+            nested_kf = KFold(n_splits=n_nested_folds, shuffle=True, random_state=i_bootstrap)
+            gridsearch = GridSearchCV(svm,
+                                      param_grid=search_space,
+                                      scoring='neg_mean_absolute_error',
+                                      refit=True, cv=nested_kf,
+                                      verbose=0, n_jobs=-1)
+
+            gridsearch.fit(x_train, y_train)
+
+            best_model = gridsearch.best_estimator_
 
             # Test data
-            predictions = rvm.predict(x_test)
+            predictions = best_model.predict(x_test)
             mae = mean_absolute_error(y_test, predictions)
             rmse = sqrt(mean_squared_error(y_test, predictions))
             r2 = r2_score(y_test, predictions)
@@ -199,7 +213,7 @@ def main(experiment_name, scanner_name, input_path, n_bootstrap, n_max_pair,
                 f'R2: {r2:0.3f} MAE: {mae:0.3f} RMSE: {rmse:0.3f} CORR: {age_error_corr:0.3f}')
 
             # Train data
-            train_predictions = rvm.predict(x_train)
+            train_predictions = best_model.predict(x_train)
             train_mae = mean_absolute_error(y_train, train_predictions)
             train_rmse = sqrt(mean_squared_error(y_train, train_predictions))
             train_r2 = r2_score(y_train, train_predictions)
@@ -215,7 +229,7 @@ def main(experiment_name, scanner_name, input_path, n_bootstrap, n_max_pair,
             # Generalisation data
             x_general_components = pca.transform(x_general)
             x_general_norm = scaler.transform(x_general_components)
-            general_predictions = rvm.predict(x_general_norm)
+            general_predictions = best_model.predict(x_general_norm)
             general_mae = mean_absolute_error(y_general, general_predictions)
             general_rmse = sqrt(
                 mean_squared_error(y_general, general_predictions))

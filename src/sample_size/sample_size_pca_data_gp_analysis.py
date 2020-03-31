@@ -18,7 +18,8 @@ from nilearn.masking import apply_mask
 from scipy import stats
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import RobustScaler
-from sklearn_rvm import EMRVR
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import DotProduct
 from tqdm import tqdm
 import pandas as pd
 from sklearn.decomposition import PCA
@@ -89,7 +90,7 @@ def main(experiment_name, scanner_name, input_path, n_bootstrap, n_max_pair,
          general_experiment_name, general_scanner_name, input_general_path,
          general_input_ids_file, input_data_type, mask_filename):
     # ----------------------------------------------------------------------------------------
-    model_name = 'pca_RVM'
+    model_name = 'pca_GPR'
 
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
@@ -179,11 +180,11 @@ def main(experiment_name, scanner_name, input_path, n_bootstrap, n_max_pair,
             x_test = scaler.transform(x_test)
 
             # Systematic search for best hyperparameters
-            rvm = EMRVR(kernel='linear', threshold_alpha=1e9)
-            rvm.fit(x_train, y_train)
+            gpr = GaussianProcessRegressor(kernel=DotProduct(), random_state=0,alpha=1e-2)
+            gpr.fit(x_train, y_train)
 
             # Test data
-            predictions = rvm.predict(x_test)
+            predictions = gpr.predict(x_test)
             mae = mean_absolute_error(y_test, predictions)
             rmse = sqrt(mean_squared_error(y_test, predictions))
             r2 = r2_score(y_test, predictions)
@@ -199,7 +200,7 @@ def main(experiment_name, scanner_name, input_path, n_bootstrap, n_max_pair,
                 f'R2: {r2:0.3f} MAE: {mae:0.3f} RMSE: {rmse:0.3f} CORR: {age_error_corr:0.3f}')
 
             # Train data
-            train_predictions = rvm.predict(x_train)
+            train_predictions = gpr.predict(x_train)
             train_mae = mean_absolute_error(y_train, train_predictions)
             train_rmse = sqrt(mean_squared_error(y_train, train_predictions))
             train_r2 = r2_score(y_train, train_predictions)
@@ -215,7 +216,7 @@ def main(experiment_name, scanner_name, input_path, n_bootstrap, n_max_pair,
             # Generalisation data
             x_general_components = pca.transform(x_general)
             x_general_norm = scaler.transform(x_general_components)
-            general_predictions = rvm.predict(x_general_norm)
+            general_predictions = gpr.predict(x_general_norm)
             general_mae = mean_absolute_error(y_general, general_predictions)
             general_rmse = sqrt(
                 mean_squared_error(y_general, general_predictions))

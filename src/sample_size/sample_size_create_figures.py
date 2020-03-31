@@ -27,6 +27,11 @@ parser.add_argument('-N', '--n_bootstrap',
                     type=int, default=1000,
                     help='Number of bootstrap iterations.')
 
+parser.add_argument('-F', '--n_min_pair',
+                    dest='n_min_pair',
+                    type=int, default=1,
+                    help='Number minimum of pairs.')
+
 parser.add_argument('-R', '--n_max_pair',
                     dest='n_max_pair',
                     type=int, default=20,
@@ -35,11 +40,11 @@ parser.add_argument('-R', '--n_max_pair',
 args = parser.parse_args()
 
 
-def main(experiment_name, model_name, n_bootstrap, n_max_pair):
+def main(experiment_name, model_name, n_bootstrap, n_min_pair, n_max_pair):
     # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
-    i_n_subject_pairs_list = range(1, n_max_pair + 1)
+    i_n_subject_pairs_list = range(n_min_pair, n_max_pair + 1)
 
     scores_i_n_subject_pairs = []
     train_scores_i_n_subject_pairs = []
@@ -87,8 +92,8 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
              linewidth=1.0,
              color='b', label=model_name + ' generalisation performance')
 
-    plt.plot(i_n_subject_pairs_list,
-             std_uniform_dist * np.ones_like(i_n_subject_pairs_list), '--',
+    plt.plot(range(1, 21),
+             std_uniform_dist * np.ones_like(range(1, 21)), '--',
              linewidth=1.0,
              color='#111111', label='Chance line')
 
@@ -110,7 +115,8 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
 
     # Create plot
     plt.xlabel('Number of subjects')
-    plt.xticks(i_n_subject_pairs_list, np.multiply(i_n_subject_pairs_list, 2 * ((73 - 47) + 1)))
+    plt.xticks(range(1, 21), np.multiply(range(1, 21), 2 * ((73 - 47) + 1)))
+    plt.xlim(0.04999999999999993, 20.95)
     plt.ylabel('Mean Absolute Error')
     plt.legend(loc='best')
     plt.tight_layout()
@@ -119,4 +125,4 @@ def main(experiment_name, model_name, n_bootstrap, n_max_pair):
 
 if __name__ == '__main__':
     main(args.experiment_name, args.model_name,
-         args.n_bootstrap, args.n_max_pair)
+         args.n_bootstrap, args.n_min_pair, args.n_max_pair)
