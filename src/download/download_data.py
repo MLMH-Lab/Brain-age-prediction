@@ -22,9 +22,7 @@ args = parser.parse_args()
 
 
 def download_files(data_dir, selected_path, dataset_prefix_path, nas_path):
-    """Download the files necessary for the study.
-
-    Function download files from network-attached storage.
+    """Download the files necessary for the study from network-attached storage.
     These files include:
         - participants.tsv: Demographic data
         - freesurferData.csv: Neuroimaging data
@@ -46,7 +44,8 @@ def download_files(data_dir, selected_path, dataset_prefix_path, nas_path):
     dataset_path = data_dir / dataset_prefix_path
     dataset_path.mkdir(exist_ok=True, parents=True)
 
-    copyfile(str(selected_path / 'participants.tsv'), str(dataset_path / 'participants.tsv'))
+    copyfile(str(selected_path / 'participants.tsv'),
+             str(dataset_path / 'participants.tsv'))
 
     try:
         copyfile(str(nas_path / 'FreeSurfer_preprocessed' / dataset_prefix_path / 'freesurferData.csv'),
@@ -83,7 +82,8 @@ def main(nas_path_str):
 
         scanner_name = subdirectory_selected_path.stem
         if (subdirectory_selected_path / 'participants.tsv').is_file():
-            download_files(data_dir, subdirectory_selected_path, dataset_name + '/' + scanner_name, nas_path)
+            download_files(data_dir, subdirectory_selected_path, dataset_name +
+                           '/' + scanner_name, nas_path)
 
 
 if __name__ == '__main__':

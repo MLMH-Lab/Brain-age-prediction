@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Script to assess correlations between BrainAGE/BrainAGER and demographic variables in UK Biobank
-(dataset created in variables_biobank.py)"""
+"""Script to assess correlations between BrainAGE/BrainAGER and gender
+in UK Biobank"""
 import argparse
 from pathlib import Path
 
@@ -28,7 +28,20 @@ args = parser.parse_args()
 
 
 def cohend(d1, d2):
-    """Calculate Cohen's d effect size for independent samples"""
+    """Calculate Cohen's d effect size for two independent samples
+
+    Parameters
+    ----------
+    d1: array
+        Values obtained for the first group
+    d2: array
+        Values obtained for the second group
+
+    Returns
+    -------
+    effect_sizes: float
+        Calculated Cohen's d
+    """
 
     n1, n2 = len(d1), len(d2)
     d1_variance, d2_variance = np.var(d1, ddof=1), np.var(d2, ddof=1)
@@ -53,7 +66,8 @@ def main(experiment_name, scanner_name, model_name):
 
     ensemble_df['participant_id'] = ensemble_df['image_id'].str.split('_').str[0]
 
-    dataset = pd.merge(ensemble_df, participants[['participant_id', 'Gender']], on='participant_id')
+    dataset = pd.merge(ensemble_df, participants[['participant_id', 'Gender']],
+                       on='participant_id')
 
     # Correlation variables
     y_list = ['BrainAGE_predmean', 'BrainAGER_predmean']
@@ -61,7 +75,7 @@ def main(experiment_name, scanner_name, model_name):
     dataset_f = dataset[dataset['Gender'] == 0]
     dataset_m = dataset[dataset['Gender'] == 1]
 
-    # Create empty dataframe for analysis of education level
+    # Create empty dataframe for analysis of gender
     output = pd.DataFrame({'Row_labels_1': ['female vs male',
                                             'female vs male',
                                             'female vs male',
@@ -71,7 +85,8 @@ def main(experiment_name, scanner_name, model_name):
                                             'mean_male']})
     output.set_index('Row_labels_1', 'Row_labels_2')
 
-    # Independent t-tests with alpha corrected for multiple comparisons using Bonferroni's method
+    # Independent t-tests with alpha corrected for multiple comparisons using
+    # Bonferroni's method
     alpha_corrected = 0.05 / 2
 
     for y in y_list:
@@ -90,6 +105,7 @@ def main(experiment_name, scanner_name, model_name):
         output[y] = y_results
 
     output.to_csv(correlation_dir / f'gender_ttest_{model_name}output.csv')
+
 
 if __name__ == '__main__':
     main(args.experiment_name, args.scanner_name,
