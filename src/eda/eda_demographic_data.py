@@ -46,7 +46,7 @@ def save_frequency_table(output_dir, input_df, col_name, suffix):
 
 
 def create_histogram(output_dir, input_df, suffix):
-    """Save histogram of age distribution by gender in experiment directory as png."""
+    """Save histogram of age distribution by gender in experiment directory as eps."""
     plt.figure(figsize=(10, 7))
 
     plt.hist(input_df.Age, color='blue', histtype='step', lw=2, bins=input_df.Age.nunique())
@@ -61,7 +61,7 @@ def create_histogram(output_dir, input_df, suffix):
 
 
 def create_gender_histogram(output_dir, input_df, suffix):
-    """Save histogram of age distribution by gender in experiment directory as png."""
+    """Save histogram of age distribution by gender in experiment directory as eps."""
     male_code = 1
     female_code = 0
 
@@ -73,14 +73,14 @@ def create_gender_histogram(output_dir, input_df, suffix):
     plt.hist(male_ages, color='blue', histtype='step', lw=2, bins=male_ages.nunique(), label='male')
     plt.hist(female_ages, color='red', histtype='step', lw=2, bins=female_ages.nunique(), label='female')
 
-    plt.title('Age distribution in UK BIOBANK by gender', fontsize=17)
+    plt.title('Age distribution in UK BIOBANK by sex', fontsize=17)
     plt.xlabel('Age at MRI scan [years]', fontsize=15)
     plt.ylabel('Number of subjects', fontsize=15)
     plt.legend(loc='upper right', fontsize=13)
     plt.tick_params(labelsize=13)
     plt.axis('tight')
 
-    plt.savefig(output_dir / f'gender_age_dist{suffix}.eps', format='eps')
+    plt.savefig(output_dir / f'sex_age_dist{suffix}.eps', format='eps')
 
 
 def main(experiment_name, scanner_name, input_ids_file, suffix):

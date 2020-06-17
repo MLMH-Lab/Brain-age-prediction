@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Script to plots distribution of education with regards to age in UK Biobank Scanner1 dataset"""
+"""Script to plot distribution of education with regards to age in UK Biobank Scanner1 dataset"""
 
 from pathlib import Path
 
@@ -11,13 +11,12 @@ PROJECT_ROOT = Path.cwd()
 
 
 def plot_save_histogram_education(output_dir, input_df, suffix):
-    # Histogram of age distribution by education level
+    """Create histogram of age distribution by education level and save in output folder as eps"""
     gcse_code = 1
     alevels_code = 2
     prof_qual_code = 3
     uni_code = 4
 
-    """Create histogram of age distribution by education level and saves in output folder as png"""
     gcse_ages = input_df.groupby('Education_highest').get_group(gcse_code).Age
     alevels_ages = input_df.groupby('Education_highest').get_group(alevels_code).Age
     prof_qual_ages = input_df.groupby('Education_highest').get_group(prof_qual_code).Age
