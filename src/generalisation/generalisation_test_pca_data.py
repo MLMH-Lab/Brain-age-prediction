@@ -3,7 +3,7 @@
 on previously unseen data from Biobank Scanner2 to predict brain age.
 
 The script loops over the 100 SVM models created in train_svm_on_freesurfer_data.py, loads their regressors,
-applies them to the Scanner2 data and saves all predictions per subjects in a csv file"""
+applies them to the Scanner2 data and saves all predictions per subjects in age_predictions_test.csv"""
 import argparse
 import random
 from math import sqrt
@@ -53,7 +53,7 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
     pca_dir = PROJECT_ROOT / 'outputs' / 'pca'
     ids_path = PROJECT_ROOT / 'outputs' / test_experiment_name / input_ids_file
-
+    # Create experiment's output directory
     test_model_dir = test_experiment_dir / model_name
     test_model_dir.mkdir(exist_ok=True)
 
@@ -81,6 +81,7 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
     for i_repetition in range(n_repetitions):
         print(f'Repetition : {i_repetition}')
         for i_fold in tqdm(range(n_folds)):
+
             # Load model and scaler
             prefix = f'{i_repetition:02d}_{i_fold:02d}'
 
@@ -99,7 +100,7 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
             pca_components = dataset_df[dataset_df.columns.difference(participants_df.columns)].values
             x_test = scaler.transform(pca_components)
 
-            # Apply model to scaled data
+            # Apply model to scaled data and measure error
             predictions = model.predict(x_test)
 
             absolute_error = mean_absolute_error(age, predictions)

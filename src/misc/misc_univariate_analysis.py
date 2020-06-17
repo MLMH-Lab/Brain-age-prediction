@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-Script to implement univariate analysis based on [1], regression for age and volume per region
-Step 1: normalise each brain region
-Step 2: create df with normalised brain region (dep var) and age of participant (indep var) (+ quadratic and cubic age)
-Step 3: output coefficient per subject
+Implements univariate analysis based on [1], regresses for age and volume per region:
+     1. normalise each brain region
+     2. creates df with normalised brain region (dependent variable) and age of participant
+     (independent variable) (+ quadratic and cubic age)
+     3. outputs coefficient per subject
 
-References
-[1] - Zhao, Lu, et al. "Age-Related Differences in Brain Morphology and the Modifiers in Middle-Aged and Older Adults."
-Cerebral Cortex (2018).
+References:
+[1] - Zhao, Lu, et al. (2018) Age-Related Differences in Brain Morphology and the Modifiers
+ in Middle-Aged and Older Adults. Cerebral Cortex.
 """
 import argparse
 from pathlib import Path
@@ -39,12 +40,44 @@ args = parser.parse_args()
 
 
 def normalise_region_df(df, region_name):
-    """Normalise region by total intracranial volume"""
+    """Normalise region by total intracranial volume
+
+    Parameters
+    ----------
+    df: dataframe
+        Data to be normalized
+    region_name: str
+        Region of interest
+
+    Returns
+    -------
+    float
+        Normalised region
+    """
     return df[region_name] / df['EstimatedTotalIntraCranialVol'] * 100
 
 
 def linear_regression(df, region_name):
-    """Perform linear regression using ordinary least squares (OLS) method"""
+    """Perform linear regression using ordinary least squares (OLS) method
+
+    Parameters
+    ----------
+    df: dataframe
+        Dataset to be regressed
+    region_name: str
+        Region of interest
+
+    Returns
+    -------
+    OLS_results.params: ndarray
+        Estimated parameters
+    OLS_results.bse: float
+        Standard error of the parameter estimates
+    OLS_results.tvalues: parameter
+        t-statistic of parameter estimates
+    OLS_results.pvalues: float
+        Two-tailed p-values of the t-statistics of the parameters
+    """
 
     endog = df['Norm_vol_' + region_name].values
     exog = sm.add_constant(df[['Age', 'Age^2', 'Age^3']].values)
@@ -69,7 +102,7 @@ def main(experiment_name, scanner_name, input_ids_file):
 
     dataset = load_freesurfer_dataset(participants_path, ids_path, freesurfer_path)
 
-    # Create new df to add normalised regional volumes to
+    # Create new df to add normalised regional volumes
     normalised_df = dataset[['participant_id', 'Diagn', 'Gender', 'Age']]
     normalised_df['Age^2'] = normalised_df['Age'] ** 2
     normalised_df['Age^3'] = normalised_df['Age'] ** 3

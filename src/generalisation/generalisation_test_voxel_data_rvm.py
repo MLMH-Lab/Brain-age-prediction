@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Script to test SVM models developed using FreeSurfer data from Biobank Scanner1
+"""
+Tests RVM models developed using voxel data from Biobank Scanner1
 on previously unseen data from Biobank Scanner2 to predict brain age.
 
-The script loops over the 100 SVM models created in train_svm_on_freesurfer_data.py, loads their regressors,
-applies them to the Scanner2 data and saves all predictions per subjects in a csv file"""
+The script loops over the 100 RVM models created in train_rvm_on_voxel_data.py,
+loads their regressors, applies them to the Scanner2 data and saves all predictions
+per subjects in age_predictions_test.csv"""
 import argparse
 import random
 from math import sqrt
@@ -78,6 +80,7 @@ def main(training_experiment_name,
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
     ids_path = PROJECT_ROOT / 'outputs' / test_experiment_name / input_ids_file
 
+    # Create experiment's output directory
     test_model_dir = test_experiment_dir / model_name
     test_model_dir.mkdir(exist_ok=True)
 
@@ -108,6 +111,8 @@ def main(training_experiment_name,
     pbar = tqdm(total=100)
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
+
+            # Load model
             prefix = f'{i_repetition:02d}_{i_fold:02d}'
             pbar.set_description(f'{prefix}')
             relevance_vector = np.load(training_cv_dir / f'{prefix}_relevance_vectors.npz')['relevance_vectors_']
