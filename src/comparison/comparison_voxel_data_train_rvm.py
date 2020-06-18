@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Script to train Relevant Vector Machines on voxel data.
+"""Script to train Relevant Vector Machines on voxel-level data.
 
-We trained the Relevant Vector Machines (RVMs) [1] in a 10 repetitions
-10 stratified k-fold cross-validation (stratified by age).
-The hyperparameter tuning was performed in an automatic way using
- a nested cross-validation.
+We trained the Relevant Vector Machines (RVMs) [1] in 10 repetitions of
+10 stratified k-fold cross-validation (CV) (stratified by age).
+
 This script assumes that a kernel has been already pre-computed.
 To compute the kernel use the script `precompute_3Ddata.py`
 
@@ -46,7 +45,7 @@ parser.add_argument('-S', '--scanner_name',
 parser.add_argument('-I', '--input_ids_file',
                     dest='input_ids_file',
                     default='homogenized_ids.csv',
-                    help='Filename indicating the ids to be used.')
+                    help='File name indicating the subject IDs to be used.')
 
 args = parser.parse_args()
 
@@ -75,13 +74,13 @@ def main(experiment_name, scanner_name, input_ids_file):
 
     age = demographics['Age'].values
 
-    # Cross validation variables
+    # CV variables
     cv_r2 = []
     cv_mae = []
     cv_rmse = []
     cv_age_error_corr = []
 
-    # Create Dataframe to hold actual and predicted ages
+    # Create DataFrame to hold actual and predicted ages
     age_predictions = demographics[['image_id', 'Age']]
     age_predictions = age_predictions.set_index('image_id')
 
@@ -93,7 +92,7 @@ def main(experiment_name, scanner_name, input_ids_file):
         repetition_column_name = f'Prediction repetition {i_repetition:02d}'
         age_predictions[repetition_column_name] = np.nan
 
-        # Create 10-fold cross-validation scheme stratified by age
+        # Create 10-fold CV scheme stratified by age
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
         for i_fold, (train_index, test_index) in enumerate(skf.split(kernel, age)):
             print(f'Running repetition {i_repetition:02d}, fold {i_fold:02d}')
@@ -144,7 +143,7 @@ def main(experiment_name, scanner_name, input_ids_file):
     # Save predictions
     age_predictions.to_csv(model_dir / 'age_predictions.csv')
 
-    # Variables for CV means across all repetitions
+    # Variables for mean scores of performance metrics of CV folds across all repetitions
     print('')
     print('Mean values:')
     print(f'R2: {np.mean(cv_r2):0.3f} MAE: {np.mean(cv_mae):0.3f} '

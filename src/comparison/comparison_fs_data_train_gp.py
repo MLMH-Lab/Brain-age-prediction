@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Script to train Gaussian Processes on freesurfer data.
+"""Script to train Gaussian Processes on FreeSurfer data.
 
-We trained the Gaussian Processes (GP) [1] in a 10 repetitions
-10 stratified k-fold cross-validation (stratified by age).
+We trained the Gaussian Processes (GP) [1] in 10 repetitions of
+10 stratified k-fold cross-validation (CV) (stratified by age).
 
 References
 ----------
@@ -76,7 +76,7 @@ def main(experiment_name, scanner_name, input_ids_file):
     regions_norm = np.true_divide(regions, tiv)
     age = dataset['Age'].values
 
-    # Cross validation variables
+    # CV variables
     cv_r2 = []
     cv_mae = []
     cv_rmse = []
@@ -95,7 +95,7 @@ def main(experiment_name, scanner_name, input_ids_file):
         repetition_column_name = f'Prediction repetition {i_repetition:02d}'
         age_predictions[repetition_column_name] = np.nan
 
-        # Create 10-fold cross-validation scheme stratified by age
+        # Create 10-fold CV scheme stratified by age
         skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=i_repetition)
         for i_fold, (train_index, test_index) in enumerate(skf.split(regions_norm, age)):
             print(f'Running repetition {i_repetition:02d}, fold {i_fold:02d}')
@@ -103,7 +103,7 @@ def main(experiment_name, scanner_name, input_ids_file):
             x_train, x_test = regions_norm[train_index], regions_norm[test_index]
             y_train, y_test = age[train_index], age[test_index]
 
-            # Scaling using inter-quartile
+            # Scaling using inter-quartile range
             scaler = RobustScaler()
             x_train = scaler.fit_transform(x_train)
             x_test = scaler.transform(x_test)
@@ -148,7 +148,7 @@ def main(experiment_name, scanner_name, input_ids_file):
     # Save predictions
     age_predictions.to_csv(model_dir / 'age_predictions.csv')
 
-    # Variables for CV means across all repetitions
+    # Variables for mean scores of performance metrics of CV folds across all repetitions
     print('')
     print('Mean values:')
     print(f'R2: {np.mean(cv_r2):0.3f} MAE: {np.mean(cv_mae):0.3f} '

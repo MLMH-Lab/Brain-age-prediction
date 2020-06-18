@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-""" Script to calculate the primal weights of the SVM approach
-for voxel data.
+""" Script to calculate the primal weights of the Support Vector Machine
+(SVM) approach for voxel-level data.
 
 """
 import argparse
@@ -29,7 +29,7 @@ parser.add_argument('-P', '--input_path',
 parser.add_argument('-I', '--input_ids_file',
                     dest='input_ids_file',
                     default='homogenized_ids.csv',
-                    help='Filename indicating the ids to be used.')
+                    help='File name indicating the subject IDs to be used.')
 
 parser.add_argument('-D', '--input_data_type',
                     dest='input_data_type',
@@ -67,6 +67,7 @@ def main(experiment_name, input_path_str, input_ids_file, input_data_type, mask_
     n_folds = 10
     coef_list = []
     index_list = []
+
     for i_repetition in range(n_repetitions):
         for i_fold in range(n_folds):
             # Load model
@@ -79,7 +80,7 @@ def main(experiment_name, input_path_str, input_ids_file, input_data_type, mask_
             coef_list.append(model.dual_coef_[0])
             index_list.append(train_index[model.support_])
 
-    # number of voxels in the mask
+    # Get the number of voxels in the mask
     mask_data = mask_img.get_fdata()
     n_voxels = sum(sum(sum(mask_data > 0)))
     n_models = 100
