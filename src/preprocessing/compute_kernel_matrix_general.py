@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Script to create the Kernel matrix (Gram matrix).
+""" Script to create the Kernel matrix (Gram matrix) for the generalisation analysis.
 
-The Kernel matrix will be used on the analysis with voxel data.
+In this script, we measure the kernel function between subjects from site 1 and 2.
 """
 import argparse
 from pathlib import Path
@@ -61,16 +61,7 @@ args = parser.parse_args()
 
 
 def calculate_gram_matrix(subjects_path, mask_img, subjects_path_2, step_size=500):
-    """Calculate the Gram matrix.
-
-    Args:
-        subjects_path:
-        mask_img:
-        step_size:
-
-    Returns:
-
-    """
+    """Calculate the Gram matrix. """
     n_samples = len(subjects_path)
     n_samples_2 = len(subjects_path_2)
     gram_matrix = np.float64(np.zeros((n_samples, n_samples_2)))

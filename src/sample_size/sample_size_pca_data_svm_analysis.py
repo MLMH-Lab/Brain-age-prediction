@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Script to perform the sample size analysis using Relevant Vector Machine
-
-NOTE: This script is adapted from comparison_train_gp_fs_data.py but
-it uses KFold instead of StratifiedKFold to account for the bootstrap
-samples with few participants
-"""
+"""Script to perform the sample size analysis using Support Vector Machine on PCA data."""
 import argparse
 import random
 import warnings

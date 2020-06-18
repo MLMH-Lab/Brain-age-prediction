@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Script to perform the sample size analysis using Gaussian Processes
-
-NOTE: This script is adapted from comparison_train_gp_fs_data.py but
-it uses KFold instead of StratifiedKFold to account for the bootstrap
-samples with few participants
-"""
+"""Script to perform the sample size analysis using Gaussian Processes. """
 import argparse
 import random
 from math import sqrt
@@ -59,7 +54,6 @@ args = parser.parse_args()
 
 def main(experiment_name, scanner_name, n_bootstrap, n_max_pair,
          general_experiment_name, general_scanner_name, general_input_ids_file):
-    # ----------------------------------------------------------------------------------------
     model_name = 'GPR'
 
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name

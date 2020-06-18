@@ -41,7 +41,6 @@ args = parser.parse_args()
 
 
 def main(experiment_name, model_name, n_bootstrap, n_min_pair, n_max_pair):
-    # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
     i_n_subject_pairs_list = range(n_min_pair, n_max_pair + 1)

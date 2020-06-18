@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Clean UK Biobank data.
+""" Clean UK Biobank data.
 
 Most of the subjects are white and some ages have very low number of subjects (<100).
 The ethnics minorities and age with low number are removed from further analysis
@@ -32,7 +32,6 @@ args = parser.parse_args()
 
 def main(experiment_name, scanner_name, input_ids_file):
     """Clean UK Biobank data."""
-    # ----------------------------------------------------------------------------------------
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
     ids_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / input_ids_file
 

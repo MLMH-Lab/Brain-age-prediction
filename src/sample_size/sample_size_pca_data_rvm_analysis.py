@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Script to perform the sample size analysis using Relevant Vector Machine
-
-NOTE: This script is adapted from comparison_train_gp_fs_data.py but
-it uses KFold instead of StratifiedKFold to account for the bootstrap
-samples with few participants
-"""
+"""Script to perform the sample size analysis using Relevant Vector Machine on PCA data"""
 import argparse
 import random
 import warnings
@@ -88,7 +83,6 @@ def load_all_subjects(subjects_path, mask_img):
 def main(experiment_name, scanner_name, input_path, n_bootstrap, n_max_pair,
          general_experiment_name, general_scanner_name, input_general_path,
          general_input_ids_file, input_data_type, mask_filename):
-    # ----------------------------------------------------------------------------------------
     model_name = 'pca_RVM'
 
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name

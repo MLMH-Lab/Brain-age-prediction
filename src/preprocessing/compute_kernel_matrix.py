@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Script to create the Kernel matrix (Gram matrix).
+""" Script to create the Kernel matrix (Gram matrix).
 
 The Kernel matrix will be used on the analysis with voxel data.
 """
@@ -43,16 +43,7 @@ args = parser.parse_args()
 
 
 def calculate_gram_matrix(subjects_path, mask_img, step_size=1000):
-    """Calculate the Gram matrix.
-
-    Args:
-        subjects_path:
-        mask_img:
-        step_size:
-
-    Returns:
-
-    """
+    """Calculate the Gram matrix. """
     n_samples = len(subjects_path)
     gram_matrix = np.float64(np.zeros((n_samples, n_samples)))
 
