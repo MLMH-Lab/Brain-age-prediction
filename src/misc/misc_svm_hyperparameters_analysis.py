@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
-Compares performance of SVM models with different hyperparameters C.
+Compares pairwise performance through independent t-test
+of SVM models with different hyperparameters C.
+Saves results into `svm_params_ttest.csv` and `svm_params_values.csv`
 """
 import argparse
 import itertools
@@ -24,7 +26,7 @@ args = parser.parse_args()
 
 
 def main(experiment_name):
-    """Pairwise comparison of SVM classifier performances with different hyperparameters."""
+    """Pairwise comparison of SVM classifier performances with different hyperparameters C."""
     # ----------------------------------------------------------------------------------------
     svm_dir = PROJECT_ROOT / 'outputs' / experiment_name / 'SVM'
     cv_dir = svm_dir / 'cv'
@@ -49,7 +51,8 @@ def main(experiment_name):
 
     results_df = pd.DataFrame(columns=['params', 'p-value', 'stats'])
 
-    # Corrected repeated k-fold cv test to compare performance of two SVM classifiers at a time
+    # Corrected repeated k-fold cv test to compare pairwise performance of the SVM classifiers
+    # through independent t-test
     for param_a, param_b in combinations:
         statistic, pvalue = ttest_ind_corrected(scores_params[:, param_a], scores_params[:, param_b],
                                                 k=n_folds, r=n_repetitions)
@@ -64,7 +67,7 @@ def main(experiment_name):
                                         'p-value': pvalue,
                                         'stats': statistic},
                                        ignore_index=True)
-
+    # Output to csv
     results_df.to_csv(svm_dir / 'svm_params_ttest.csv', index=False)
 
     values_df = pd.DataFrame(columns=['measures'] + list(search_space['C']))
