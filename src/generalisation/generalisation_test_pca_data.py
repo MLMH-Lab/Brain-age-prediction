@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Script to test SVM models developed using FreeSurfer data from Biobank Scanner1
+"""
+Tests models trained using voxel-level data from Biobank Scanner1
+with reduced dimensionality through Principal Component Analysis (PCA),
 on previously unseen data from Biobank Scanner2 to predict brain age.
 
-The script loops over the 100 SVM models created in train_svm_on_freesurfer_data.py, loads their regressors,
-applies them to the Scanner2 data and saves all predictions per subjects in age_predictions_test.csv"""
+The script loops over the 100 models created in comparison_pca_data_train_svm.py
+and comparison_pca_data_train_rvm.py, loads their regressors, applies them to the
+Scanner2 data and saves all predictions per subjects in age_predictions_test.csv
+"""
 import argparse
 import random
 from math import sqrt

@@ -3,9 +3,10 @@
 Tests RVM models developed using voxel data from Biobank Scanner1
 on previously unseen data from Biobank Scanner2 to predict brain age.
 
-The script loops over the 100 RVM models created in train_rvm_on_voxel_data.py,
+The script loops over the 100 RVM models created in comparison_voxel_data_train_rvm.py,
 loads their regressors, applies them to the Scanner2 data and saves all predictions
-per subjects in age_predictions_test.csv"""
+per subjects in age_predictions_test.csv.
+"""
 import argparse
 import random
 from math import sqrt

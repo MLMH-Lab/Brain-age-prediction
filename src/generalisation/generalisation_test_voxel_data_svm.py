@@ -3,9 +3,9 @@
 Tests SVM models developed using voxel data from Biobank Scanner1
 on previously unseen data from Biobank Scanner2 to predict brain age.
 
-The script loops over the 100 SVM models created in train_svm_on_voxel_data.py,
+The script loops over the 100 SVM models created in comparison_voxel_data_train_svm.py,
 loads their regressors, applies them to the Scanner2 data and saves all
-predictions per subjects in age_predictions_test.csv
+predictions per subjects in age_predictions_test.csv.
 """
 import argparse
 import random
