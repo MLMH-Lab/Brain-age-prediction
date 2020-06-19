@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Script to create the Kernel matrix (Gram matrix).
+""" Script to create the PCA models.
 
-The Kernel matrix will be used on the analysis with voxel data.
+Note: We calculate only 150 components due to resources limitations.
 """
 import argparse
 import warnings
@@ -53,7 +53,6 @@ args = parser.parse_args()
 
 
 def main(input_path_str, experiment_name, input_ids_file, scanner_name, input_data_type, mask_filename):
-    """"""
     dataset_path = Path(input_path_str)
 
     output_path = PROJECT_ROOT / 'outputs' / 'pca'

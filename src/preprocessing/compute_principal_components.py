@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Script to create the Kernel matrix (Gram matrix).
-
-The Kernel matrix will be used on the analysis with voxel data.
-"""
+""" Script to extract the pca components from the participant's data. """
 import argparse
 from pathlib import Path
 
@@ -68,7 +65,6 @@ def load_all_subjects(subjects_path, mask_img):
     return imgs
 
 def main(input_path_str, experiment_name, input_ids_file, input_data_type, mask_filename, output_suffix):
-    """"""
     dataset_path = Path(input_path_str)
     output_path = PROJECT_ROOT / 'outputs' / 'pca'
     models_output_path = output_path / 'models'

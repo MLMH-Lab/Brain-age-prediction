@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Comparing classifiers using a version of the paired Student’s t-test that is
+"""Comparing the performance of machine learning models using a version of the paired Student’s t-test that is
 corrected for the violation of the independence assumption from repeated k-fold cross-validation
 when training the model
 
@@ -43,9 +43,10 @@ args = parser.parse_args()
 
 
 def main(experiment_name, suffix, model_list):
-    # Create summary of results
+    # Create summary of the performance scores across the 100 iterations of each model type (10 times 10-fold CV)
     n_repetitions = 10
     n_folds = 10
+
     for model_name in model_list:
         model_dir = PROJECT_ROOT / 'outputs' / experiment_name / model_name
         cv_dir = model_dir / 'cv'
@@ -77,9 +78,10 @@ def main(experiment_name, suffix, model_list):
 
         results.to_csv(model_dir / f'{model_name}_scores_summary.csv', index=False)
 
+    # Perform the statistical comparison of the summary performance metrics from different models
     combinations = list(itertools.combinations(model_list, 2))
 
-    # Bonferroni correction for multiple comparisons
+    # Create new significance threshold based on Bonferroni correction for multiple comparisons
     corrected_alpha = 0.05 / len(combinations)
 
     results_df = pd.DataFrame(columns=['regressors', 'p-value', 'stats'])

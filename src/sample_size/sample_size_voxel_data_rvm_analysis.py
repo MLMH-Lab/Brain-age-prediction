@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Perform sample size Script to run SVM (linear SVR) on bootstrap datasets of UK BIOBANK Scanner1
-IMPORTANT NOTE: This script is adapted from svm.py but uses KFold instead of StratifiedKFold
-to account for the bootstrap samples with few participants
-"""
+"""Perform sample size Script to run RVM on bootstrap datasets of UK BIOBANK Scanner1. """
 import argparse
 import random
 import warnings
@@ -59,7 +56,6 @@ args = parser.parse_args()
 
 def main(experiment_name, scanner_name, n_bootstrap, n_max_pair,
          general_experiment_name, general_scanner_name, general_input_ids_file):
-    # ----------------------------------------------------------------------------------------
     model_name = 'voxel_RVM'
 
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name

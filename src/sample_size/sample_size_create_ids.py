@@ -43,8 +43,6 @@ args = parser.parse_args()
 
 
 def main(experiment_name, scanner_name, input_ids_file, n_bootstrap, n_max_pair):
-    """"""
-    # ----------------------------------------------------------------------------------------
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / scanner_name / 'participants.tsv'
     ids_path = experiment_dir / input_ids_file
