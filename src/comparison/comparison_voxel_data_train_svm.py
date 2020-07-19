@@ -7,7 +7,7 @@ The hyperparameter tuning was performed in an automatic way using
 a nested CV.
 
 This script assumes that a kernel has been already pre-computed.
-To compute the kernel use the script `precompute_3Ddata.py`
+To compute the kernel use the script `src/preprocessing/compute_kernel_matrix.py`
 
 References
 ----------

@@ -3,9 +3,13 @@
 Tests SVM models developed using voxel data from Biobank Scanner1
 on previously unseen data from Biobank Scanner2 to predict brain age.
 
-The script loops over the 100 SVM models created in comparison_voxel_data_train_svm.py,
-loads their regressors, applies them to the Scanner2 data and saves all
-predictions per subjects in age_predictions_test.csv.
+The script loops over the 100 SVM models created in
+train_svm_on_freesurfer_data.py, loads their regressors,
+applies them to the Scanner2 data and saves all predictions per subjects in a csv file
+
+This script assumes that a nifti file with the feature weights has been already
+pre-computed. To compute the weights use the script
+`src/comparison/comparison_voxel_data_svm_primal_weights.py`
 """
 import argparse
 import random
