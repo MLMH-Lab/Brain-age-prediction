@@ -117,7 +117,7 @@ def main(experiment_name, scanner_name, input_ids_file):
             mae = mean_absolute_error(y_test, predictions)
             rmse = sqrt(mean_squared_error(y_test, predictions))
             r2 = r2_score(y_test, predictions)
-            age_error_corr, _ = stats.spearmanr(np.abs(y_test - predictions), y_test)
+            age_error_corr, _ = stats.spearmanr((predictions - y_test), y_test)
 
             cv_r2.append(r2)
             cv_mae.append(mae)
