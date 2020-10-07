@@ -43,12 +43,40 @@ def main():
             print(f'No age prediction file for {model_name}.')
             raise
 
-        # Get mean predicted age across the 10 folds for each repetition
-        repetion_cols = model_data.loc[:,
+        # TODO: check where the standard deviation in previous manuscript version comes from
+        # is it correlation values for each of the 100 models then averaged (option 1 below)
+        # or are all models averaged before correlation (option 2) and std is obtained differently?
+
+        # OPTION 1
+        # # Get mean predicted age across the 10 folds for each repetition
+        # n_repetitions = 10
+        # n_folds = 10
+        #
+        # repetition_mean_ls = []
+        #
+        # for i_repetition in range(n_repetitions):
+        #     col_first_fold = 'Prediction ' + str(f'{i_repetition:02}') + '_00'
+        #     col_last_fold = 'Prediction ' + str(f'{i_repetition:02}') + '_09'
+        #     fold_cols = model_data.loc[:, col_first_fold : col_last_fold]
+        #     new_col_name = 'Mean_repetition_' + str(f'{i_repetition:02}')
+        #     model_data[new_col_name] = fold_cols.mean(axis=1)
+        #     repetition_mean_ls.append(new_col_name)
+        #
+        # # get r value
+        # for repetition_col in repetition_mean_ls:
+        #     r_val = model_data['Age'].corr(model_data[repetition_col])
+        #     print(model_name, r_val)
+
+        # # Add r value to r_val_df
+        # r_val_df[model_name] = [r_val]
+
+
+        #OPTION 2
+        repetition_cols = model_data.loc[:,
                         'Prediction 00_00' : 'Prediction 09_09']
 
         # get mean predictions across repetitions
-        model_data['prediction_mean'] = repetion_cols.mean(axis=1)
+        model_data['prediction_mean'] = repetition_cols.mean(axis=1)
 
         # get those into one file for all models
         age_predictions_all[model_name] = model_data['prediction_mean']
