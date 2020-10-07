@@ -152,7 +152,7 @@ def main(training_experiment_name,
             mae = mean_absolute_error(age, predictions)
             rmse = sqrt(mean_squared_error(age, predictions))
             r2 = r2_score(age, predictions)
-            age_error_corr, _ = stats.spearmanr(np.abs(age - predictions), age)
+            age_error_corr, _ = stats.spearmanr((predictions - age), age)
 
             # Save model scores
             scores_array = np.array([r2, mae, rmse, age_error_corr])

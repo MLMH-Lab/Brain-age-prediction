@@ -110,7 +110,7 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
             absolute_error = mean_absolute_error(age, predictions)
             root_squared_error = sqrt(mean_squared_error(age, predictions))
             r2 = r2_score(age, predictions)
-            age_error_corr, _ = stats.spearmanr(np.abs(age - predictions), age)
+            age_error_corr, _ = stats.spearmanr((predictions - age), age)
 
             # Save prediction per model in df
             age_predictions[f'Prediction {i_repetition:02d}_{i_fold:02d}'] = predictions
