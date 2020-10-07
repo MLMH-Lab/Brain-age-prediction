@@ -43,8 +43,9 @@ def main():
             print(f'No age prediction file for {model_name}.')
             raise
 
+        # Get mean predicted age across the 10 folds for each repetition
         repetion_cols = model_data.loc[:,
-                        'Prediction repetition 00' : 'Prediction repetition 09']
+                        'Prediction 00_00' : 'Prediction 09_09']
 
         # get mean predictions across repetitions
         model_data['prediction_mean'] = repetion_cols.mean(axis=1)
@@ -60,8 +61,8 @@ def main():
         r_val_df[model_name] = [r_val]
 
     # Export age_predictions_all and r_val_df as csv
-    age_predictions_all.to_csv(experiment_dir / 'age_predictions_allmodels.csv')
-    r_val_df.to_csv(experiment_dir / 'r_values_allmodels.csv')
+    age_predictions_all.to_csv(experiment_dir / 'age_predictions_test_allmodels.csv')
+    r_val_df.to_csv(experiment_dir / 'r_values_test_allmodels.csv')
 
 
 if __name__ == '__main__':
