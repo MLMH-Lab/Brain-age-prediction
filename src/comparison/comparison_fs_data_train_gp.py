@@ -77,6 +77,7 @@ def main(experiment_name, scanner_name, input_ids_file):
     age = dataset['Age'].values
 
     # CV variables
+    cv_r = []
     cv_r2 = []
     cv_mae = []
     cv_rmse = []
@@ -116,9 +117,11 @@ def main(experiment_name, scanner_name, input_ids_file):
 
             mae = mean_absolute_error(y_test, predictions)
             rmse = sqrt(mean_squared_error(y_test, predictions))
+            r, _ = stats.pearsonr(y_test, predictions)
             r2 = r2_score(y_test, predictions)
             age_error_corr, _ = stats.spearmanr((predictions - y_test), y_test)
 
+            cv_r.append(r)
             cv_r2.append(r2)
             cv_mae.append(mae)
             cv_rmse.append(rmse)
@@ -133,7 +136,7 @@ def main(experiment_name, scanner_name, input_ids_file):
             dump(model, cv_dir / f'{output_prefix}_regressor.joblib')
 
             # Save model scores
-            scores_array = np.array([r2, mae, rmse, age_error_corr])
+            scores_array = np.array([r, r2, mae, rmse, age_error_corr])
             np.save(cv_dir / f'{output_prefix}_scores.npy', scores_array)
 
             # ----------------------------------------------------------------------------------------
@@ -142,7 +145,8 @@ def main(experiment_name, scanner_name, input_ids_file):
                 age_predictions.iloc[row, age_predictions.columns.get_loc(repetition_column_name)] = value
 
             # Print results of the CV fold
-            print(f'Repetition {i_repetition:02d} Fold {i_fold:02d} R2: {r2:0.3f}, '
+            print(f'Repetition {i_repetition:02d} Fold {i_fold:02d} ' 
+                  f'r: {r:0.3f}, R2: {r2:0.3f}, '
                   f'MAE: {mae:0.3f} RMSE: {rmse:0.3f} CORR: {age_error_corr:0.3f}')
 
     # Save predictions
@@ -151,7 +155,7 @@ def main(experiment_name, scanner_name, input_ids_file):
     # Variables for mean scores of performance metrics of CV folds across all repetitions
     print('')
     print('Mean values:')
-    print(f'R2: {np.mean(cv_r2):0.3f} MAE: {np.mean(cv_mae):0.3f} '
+    print(f'r: {np.mean(r):0.3f} R2: {np.mean(cv_r2):0.3f} MAE: {np.mean(cv_mae):0.3f} '
           f'RMSE: {np.mean(cv_rmse):0.3f} CORR: {np.mean(cv_age_error_corr):0.3f}')
 
 
