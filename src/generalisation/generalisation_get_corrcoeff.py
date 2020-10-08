@@ -2,12 +2,11 @@
 for all model predictions per subject and chronological age
 in the independent test set;
 
-The script also creates a summary file of mean model predictions
-for all subjects across model repetitions;
-
 This script is adapted from comparison_get_corrcoeff"""
 
 import pandas as pd
+import numpy as np
+from scipy.stats import pearsonr
 from pathlib import Path
 
 PROJECT_ROOT = Path.cwd()
@@ -21,18 +20,10 @@ def main():
                 'voxel_SVM', 'voxel_RVM',
                 'pca_SVM', 'pca_RVM', 'pca_GPR']
 
-    # Create df with subject IDs and chronological age
-    # All mean model predictions will be added to this df in the loop
-    # Based on an age_predictions csv file from model training to have the
-    # same order of subjects
-    example_file = pd.read_csv(experiment_dir / 'SVM' / 'age_predictions_test.csv')
-    age_predictions_all = pd.DataFrame(example_file.loc[:, 'image_id':'Age'])
-
     # Create df to hold r values for all models
     r_val_df = pd.DataFrame()
 
-    # Loop over all models, calculate mean predictions across repetitions,
-    # calculate r
+    # Loop over all models to obtain r values
     for model_name in model_ls:
         model_dir = experiment_dir / model_name
         file_name = model_dir / 'age_predictions_test.csv'
@@ -43,53 +34,33 @@ def main():
             print(f'No age prediction file for {model_name}.')
             raise
 
-        # TODO: check where the standard deviation in previous manuscript version comes from
-        # is it correlation values for each of the 100 models then averaged (option 1 below)
-        # or are all models averaged before correlation (option 2) and std is obtained differently?
-
-        # OPTION 1
-        # # Get mean predicted age across the 10 folds for each repetition
-        # n_repetitions = 10
-        # n_folds = 10
-        #
-        # repetition_mean_ls = []
-        #
-        # for i_repetition in range(n_repetitions):
-        #     col_first_fold = 'Prediction ' + str(f'{i_repetition:02}') + '_00'
-        #     col_last_fold = 'Prediction ' + str(f'{i_repetition:02}') + '_09'
-        #     fold_cols = model_data.loc[:, col_first_fold : col_last_fold]
-        #     new_col_name = 'Mean_repetition_' + str(f'{i_repetition:02}')
-        #     model_data[new_col_name] = fold_cols.mean(axis=1)
-        #     repetition_mean_ls.append(new_col_name)
-        #
-        # # get r value
-        # for repetition_col in repetition_mean_ls:
-        #     r_val = model_data['Age'].corr(model_data[repetition_col])
-        #     print(model_name, r_val)
-
-        # # Add r value to r_val_df
-        # r_val_df[model_name] = [r_val]
-
-
-        #OPTION 2
+        # Access variable names for all 100 models
         repetition_cols = model_data.loc[:,
                         'Prediction 00_00' : 'Prediction 09_09']
+        repetition_col_names = repetition_cols.columns
 
-        # get mean predictions across repetitions
-        model_data['prediction_mean'] = repetition_cols.mean(axis=1)
+        # Loop over all models to obtain r value for each
+        r_val_ls = []
 
-        # get those into one file for all models
-        age_predictions_all[model_name] = model_data['prediction_mean']
+        # Initialise variable 'skipped' that counts how often r_val could not be
+        # calculated for a model (possibly due to model non-convergence)
+        skipped = 0
 
-        # get r value
-        r_val = model_data['Age'].corr(model_data['prediction_mean'])
-        print(model_name, r_val)
+        for i_col in repetition_col_names:
+            r_val, _ = pearsonr(model_data['Age'],model_data[i_col])
+            if not np.isnan(r_val):
+                r_val_ls.append(r_val)
+            else:
+                skipped += 1
 
-        # Add r value to r_val_df
-        r_val_df[model_name] = [r_val]
+        r_mean = np.mean(r_val_ls)
+        r_std = np.std(r_val_ls)
+        print(model_name, skipped)
+        print(model_name, r_mean, r_std)
+
+        r_val_df[model_name] = [r_mean, r_std]
 
     # Export age_predictions_all and r_val_df as csv
-    age_predictions_all.to_csv(experiment_dir / 'age_predictions_test_allmodels.csv')
     r_val_df.to_csv(experiment_dir / 'r_values_test_allmodels.csv')
 
 
