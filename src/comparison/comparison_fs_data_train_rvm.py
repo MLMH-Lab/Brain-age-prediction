@@ -149,7 +149,7 @@ def main(experiment_name, scanner_name, input_ids_file):
     print('')
     print('Mean values:')
     print(f'R2: {np.mean(cv_r2):0.3f} MAE: {np.mean(cv_mae):0.3f} '
-          f'RMSE: {np.mean(cv_rmse):0.3f} CORR: {np.mean(np.abs(cv_age_error_corr)):0.3f}')
+          f'RMSE: {np.mean(cv_rmse):0.3f} CORR: {np.mean(cv_age_error_corr):0.3f}')
 
 
 if __name__ == '__main__':
