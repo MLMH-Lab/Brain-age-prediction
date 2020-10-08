@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
-"""Comparing the performance of machine learning models using a version of the paired Student’s t-test that is
-corrected for the violation of the independence assumption from repeated k-fold cross-validation
-when training the model
+"""Script to statistically assess the performance of machine learning models;
+Specifically, the script:
+i) creates a summary of performance scores of the 100 iterations of each model type
+ii) compares the performance of models using a version of
+the paired Student’s t-test that is corrected for the violation of the
+independence assumption from repeated k-fold cross-validation
+when training the model [1-3]
 
 References:
 -----------
@@ -43,7 +47,8 @@ args = parser.parse_args()
 
 
 def main(experiment_name, suffix, model_list):
-    # Create summary of the performance scores across the 100 iterations of each model type (10 times 10-fold CV)
+    # Create summary of the performance scores across the 100 iterations
+    # of each model type (10 times 10-fold CV)
     n_repetitions = 10
     n_folds = 10
 
@@ -51,6 +56,7 @@ def main(experiment_name, suffix, model_list):
         model_dir = PROJECT_ROOT / 'outputs' / experiment_name / model_name
         cv_dir = model_dir / 'cv'
 
+        r_list = []
         r2_list = []
         mae_list = []
         rmse_list = []
@@ -58,13 +64,16 @@ def main(experiment_name, suffix, model_list):
 
         for i_repetition in range(n_repetitions):
             for i_fold in range(n_folds):
-                r2, mae, rmse, age_error_corr = np.load(cv_dir / f'{i_repetition:02d}_{i_fold:02d}_scores.npy')
+                r, r2, mae, rmse, age_error_corr = np.load(cv_dir / f'{i_repetition:02d}_{i_fold:02d}_scores.npy')
+                r_list.append(r)
                 r2_list.append(r2)
                 mae_list.append(mae)
                 rmse_list.append(rmse)
                 age_error_corr_list.append(age_error_corr)
 
         results = pd.DataFrame(columns=['Measure', 'Value'])
+        results = results.append({'Measure': 'mean_r', 'Value': np.mean(r_list)}, ignore_index=True)
+        results = results.append({'Measure': 'std_r', 'Value': np.std(r_list)}, ignore_index=True)
         results = results.append({'Measure': 'mean_r2', 'Value': np.mean(r2_list)}, ignore_index=True)
         results = results.append({'Measure': 'std_r2', 'Value': np.std(r2_list)}, ignore_index=True)
         results = results.append({'Measure': 'mean_mae', 'Value': np.mean(mae_list)}, ignore_index=True)
