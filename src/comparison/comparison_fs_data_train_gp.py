@@ -87,7 +87,6 @@ def main(experiment_name, scanner_name, input_ids_file):
     age_predictions = dataset[['image_id', 'Age']]
     age_predictions = age_predictions.set_index('image_id')
 
-    # Create list of model prefixes
     n_repetitions = 10
     n_folds = 10
 
@@ -155,7 +154,7 @@ def main(experiment_name, scanner_name, input_ids_file):
     # Variables for mean scores of performance metrics of CV folds across all repetitions
     print('')
     print('Mean values:')
-    print(f'r: {np.mean(r):0.3f} R2: {np.mean(cv_r2):0.3f} MAE: {np.mean(cv_mae):0.3f} '
+    print(f'r: {np.mean(cv_r):0.3f} R2: {np.mean(cv_r2):0.3f} MAE: {np.mean(cv_mae):0.3f} '
           f'RMSE: {np.mean(cv_rmse):0.3f} CORR: {np.mean(cv_age_error_corr):0.3f}')
 
 
