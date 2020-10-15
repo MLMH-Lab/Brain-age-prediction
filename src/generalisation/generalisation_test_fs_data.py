@@ -104,6 +104,7 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
 
             absolute_error = mean_absolute_error(age, predictions)
             root_squared_error = sqrt(mean_squared_error(age, predictions))
+            r, _ = stats.pearsonr(age, predictions)
             r2 = r2_score(age, predictions)
             age_error_corr, _ = stats.spearmanr((predictions - age), age)
 
@@ -111,7 +112,7 @@ def main(training_experiment_name, test_experiment_name, scanner_name, model_nam
             age_predictions[f'Prediction {i_repetition:02d}_{i_fold:02d}'] = predictions
 
             # Save model scores
-            scores_array = np.array([r2, absolute_error, root_squared_error, age_error_corr])
+            scores_array = np.array([r, r2, absolute_error, root_squared_error, age_error_corr])
             np.save(test_cv_dir / f'{prefix}_scores.npy', scores_array)
 
     # Save predictions

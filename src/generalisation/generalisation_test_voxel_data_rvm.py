@@ -151,11 +151,12 @@ def main(training_experiment_name,
 
             mae = mean_absolute_error(age, predictions)
             rmse = sqrt(mean_squared_error(age, predictions))
+            r, _ = stats.pearsonr(age, predictions)
             r2 = r2_score(age, predictions)
             age_error_corr, _ = stats.spearmanr((predictions - age), age)
 
             # Save model scores
-            scores_array = np.array([r2, mae, rmse, age_error_corr])
+            scores_array = np.array([r, r2, mae, rmse, age_error_corr])
             np.save(test_cv_dir / f'{prefix}_scores.npy', scores_array)
 
             pbar.update(1)
