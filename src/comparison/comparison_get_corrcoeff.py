@@ -1,11 +1,10 @@
 """Script to calculate Pearson's r correlation coefficient
-for all model predictions per subject and chronological age;
-
-The script also creates a summary file of mean model predictions
-for all subjects across model repetitions"""
+for all model predictions per subject and chronological age
+in the CV iterations"""
 
 import pandas as pd
-from scipy import stats
+import numpy as np
+from scipy.stats import pearsonr, spearmanr
 from pathlib import Path
 
 PROJECT_ROOT = Path.cwd()
@@ -19,8 +18,8 @@ def main():
                 'voxel_SVM', 'voxel_RVM',
                 'pca_SVM', 'pca_RVM', 'pca_GPR']
 
+    # TODO: check whether age_predictions_all is needed
     # Create df with subject IDs and chronological age
-    # All mean model predictions will be added to this df in the loop
     # Based on an age_predictions csv file from model training to have the
     # same order of subjects
     example_file = pd.read_csv(experiment_dir / 'SVM' / 'age_predictions.csv')
@@ -41,31 +40,43 @@ def main():
             print(f'No age prediction file for {model_name}.')
             raise
 
-        repetion_cols = model_data.loc[:,
+        repetition_cols = model_data.loc[:,
                         'Prediction repetition 00' : 'Prediction repetition 09']
+        repetition_col_names = repetition_cols.columns
 
-        # get mean predictions across repetitions
-        model_data['prediction_mean'] = repetion_cols.mean(axis=1)
+        # Loop over all models to obtain r value for each
+        r_val_ls = []
 
-        # get those into one file for all models
-        age_predictions_all[model_name] = model_data['prediction_mean']
+        # Initialise variable 'skipped' that counts how often r_val could not be
+        # calculated for a model (possibly due to model non-convergence)
+        skipped = 0
 
-        # get r value
-        r_val = model_data['Age'].corr(model_data['prediction_mean'])
-        print(model_name, r_val)
+        for i_col in repetition_col_names:
+            r_val, _ = pearsonr(model_data['Age'], model_data[i_col])
+            if not np.isnan(r_val):
+                r_val_ls.append(r_val)
+            else:
+                skipped += 1
 
-        # Add r value to r_val_df
-        r_val_df[model_name] = [r_val]
+        r_mean = np.mean(r_val_ls)
+        r_std = np.std(r_val_ls)
+        print(model_name, skipped)
+        print(model_name, r_mean, r_std)
+
+        r_val_df[model_name] = [r_mean, r_std]
 
     # Export age_predictions_all and r_val_df as csv
-    age_predictions_all.to_csv(experiment_dir / 'age_predictions_allmodels.csv')
+    # age_predictions_all.to_csv(experiment_dir / 'age_predictions_allmodels.csv')
     r_val_df.to_csv(experiment_dir / 'r_values_allmodels.csv')
 
     # ----------------------------------------
     # Calculate age-BrainAGE correlation
-    # #TODO: correct in comparison_statistical_analysis.py
+    # #TODO: delete this part in final version
+    # TODO: get standard deviation for this
+    # Note: this has now been corrected in previous scripts but keeping it here
+    # to assess existing models
     for model_name in model_ls:
-        age_error_corr, _ = stats.spearmanr(
+        age_error_corr, _ = spearmanr(
             (age_predictions_all[model_name] - age_predictions_all['Age']),
             age_predictions_all['Age'])
         print(model_name, age_error_corr)
