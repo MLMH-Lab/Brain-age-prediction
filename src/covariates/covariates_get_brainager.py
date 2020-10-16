@@ -30,14 +30,6 @@ def main():
                                             'age_predictions_allmodels.csv',
                                             index_col = 0)
 
-    # Calculate brainAGE for all models and add to age_predictions_allmodels df
-    # brainAGE = predicted age - chronological age
-    for model_name in model_ls:
-        brainage_model = age_predictions_allmodels[model_name] - \
-                         age_predictions_allmodels['Age']
-        brainage_col_name = model_name + '_brainAGE'
-        age_predictions_allmodels[brainage_col_name] = brainage_model
-
     # Calculate brainAGE-Residualised (brainAGER) for all models and add to
     # age_predictions_allmodels df as new columns
     for model in model_ls:
