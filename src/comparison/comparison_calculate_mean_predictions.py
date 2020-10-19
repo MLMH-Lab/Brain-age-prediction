@@ -49,5 +49,33 @@ def main():
     # Export age_predictions_all as csv
     age_predictions_all.to_csv(experiment_dir / 'age_predictions_allmodels.csv')
 
+    # -------------------------------------------
+    # Get mean BrainAGE per age
+
+    # Get included ages
+    ages = age_predictions_all['Age'].unique()
+    ages_ls = ages.tolist()
+    ages_ls.sort()
+
+    for model_name in model_ls:
+        brainage_col_name = model_name + '_brainAGE'
+        for age in ages_ls:
+            subjects_per_age = age_predictions_all.groupby('Age').get_group(age)
+            mean_brainage = subjects_per_age[brainage_col_name].mean()
+            print(model_name, age, mean_brainage)
+        print('')
+
+    # Test if brainAGER removed bias correctly #TODO: remove this part later
+    age_predictions_all_brainager = pd.read_csv(
+        experiment_dir / 'age_predictions_allmodels_brainager.csv')
+
+    for model_name in model_ls:
+        brainage_col_name = model_name + '_brainAGER'
+        for age in ages_ls:
+            subjects_per_age = age_predictions_all_brainager.groupby('Age').get_group(age)
+            mean_brainage = subjects_per_age[brainage_col_name].mean()
+            print(model_name, age, mean_brainage)
+        print('')
+
 if __name__ == '__main__':
     main()
