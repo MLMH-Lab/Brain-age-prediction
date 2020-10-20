@@ -57,6 +57,7 @@ def main():
     ages_ls = ages.tolist()
     ages_ls.sort()
 
+    # Get total sample size
     n_total = len(age_predictions_all)
 
     # Loop over models and ages to obtain mean brainAGE per age
@@ -64,7 +65,8 @@ def main():
         model_dir = experiment_dir / model_name
         brainage_col_name = model_name + '_brainAGE'
 
-        results = pd.DataFrame(columns=['Age', 'n', 'n_percentage', 'mean_brainAGE'])
+        results = pd.DataFrame(columns=['Age', 'n',
+                                        'n_percentage', 'mean_brainAGE'])
 
         for age in ages_ls:
             subjects_per_age = age_predictions_all.groupby('Age').get_group(age)
@@ -79,7 +81,7 @@ def main():
                 ignore_index=True)
         print('')
 
-        results.to_csv(model_dir / f'{model_name}_brainage_per_age.csv', index=False)
+        results.to_csv(model_dir / f'{model_name}_test_brainage_per_age.csv', index=False)
 
 
 
