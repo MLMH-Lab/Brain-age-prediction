@@ -2,6 +2,7 @@
 
 import pandas as pd
 from pathlib import Path
+
 PROJECT_ROOT = Path.cwd()
 
 def main():
@@ -57,13 +58,26 @@ def main():
     ages_ls = ages.tolist()
     ages_ls.sort()
 
+    # Loop over models and ages to obtain mean brainAGE per age
     for model_name in model_ls:
+        model_dir = experiment_dir / model_name
         brainage_col_name = model_name + '_brainAGE'
+
+        results = pd.DataFrame(columns=['Age', 'n', 'mean_brainAGE'])
+
         for age in ages_ls:
             subjects_per_age = age_predictions_all.groupby('Age').get_group(age)
+            n_per_age = len(subjects_per_age)
             mean_brainage = subjects_per_age[brainage_col_name].mean()
-            print(model_name, age, mean_brainage)
+            print(model_name, age, n_per_age, mean_brainage)
+
+            results = results.append(
+                {'Age': age, 'n': n_per_age, 'mean_brainAGE': mean_brainage},
+                ignore_index=True)
         print('')
+
+        results.to_csv(model_dir / f'{model_name}_brainage_per_age.csv', index=False)
+
 
     # Test if brainAGER removed bias correctly #TODO: remove this part later
     age_predictions_all_brainager = pd.read_csv(
@@ -73,8 +87,9 @@ def main():
         brainage_col_name = model_name + '_brainAGER'
         for age in ages_ls:
             subjects_per_age = age_predictions_all_brainager.groupby('Age').get_group(age)
+            n_per_age = len(subjects_per_age)
             mean_brainage = subjects_per_age[brainage_col_name].mean()
-            print(model_name, age, mean_brainage)
+            print(model_name, age, n_per_age, mean_brainage)
         print('')
 
 if __name__ == '__main__':
