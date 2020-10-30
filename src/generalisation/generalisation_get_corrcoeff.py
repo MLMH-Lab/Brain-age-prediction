@@ -49,20 +49,24 @@ def main():
         r_val_ls = []
 
         # Initialise variable 'skipped' that counts how often r_val could not be
-        # calculated for a model (possibly due to model non-convergence)
+        # calculated for a model (possibly due to model convergence to sample mean)
         skipped = 0
+        failed_model_ls = []
 
         for i_col in repetition_col_names:
             r_val, _ = pearsonr(model_data['Age'],model_data[i_col])
             if not np.isnan(r_val):
                 r_val_ls.append(r_val)
             else:
+                failed_model_ls.append(i_col)
                 skipped += 1
 
         r_mean = np.mean(r_val_ls)
         r_std = np.std(r_val_ls)
         if skipped > 0:
             print(model_name, skipped)
+            failed_model_df = pd.DataFrame(failed_model_ls)
+            failed_model_df.to_csv(model_dir / 'failed_model.csv')
         print(model_name, r_mean, r_std)
 
         r_val_df[model_name] = [r_mean, r_std]
