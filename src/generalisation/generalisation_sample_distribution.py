@@ -21,8 +21,8 @@ def main():
 
     # -------------------------------------------
     # Get included ages from example model file
-    example_file = pd.read_csv(experiment_dir / 'SVM' / 'age_predictions_test.csv')
-    age_predictions_all = pd.DataFrame(example_file.loc[:, 'image_id':'Age'])
+    age_predictions_all = pd.read_csv(
+        experiment_dir / 'age_predictions_test_allmodels.csv')
     ages = age_predictions_all['Age'].unique()
     ages_ls = ages.tolist()
     ages_ls.sort()
@@ -60,13 +60,6 @@ def main():
 
     # ----------------------------------------
     # Check at what age 50% of subjects are included
-    ages = age_predictions_all['Age'].unique()
-    ages_ls = ages.tolist()
-    ages_ls.sort()
-
-    # Get total sample size
-    n_total = len(age_predictions_all)
-
     for model_name in model_ls:
         percentage = 0
 

@@ -2,7 +2,7 @@
 #TODO: combine scripts for sites 1 and 2
 
 import pandas as pd
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error #TODO: implement same calculation of MAE as in trainign scripts
 from pathlib import Path
 
 PROJECT_ROOT = Path.cwd()
@@ -18,8 +18,7 @@ def main():
 
     # -------------------------------------------
     # Get included ages from example model file
-    example_file = pd.read_csv(experiment_dir / 'SVM' / 'age_predictions.csv')
-    age_predictions_all = pd.DataFrame(example_file.loc[:, 'image_id':'Age'])
+    age_predictions_all = pd.read_csv(experiment_dir / 'age_predictions_allmodels.csv')
     ages = age_predictions_all['Age'].unique()
     ages_ls = ages.tolist()
     ages_ls.sort()
@@ -54,21 +53,7 @@ def main():
         print('')
 
         results.to_csv(model_dir / f'{model_name}_mae_per_age.csv', index=False)
-
-
-    # Test if brainAGER removed bias correctly #TODO: remove this part later
-    age_predictions_all_brainager = pd.read_csv(
-        experiment_dir / 'age_predictions_allmodels_brainager.csv')
-
-    for model_name in model_ls:
-        brainage_col_name = model_name + '_brainAGER'
-        for age in ages_ls:
-            subjects_per_age = age_predictions_all_brainager.groupby('Age').get_group(age)
-            n_per_age = len(subjects_per_age)
-            mean_brainage = subjects_per_age[brainage_col_name].mean()
-            print(model_name, age, n_per_age, mean_brainage)
-        print('')
-
+        #TODO: create one output file that includes all models
 
 if __name__ == '__main__':
     main()
