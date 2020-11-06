@@ -6,6 +6,7 @@ ages that had lower MAE in the training set (site 1)"""
 
 import pandas as pd
 from sklearn.metrics import mean_absolute_error
+from scipy.stats import ttest_ind
 from pathlib import Path
 
 PROJECT_ROOT = Path.cwd()
@@ -65,6 +66,17 @@ def main():
 
     # Save results
     results.to_csv(experiment_dir / 'test_mae_per_age.csv', index=False)
+
+    # ------------------------
+    # Compare age mean in sites 1 and 2
+    site2_ages = age_predictions_all['Age']
+
+    age_predictions_site1 = pd.read_csv(PROJECT_ROOT / 'outputs' /
+                                        'biobank_scanner1' /
+                                        'age_predictions_allmodels.csv',
+                                        index_col=0)
+    site1_ages = age_predictions_site1['Age']
+    tstat, pval = ttest_ind(site1_ages, site2_ages)
 
 
 if __name__ == '__main__':
