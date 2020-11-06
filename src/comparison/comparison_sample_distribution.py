@@ -2,7 +2,7 @@
 #TODO: combine scripts for sites 1 and 2
 
 import pandas as pd
-from sklearn.metrics import mean_absolute_error #TODO: implement same calculation of MAE as in trainign scripts
+from sklearn.metrics import mean_absolute_error
 from pathlib import Path
 
 PROJECT_ROOT = Path.cwd()
@@ -17,8 +17,10 @@ def main():
                 'pca_SVM', 'pca_RVM', 'pca_GPR']
 
     # -------------------------------------------
-    # Get included ages from example model file
-    age_predictions_all = pd.read_csv(experiment_dir / 'age_predictions_allmodels.csv')
+    # Load file with all model predictions (averaged across iterations)
+    # and get included ages
+    age_predictions_all = pd.read_csv(
+        experiment_dir / 'age_predictions_allmodels.csv', index_col=0)
     ages = age_predictions_all['Age'].unique()
     ages_ls = ages.tolist()
     ages_ls.sort()
@@ -26,34 +28,40 @@ def main():
     # Get total sample size
     n_total = len(age_predictions_all)
 
+    # Set up df to store results incl number of subjects per age and
+    # % of total sample per age group
+    results = pd.DataFrame(columns=['Age', 'n', 'n_percentage'])
+
+    n_per_age_ls = []
+    n_perc_ls = []
+
+    for age in ages_ls:
+        subjects_per_age = age_predictions_all.groupby('Age').get_group(age)
+        n_per_age = len(subjects_per_age)
+        n_perc = n_per_age / n_total * 100
+
+        n_per_age_ls.append(n_per_age)
+        n_perc_ls.append(n_perc)
+
+    results['Age'] = ages_ls
+    results['n'] = n_per_age_ls
+    results['n_percentage'] = n_perc_ls
+
     # Loop over models and ages to obtain MAE per age
     for model_name in model_ls:
-        model_dir = experiment_dir / model_name
+        model_mae_ls = []
 
-        results = pd.DataFrame(columns=['Age', 'n',
-                                        'n_percentage', 'mae_per_age'])
-
-        # Loop to calculate statistics per age group: sample size per age,
-        # % of total sample in age group, MAE per age group
         for age in ages_ls:
             subjects_per_age = age_predictions_all.groupby('Age').get_group(age)
 
-            n_per_age = len(subjects_per_age)
-            n_perc = n_per_age / n_total * 100
-
             mae_per_age = mean_absolute_error(subjects_per_age['Age'],
                                                subjects_per_age[model_name])
+            model_mae_ls.append(mae_per_age)
 
-            print(model_name, age, n_per_age, n_perc, mae_per_age)
+        results[model_name] = model_mae_ls
 
-            results = results.append(
-                {'Age': age, 'n': n_per_age,
-                 'n_percentage': n_perc, 'mae_per_age': mae_per_age},
-                ignore_index=True)
-        print('')
-
-        results.to_csv(model_dir / f'{model_name}_mae_per_age.csv', index=False)
-        #TODO: create one output file that includes all models
+    # Save results
+    results.to_csv(experiment_dir / 'cv_mae_per_age.csv', index=False)
 
 if __name__ == '__main__':
     main()

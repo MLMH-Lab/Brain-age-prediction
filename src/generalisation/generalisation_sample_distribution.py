@@ -64,7 +64,7 @@ def main():
         results[model_name] = model_mae_ls
 
     # Save results
-    results.to_csv(experiment_dir / 'mae_per_age.csv', index=False)
+    results.to_csv(experiment_dir / 'test_mae_per_age.csv', index=False)
 
 
 if __name__ == '__main__':
