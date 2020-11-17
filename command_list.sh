@@ -46,7 +46,7 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./src/comparison/comparison_pca_data_train_svm.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 ./src/comparison/comparison_pca_data_train_gp.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 
-./src/comparison/comparison_statistical_analsysis.py -E "biobank_scanner1" -S "_all" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM" "pca_RVM" "pca_SVM" "pca_GPR"
+./src/comparison/comparison_statistical_analysis.py -E "biobank_scanner1" -S "_all" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM" "pca_RVM" "pca_SVM" "pca_GPR"
 
 ./src/comparison/comparison_voxel_data_svm_primal_weights.py -E "biobank_scanner1" -P "/media/kcl_1/SSD2/BIOBANK"
 
@@ -54,7 +54,7 @@ export PYTHONPATH=$PYTHONPATH:./src
 
 ./comparison_feature_importance_visualisation.py
 
-## ----------------------------- Generalization comparison -----------------------
+## ----------------------------- Generalisation comparison -----------------------
 ./src/generalisation/generalisation_test_fs_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "BIOBANK-SCANNER02" -M "SVM" -I "cleaned_ids.csv"
 ./src/generalisation/generalisation_test_fs_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "BIOBANK-SCANNER02" -M "RVM" -I "cleaned_ids.csv"
 ./src/generalisation/generalisation_test_fs_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "BIOBANK-SCANNER02" -M "GPR" -I "cleaned_ids.csv"
@@ -66,7 +66,7 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./src/generalisation/generalisation_test_pca_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "BIOBANK-SCANNER02" -M "pca_SVM" -I "cleaned_ids.csv"
 ./src/generalisation/generalisation_test_pca_data.py -T "biobank_scanner1" -G "biobank_scanner2" -S "BIOBANK-SCANNER02" -M "pca_GPR" -I "cleaned_ids.csv"
 
-./src/comparison/comparison_statistical_analsysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM" "pca_RVM" "pca_SVM" "pca_GPR"
+./src/comparison/comparison_statistical_analysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM" "pca_RVM" "pca_SVM" "pca_GPR"
 
 # ----------------------------- Sample size analysis ------------------------------------
 ./src/sample_size/sample_size_create_ids.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
