@@ -1,4 +1,4 @@
-## Initiate virtual enviroment
+## Initiate virtual environment
 #source venv/bin/activate
 #
 ## Make all files executable
@@ -13,16 +13,16 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./src/download/download_ants_data.py -N "/run/user/1000/gvfs/smb-share:server=kc-deeplab.local,share=deeplearning/" -S "BIOBANK-SCANNER02" -O "/media/kcl_1/HDD/DATASETS/BIOBANK"
 
 # ----------------------------- Preprocessing ------------------------------------
-# Clean UK Biobank data.
+# Clean UK Biobank data
 ./src/preprocessing/clean_data.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 ./src/preprocessing/clean_data.py -E "biobank_scanner2" -S "BIOBANK-SCANNER02"
 
-# Perform quality control.
+# Perform quality control
 ./src/preprocessing/quality_control.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 ./src/preprocessing/quality_control.py -E "biobank_scanner2" -S "BIOBANK-SCANNER02"
 
-# Make gender homogeneous along age range (performed only in the scanner1
-# because we were concerned in not create a biased regressor).
+# Make gender homogeneous along age range
+# This was only performed in scanner1 because we were concerned not to create a biased regressor
 ./src/preprocessing/homogenize_gender.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 
 # Create kernel matrix for voxel-based analysis
@@ -34,7 +34,7 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./src/preprocessing/compute_principal_components.py -P "/media/kcl_1/SSD2/BIOBANK" -E "biobank_scanner1"
 ./src/preprocessing/compute_principal_components.py -P "/media/kcl_1/HDD/DATASETS/BIOBANK/BIOBANK" -E "biobank_scanner2" -I "cleaned_ids.csv" -S "_general"
 
-# ----------------------------- Regressors comparison ------------------------------------
+# ----------------------------- Regressor comparison ------------------------------------
 ./src/comparison/comparison_fs_data_train_svm.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 ./src/comparison/comparison_fs_data_train_rvm.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 ./src/comparison/comparison_fs_data_train_gp.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
@@ -68,7 +68,7 @@ export PYTHONPATH=$PYTHONPATH:./src
 
 ./src/comparison/comparison_statistical_analysis.py -E "biobank_scanner2" -S "_generalization" -M "SVM" "RVM" "GPR" "voxel_SVM" "voxel_RVM" "pca_RVM" "pca_SVM" "pca_GPR"
 
-# ----------------------------- Sample size analysis ------------------------------------
+# ----------------------------- Training set size analysis ------------------------------------
 ./src/sample_size/sample_size_create_ids.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 
 ./src/sample_size/sample_size_fs_data_svm_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01" -G "biobank_scanner2" -C "BIOBANK-SCANNER02"
@@ -87,15 +87,15 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "voxel_SVM"
 ./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "voxel_RVM"
 
-# ----------------------------- Covariates analysis ------------------------------------
+# ----------------------------- Covariate analysis ------------------------------------
 ./src/covariates/covariates_ensemble_output.py -E "biobank_scanner1" -M "SVM"
 ./src/covariates/covariates_statistical_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01" -M "SVM"
 
 ./src/covariates/covariates_ensemble_output.py -E "biobank_scanner1" -M "RVM"
 ./src/covariates/covariates_statistical_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01" -M "RVM"
 
-# ----------------------------- Miscelanious ------------------------------------
-# Univariate analysis on freesurfer data
+# ----------------------------- Miscellaneous ------------------------------------
+# Univariate analysis on FreeSurfer data
 ./src/misc/misc_univariate_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
 
 ./misc_classifier_train_svm.py
