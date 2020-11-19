@@ -62,18 +62,6 @@ def main(experiment_name, scanner_name):
         tstat, pval = ttest_ind(male_pred, female_pred)
         print(model, male_pred_mean, female_pred_mean, tstat, pval)
 
-    # TODO: possibly remove this part of script in final version
-    # Alternative method to t-test for sex differences:
-    # Regression of sex on brainAGER per model (same results)
-    for model in model_ls:
-        brainage_model = model + '_brainAGER'
-        x = brainage_sex['Gender']
-        y = brainage_sex[brainage_model]
-        x = sm.add_constant(x)
-        brainager_model = sm.OLS(y, x)
-        brainager_results = brainager_model.fit()
-        print(brainager_results.summary())
-
 
 if __name__ == '__main__':
     main(args.experiment_name, args.scanner_name)
