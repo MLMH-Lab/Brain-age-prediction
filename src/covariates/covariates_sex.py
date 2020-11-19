@@ -1,5 +1,6 @@
 """Analysis of brainAGER differences between men and women"""
 
+import argparse
 import pandas as pd
 from scipy.stats import ttest_ind
 import statsmodels.api as sm
@@ -8,9 +9,16 @@ from utils import load_demographic_data
 
 PROJECT_ROOT = Path.cwd()
 
+parser = argparse.ArgumentParser()
 
-def main():
-    experiment_name = 'biobank_scanner1'
+parser.add_argument('-E', '--experiment_name',
+                    dest='experiment_name',
+                    help='Name of the experiment.')
+
+args = parser.parse_args()
+
+
+def main(experiment_name):
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
     # Load file containing brainAGE and brainAGER scores for all subjects
@@ -20,8 +28,13 @@ def main():
         index_col = 0)
 
     # Access demographics file and add sex variable to brainage_allmodels
-    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / \
-                        'BIOBANK-SCANNER01' / 'participants.tsv'
+    if experiment_name == 'biobank_scanner1':
+        participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / \
+                            'BIOBANK-SCANNER01' / 'participants.tsv'
+    if experiment_name == 'biobank_scanner2':
+        participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / \
+                            'BIOBANK-SCANNER02' / 'participants.tsv'
+
     ids_path = experiment_dir / 'homogenized_ids.csv'
     demographics = load_demographic_data(participants_path, ids_path)
     demographics_sex = demographics[['image_id', 'Gender']]
@@ -63,4 +76,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(args.experiment_name)
