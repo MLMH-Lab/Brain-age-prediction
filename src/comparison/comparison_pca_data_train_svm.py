@@ -99,7 +99,7 @@ def main(experiment_name, scanner_name, input_ids_file):
             pca_path = pca_dir / f'{output_prefix}_pca_components.csv'
 
             pca_df = pd.read_csv(pca_path)
-            pca_df['image_id']=pca_df['image_id'].str.replace('/media/kcl_1/SSD2/BIOBANK/','') #TODO: fix path?
+            pca_df['image_id']=pca_df['image_id'].str.replace('/media/kcl_1/SSD2/BIOBANK/','')
             pca_df['image_id']=pca_df['image_id'].str.replace('_Warped.nii.gz', '')
 
             dataset_df = pd.merge(pca_df, participants_df, on='image_id')
