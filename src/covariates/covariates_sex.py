@@ -1,9 +1,9 @@
 """Analysis of BrainAGER differences between men and women"""
+# TODO: this script overlaps with covariates_statistical_analysis, so decide which one to keep
 
 import argparse
 import pandas as pd
 from scipy.stats import ttest_ind
-import statsmodels.api as sm
 from pathlib import Path
 from utils import load_demographic_data
 
@@ -35,6 +35,7 @@ def main(experiment_name, scanner_name):
     participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / \
                         scanner_name / 'participants.tsv'
 
+    #TODO: make this part work for site2
     ids_path = experiment_dir / 'homogenized_ids.csv'
     demographics = load_demographic_data(participants_path, ids_path)
     demographics_sex = demographics[['image_id', 'Gender']]
