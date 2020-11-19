@@ -1,4 +1,4 @@
-"""Analysis of brainAGER differences between men and women"""
+"""Analysis of BrainAGER differences between men and women"""
 
 import argparse
 import pandas as pd
@@ -15,10 +15,14 @@ parser.add_argument('-E', '--experiment_name',
                     dest='experiment_name',
                     help='Name of the experiment.')
 
+parser.add_argument('-S', '--scanner_name',
+                    dest='scanner_name',
+                    help='Name of the scanner.')
+
 args = parser.parse_args()
 
 
-def main(experiment_name):
+def main(experiment_name, scanner_name):
     experiment_dir = PROJECT_ROOT / 'outputs' / experiment_name
 
     # Load file containing brainAGE and brainAGER scores for all subjects
@@ -28,12 +32,8 @@ def main(experiment_name):
         index_col = 0)
 
     # Access demographics file and add sex variable to brainage_allmodels
-    if experiment_name == 'biobank_scanner1':
-        participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / \
-                            'BIOBANK-SCANNER01' / 'participants.tsv'
-    if experiment_name == 'biobank_scanner2':
-        participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / \
-                            'BIOBANK-SCANNER02' / 'participants.tsv'
+    participants_path = PROJECT_ROOT / 'data' / 'BIOBANK' / \
+                        scanner_name / 'participants.tsv'
 
     ids_path = experiment_dir / 'homogenized_ids.csv'
     demographics = load_demographic_data(participants_path, ids_path)
@@ -76,4 +76,4 @@ def main(experiment_name):
 
 
 if __name__ == '__main__':
-    main(args.experiment_name)
+    main(args.experiment_name, args.scanner_name)
