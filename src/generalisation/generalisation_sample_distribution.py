@@ -76,7 +76,13 @@ def main():
                                         'age_predictions_allmodels.csv',
                                         index_col=0)
     site1_ages = age_predictions_site1['Age']
+
+    site1_meanage = site1_ages.mean()
+    site2_meanage = site2_ages.mean()
+
     tstat, pval = ttest_ind(site1_ages, site2_ages)
+    print('Mean ages for sites 1 and 2: ', site1_meanage, site2_meanage)
+    print('Results of t test: ', tstat, pval)
 
 
 if __name__ == '__main__':
