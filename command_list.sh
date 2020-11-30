@@ -87,13 +87,6 @@ export PYTHONPATH=$PYTHONPATH:./src
 ./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "voxel_SVM"
 ./src/sample_size/sample_size_create_figures.py -E "biobank_scanner1" -M "voxel_RVM"
 
-# ----------------------------- Covariate analysis ------------------------------------
-./src/covariates/covariates_ensemble_output.py -E "biobank_scanner1" -M "SVM"
-./src/covariates/covariates_statistical_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01" -M "SVM"
-
-./src/covariates/covariates_ensemble_output.py -E "biobank_scanner1" -M "RVM"
-./src/covariates/covariates_statistical_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01" -M "RVM"
-
 # ----------------------------- Miscellaneous ------------------------------------
 # Univariate analysis on FreeSurfer data
 ./src/misc/misc_univariate_analysis.py -E "biobank_scanner1" -S "BIOBANK-SCANNER01"
