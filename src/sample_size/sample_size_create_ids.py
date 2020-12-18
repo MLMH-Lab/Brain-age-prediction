@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Script to create files with subjects' ids to perform sample size analysis
 
-This script creates gender-homogeneous bootstraped datasets.
-Creates 20 bootstrap samples with increasing size
+This script creates sex-homogeneous bootstrapped datasets.
+Creates 20 bootstrap samples of increasing size
 """
 import argparse
 from pathlib import Path
@@ -27,7 +27,7 @@ parser.add_argument('-S', '--scanner_name',
 parser.add_argument('-I', '--input_ids_file',
                     dest='input_ids_file',
                     default='homogenized_ids.csv',
-                    help='Filename indicating the ids to be used.')
+                    help='File name indicating the ids to be used.')
 
 parser.add_argument('-N', '--n_bootstrap',
                     dest='n_bootstrap',
@@ -37,7 +37,7 @@ parser.add_argument('-N', '--n_bootstrap',
 parser.add_argument('-R', '--n_max_pair',
                     dest='n_max_pair',
                     type=int, default=20,
-                    help='Number maximum of pairs.')
+                    help='Maximum number of pairs.')
 
 args = parser.parse_args()
 

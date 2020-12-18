@@ -2,7 +2,9 @@
 """Perform quality control.
 
 This script removes participants that did not pass the quality
-control performed using MRIQC [1] and Qoala [2].
+control performed using MRIQC [1] for raw MRI data and Qoala [2] for
+FreeSurfer-preprocessed data. These analyses were performed separately and the
+results are applied to the Biobank data in this script.
 
 In Qoala, higher numbers indicate a higher chance of being a high quality scan
 (Source: https://qoala-t.shinyapps.io/qoala-t_app/).
