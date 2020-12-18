@@ -102,7 +102,8 @@ def main(experiment_name, scanner_name, input_ids_file):
             x_test = kernel.iloc[test_index, train_index].values
             y_train, y_test = age[train_index], age[test_index]
 
-            model = EMRVR(kernel='precomputed', threshold_alpha=1e9)
+            model = EMRVR(kernel='precomputed',
+                          alpha_max=1e11, threshold_alpha=1e10)
 
             model.fit(x_train, y_train)
 

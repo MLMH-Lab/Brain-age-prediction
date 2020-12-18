@@ -39,7 +39,7 @@ parser.add_argument('-D', '--input_data_type',
 parser.add_argument('-M', '--mask_filename',
                     dest='mask_filename',
                     default='mni_icbm152_t1_tal_nlin_sym_09c_mask.nii',
-                    help='Input data type')
+                    help='File name of brain mask')
 
 args = parser.parse_args()
 
