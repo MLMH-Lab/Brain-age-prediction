@@ -11,4 +11,4 @@ Brain age prediction can be used to detect abnormalities in the ageing trajector
 ## Citation
 If you find this code useful for your research, please cite:
 
-    @article{}
+    Baecker L, Dafflon J, da Costa PF, Garcia-Dias R, Vieira S, Scarpazza C, Calhoun VD, Sato JR, Mechelli A*, Pinaya WHL* (in press). Brain age prediction: A comparison between machine learning models using region- and voxel-based morphometric data. Human Brain Mapping. * These authors contributed equally to this work
